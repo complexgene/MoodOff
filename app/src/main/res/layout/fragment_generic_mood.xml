@@ -1,0 +1,70 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:id="@+id/genericmood"
+    android:layout_height="match_parent"
+    android:paddingTop="50dp"
+    tools:context="com.moodoff.GenericMood">
+    <!-- TODO: Update blank fragment layout -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FC6A38"
+
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="65dp"
+            android:id="@+id/moodpage"
+            android:background="#f45"
+            >
+
+
+            <TextView
+                android:text="Feeling Romantic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView"
+                android:fontFamily="sans-serif-smallcaps"
+                android:textSize="24sp"
+                android:textStyle="normal|bold"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:srcCompat="@android:color/background_dark"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:paddingBottom="70dp"
+                android:scaleType="fitXY"
+                android:id="@+id/photoView" />
+        </RelativeLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/camera"
+            android:id="@+id/btn_camera" />
+
+        <TextView
+            android:text="Did you know that there are 206 \nbones in human body? Details.."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/interestingFact"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:paddingLeft="10dp"
+            android:layout_alignBottom="@+id/btn_camera" />
+    </RelativeLayout>
+
+</FrameLayout>

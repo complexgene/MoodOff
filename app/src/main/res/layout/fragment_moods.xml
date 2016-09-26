@@ -1,0 +1,50 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/allmoods"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.moodoff.Moods"
+    android:background="#000000">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <Button
+        android:text="Romantic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_romantic"
+        android:layout_alignBaseline="@+id/btn_love"
+        android:layout_alignBottom="@+id/btn_love"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:text="Love"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_love"
+        android:layout_alignBaseline="@+id/btn_hate"
+        android:layout_alignBottom="@+id/btn_hate"
+        android:layout_toRightOf="@+id/btn_romantic"
+        android:layout_toEndOf="@+id/btn_romantic" />
+
+    <Button
+        android:text="Party"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_party"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/btn_hate"
+        android:layout_toEndOf="@+id/btn_hate"
+        android:layout_marginTop="81dp" />
+
+    <Button
+        android:text="Hate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_hate"
+        android:layout_alignBaseline="@+id/btn_party"
+        android:layout_alignBottom="@+id/btn_party"
+        android:layout_toRightOf="@+id/btn_love"
+        android:layout_toEndOf="@+id/btn_love" />
+</RelativeLayout>
