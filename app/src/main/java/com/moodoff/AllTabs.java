@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
-public class AllTabs extends AppCompatActivity implements Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener{
+public class AllTabs extends AppCompatActivity implements Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -61,7 +61,6 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
                 1);
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -139,6 +138,7 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
             // getItem is called to instantiate the fragment for the given page.
             if(position == 0)return Moods.newInstance("a","b");
             else if(position == 1)return NotificationFragment.newInstance("x","y");
+            else if(position == 2)return KaraokeFragment.newInstance("p","q");
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
         }
