@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
-public class AllTabs extends AppCompatActivity implements Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener{
+public class AllTabs extends AppCompatActivity implements Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -57,7 +57,7 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
 
         //Request all the dangerous permissions over here
         ActivityCompat.requestPermissions(AllTabs.this,
-                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.INTERNET},
                 1);
 
     }
@@ -138,6 +138,7 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             if(position == 0)return Moods.newInstance("a","b");
+            else if(position == 1)return NotificationFragment.newInstance("x","y");
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
         }

@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ExpandableListView;
+import android.widget.RelativeLayout;
 
 
 /**
@@ -26,6 +28,10 @@ public class Moods extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    // Local variables
+    MoodsListAdapter moodsListAdapter;
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -65,17 +71,26 @@ public class Moods extends Fragment {
         //Intent ii = new Intent(Moods.this, GenericMood.class);
 
     }
-
+    View rootView;
+    Button btnRomantic,btnParty,btnOnTour,btnInLove,btnDance,btnMissU;
+    ExpandableListView moodlist;
+    RelativeLayout layout;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_moods, container,
+        rootView = inflater.inflate(R.layout.fragment_moods, container,
                 false);
-        Button btnRomantic = (Button)rootView.findViewById(R.id.btn_romantic);
+        btnRomantic = (Button)rootView.findViewById(R.id.btn_romantic);
+        btnParty = (Button)rootView.findViewById(R.id.btn_party);
+        btnOnTour = (Button)rootView.findViewById(R.id.btn_ontour);
+        btnInLove = (Button)rootView.findViewById(R.id.btn_inlove);
+        btnDance = (Button)rootView.findViewById(R.id.btn_dance);
+        btnMissU = (Button)rootView.findViewById(R.id.btn_missu);
+        layout = (RelativeLayout)rootView.findViewById(R.id.relativeLayout);
+
         btnRomantic.setOnClickListener(new View.OnClickListener() {
             @Override
-
             public void onClick(View v) {
                 Fragment newFragment = new GenericMood();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -83,13 +98,33 @@ public class Moods extends Fragment {
                 // and add the transaction to the back stack if needed
                 transaction.replace(R.id.allmoods, newFragment);
                 transaction.addToBackStack(null);
+                putAllButtonsOff();
 
 // Commit the transaction
                 transaction.commit();
             }
         });
+
+        moodlist = (ExpandableListView)rootView.findViewById(R.id.moodlist);
+        moodsListAdapter = new MoodsListAdapter(getContext());
+        moodlist.setAdapter(moodsListAdapter);
+
         return rootView;
     }
+    public void putAllButtonsOff(){
+        btnRomantic.setVisibility(View.INVISIBLE);
+        btnParty.setVisibility(View.INVISIBLE);
+        btnOnTour.setVisibility(View.INVISIBLE);
+        btnInLove.setVisibility(View.INVISIBLE);
+        btnDance.setVisibility(View.INVISIBLE);
+        btnMissU.setVisibility(View.INVISIBLE);
+        layout.setVisibility(View.VISIBLE);
+    }
+/*
+    public void putmeoff(View v){
+        Button b = (Button)rootView.findViewById(R.id.btn_romantic);
+        b.setVisibility(View.GONE);
+    }*/
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

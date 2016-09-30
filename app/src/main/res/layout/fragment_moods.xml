@@ -3,48 +3,117 @@
     android:id="@+id/allmoods"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.moodoff.Moods"
-    android:background="#000000">
+    android:background="@color/colorAccent"
+    tools:context="com.moodoff.Moods">
+
 
     <!-- TODO: Update blank fragment layout -->
+
+    <RelativeLayout
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:id="@+id/relativeLayout"
+        android:visibility="gone"
+        >
+    <ExpandableListView
+        android:id="@+id/moodlist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:clickable="true"
+        />
+    </RelativeLayout>
 
     <Button
         android:text="Romantic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="65dp"
         android:id="@+id/btn_romantic"
-        android:layout_alignBaseline="@+id/btn_love"
-        android:layout_alignBottom="@+id/btn_love"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_below="@+id/relativeLayout"
+        android:layout_toRightOf="@+id/relativeLayout"
+        android:layout_toEndOf="@+id/relativeLayout"
+        android:height="100dp"
+        android:width="120dp"
+        android:onClick="putmeoff"
+        android:layout_marginLeft="17dp"
+        android:layout_marginStart="17dp" />
 
     <Button
-        android:text="Love"
+        android:id="@+id/btn_ontour"
+        android:text="On tour"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_love"
-        android:layout_alignBaseline="@+id/btn_hate"
-        android:layout_alignBottom="@+id/btn_hate"
+        android:layout_alignBottom="@+id/btn_party"
+        android:layout_toRightOf="@+id/btn_party"
+        android:layout_toEndOf="@+id/btn_party"
+        android:height="100dp"
+        android:width="120dp"
+        android:onClick="putmeoff"
+         />
+
+    <Button
+        android:id="@+id/btn_party"
+        android:text="Party"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/btn_romantic"
+        android:height="100dp"
+        android:width="120dp"
+        android:onClick="putmeoff"
+        android:layout_alignBottom="@+id/btn_romantic"
         android:layout_toRightOf="@+id/btn_romantic"
         android:layout_toEndOf="@+id/btn_romantic" />
 
     <Button
-        android:text="Party"
+        android:text="in love"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_party"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/btn_hate"
-        android:layout_toEndOf="@+id/btn_hate"
-        android:layout_marginTop="81dp" />
+        android:id="@+id/btn_inlove"
+        android:layout_below="@+id/btn_romantic"
+        android:layout_alignLeft="@+id/btn_romantic"
+        android:height="100dp"
+        android:width="120dp"
+        android:onClick="putmeoff"
+        android:layout_alignStart="@+id/btn_romantic" />
 
     <Button
-        android:text="Hate"
+        android:text="dance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_hate"
-        android:layout_alignBaseline="@+id/btn_party"
-        android:layout_alignBottom="@+id/btn_party"
-        android:layout_toRightOf="@+id/btn_love"
-        android:layout_toEndOf="@+id/btn_love" />
+        android:id="@+id/btn_dance"
+        android:layout_below="@+id/btn_romantic"
+        android:layout_toRightOf="@+id/btn_romantic"
+        android:height="100dp"
+        android:width="120dp"
+        android:onClick="putmeoff"
+        android:layout_toEndOf="@+id/btn_romantic" />
+
+    <Button
+        android:text="miss u"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_missu"
+        android:height="100dp"
+        android:width="120dp"
+        android:onClick="putmeoff"
+        android:layout_below="@+id/btn_ontour"
+        android:layout_toRightOf="@+id/btn_party"
+        android:layout_toEndOf="@+id/btn_party" />
+
+    <TextView
+        android:text="Just Tell Us Your Mood"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView2"
+        android:fontFamily="sans-serif"
+        tools:fontFamily="casual"
+        tools:textStyle="bold"
+        android:typeface="normal"
+        android:textSize="18sp"
+        android:layout_above="@+id/btn_ontour"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
