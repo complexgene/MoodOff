@@ -73,11 +73,17 @@ public class GenericMood extends Fragment {
 
     }
     View view;
+    Bitmap bitmap;
+    String folder;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
+        moodpageBG = (ImageView) view.findViewById(R.id.photoView);
+        folder=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
+        bitmap = BitmapFactory.decodeFile(folder);
+        moodpageBG.setImageBitmap(bitmap);
         FloatingActionButton cameraButton = (FloatingActionButton)view.findViewById(R.id.btn_camera);
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,15 +105,14 @@ public class GenericMood extends Fragment {
         return view;
     }
 
-
+    ImageView moodpageBG;
     static String getPictureName(){
         return "mogambo.jpg";
     }
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String folder=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
-        Bitmap bitmap = BitmapFactory.decodeFile(folder);
-        ImageView moodpageBG = (ImageView) view.findViewById(R.id.photoView);
+        folder=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
+        bitmap = BitmapFactory.decodeFile(folder);
         moodpageBG.setImageBitmap(bitmap);
 
         //iv.setImageBitmap(bitmap);
