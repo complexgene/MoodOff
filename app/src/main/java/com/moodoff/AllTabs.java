@@ -57,7 +57,7 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
 
         //Request all the dangerous permissions over here
         ActivityCompat.requestPermissions(AllTabs.this,
-                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.INTERNET},
+                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.INTERNET,Manifest.permission.RECORD_AUDIO},
                 1);
 
     }
