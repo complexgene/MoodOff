@@ -1,0 +1,57 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.moodoff.KaraokeFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_blue_light">
+
+        <Button
+            android:id="@+id/record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Record"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="51dp"
+            android:layout_marginStart="51dp"
+            android:onClick="startRecord" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STOP"
+            android:id="@+id/stop"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/record"
+            android:layout_toEndOf="@+id/record"
+            android:onClick="stopRecord"
+            android:enabled="false" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PLAY"
+            android:id="@+id/play"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/stop"
+            android:layout_toEndOf="@+id/stop"
+            android:onClick="playRecord"
+            android:enabled="false" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Record"
+            android:id="@+id/newRecord"
+            android:layout_below="@+id/record"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="42dp"
+            android:onClick="newRecord"/>
+    </RelativeLayout>
+
+</FrameLayout>
