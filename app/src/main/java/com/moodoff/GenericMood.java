@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,9 +13,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import java.io.File;
 
@@ -99,6 +96,14 @@ public class GenericMood extends Fragment {
                 cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,picture);
                 // Start the Activity Now
                 startActivityForResult(cameraIntent,0);
+            }
+        });
+
+        final FloatingActionButton loveButton = (FloatingActionButton)view.findViewById(R.id.btn_love);
+        loveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loveButton.setImageResource(R.drawable.love_s);
             }
         });
 
