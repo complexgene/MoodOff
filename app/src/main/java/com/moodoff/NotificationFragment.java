@@ -71,18 +71,25 @@ public class NotificationFragment extends Fragment {
     }
 
     View view;
-    TextView allNotifications;
+    TextView allNotificationsTextView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_notification, container, false);
 
+        fetchNotifications();
+
+        return view;
+    }
+
+    public void fetchNotifications(){
         // FETCHING NOTIFICATIONS FROM THE SERVER IN JSON FORMAT.
         // Let suppose i want to populate a textview on the screen whose name is allNotitifactions
         // Remember that i would get the response in json format finally in the variable response,
         // which can be parsed for retrievng the actual values.
-        allNotifications = (TextView)view.findViewById(R.id.getresponse);
+        allNotificationsTextView = (TextView)view.findViewById(R.id.getresponse);
+        allNotificationsTextView.setText("");
         // Start a separate thread for Http Connection
         new Thread(new Runnable() {
             HttpURLConnection urlConnection=null;
@@ -109,14 +116,16 @@ public class NotificationFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ArrayList<String> allnotifications = ParseNotificationData.getNotification(response.toString());
-                            allNotifications.setText("Here is the response from Server:"+allnotifications.get(0));
+                            ArrayList<String> allNotifications = ParseNotificationData.getNotification(response.toString());
+                            for(String eachNotification:allNotifications) {
+                                allNotificationsTextView.setText(allNotificationsTextView.getText() + eachNotification + "\n----------------------------------------------------------------------------------------\n");
+                            }
 
                         }
                     });
                     // If you want to see the output in the console uncomment the next line.
-                  //  Log.i("TAG","Response:"+response.toString());
-                }catch(Exception ee){allNotifications.setText(ee.getMessage());ee.printStackTrace();}
+                    //  Log.i("TAG","Response:"+response.toString());
+                }catch(Exception ee){allNotificationsTextView.setText(ee.getMessage());ee.printStackTrace();}
                 // Close the Http Connection that you started in finally.
                 finally {
                     if(urlConnection!=null)
@@ -129,10 +138,10 @@ public class NotificationFragment extends Fragment {
         // How to get a string representation of the StringBuilder variable then? Just use "VARIABLE_NAME.toString()"
 
         // When the server is ON, you can represent the above URL with this ti get the actual notifications for the number 9681578989.
-       //URL url = new URL("http://192.168.2.5:5213/controller/moodoff/notifications/9681578989");
+        //URL url = new URL("http://192.168.2.5:5213/controller/moodoff/notifications/9681578989");
 
-    return view;
-}
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
