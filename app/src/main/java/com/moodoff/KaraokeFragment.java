@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.File;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -87,7 +89,7 @@ public class KaraokeFragment extends Fragment {
         stop = (Button) view.findViewById(R.id.stop);
         newRecord = (Button) view.findViewById(R.id.newRecord);
 
-        outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + ".mp3";
+        outputFile = Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+File.separator+"/moodoff"+File.separator+"sam.mp3";
 
         rec.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,7 +107,6 @@ public class KaraokeFragment extends Fragment {
                                         myRec.setAudioSource(MediaRecorder.AudioSource.MIC);
                                         myRec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                                         myRec.setAudioEncoder(MediaRecorder.OutputFormat.MPEG_4);
-                                        Log.i("LOC5678904567890",outputFile);
                                         myRec.setOutputFile(outputFile);
                                         mpp = new MediaPlayer();
                                         AssetFileDescriptor afd = view.getContext().getAssets().openFd("BDNZ.mp3");

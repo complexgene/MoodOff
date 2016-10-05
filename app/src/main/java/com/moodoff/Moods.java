@@ -105,10 +105,11 @@ public class Moods extends Fragment {
             }
         });
 
+        /*
         moodlist = (ExpandableListView)rootView.findViewById(R.id.moodlist);
         moodsListAdapter = new MoodsListAdapter(getContext());
         moodlist.setAdapter(moodsListAdapter);
-
+        */
         return rootView;
     }
     public void putAllButtonsOff(){

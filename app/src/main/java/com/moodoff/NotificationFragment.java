@@ -97,7 +97,7 @@ public class NotificationFragment extends Fragment {
             public void run() {
                 try {
                     // Proide the URL from which you would get the JSON response
-                    URL url = new URL("http://192.168.2.3:5213/controller/moodoff/notifications/9681578989");
+                    URL url = new URL("http://192.168.2.4:5002/controller/moodoff/notifications/9681578989");
                     urlConnection = (HttpURLConnection) url.openConnection();
                     // Now as the data would start coming asociate that with an InputStream to store it.
                     InputStream is = urlConnection.getInputStream();
@@ -125,7 +125,7 @@ public class NotificationFragment extends Fragment {
                     });
                     // If you want to see the output in the console uncomment the next line.
                     //  Log.i("TAG","Response:"+response.toString());
-                }catch(Exception ee){allNotificationsTextView.setText(ee.getMessage());ee.printStackTrace();}
+                }catch(Exception ee){ee.printStackTrace();}
                 // Close the Http Connection that you started in finally.
                 finally {
                     if(urlConnection!=null)
