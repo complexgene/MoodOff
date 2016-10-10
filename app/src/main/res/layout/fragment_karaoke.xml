@@ -52,6 +52,18 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="42dp"
             android:onClick="newRecord"/>
+
+        <SeekBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="18dp"
+            android:id="@+id/seekBar"
+            android:layout_above="@+id/record"
+            android:layout_alignLeft="@+id/record"
+            android:layout_alignStart="@+id/record"
+            android:background="@android:color/holo_orange_dark"
+            android:layout_alignRight="@+id/play"
+            android:layout_alignEnd="@+id/play" />
     </RelativeLayout>
 
 </FrameLayout>

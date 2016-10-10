@@ -96,8 +96,8 @@ public class KaraokeFragment extends Fragment {
             public void onClick(View v) {
                 try {
                     new AlertDialog.Builder(view.getContext())
-                            .setTitle("Title")
-                            .setMessage("Set the volume level at 50% for better recording and Click Ok")
+                            .setTitle("What We Suggest")
+                            .setMessage("Set the volume level at 50% for better recording.")
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
@@ -122,7 +122,6 @@ public class KaraokeFragment extends Fragment {
                                 }
                             })
                             .setNegativeButton(android.R.string.no, null).show();
-
 
                 } catch (Exception ee) {
                     ee.printStackTrace();

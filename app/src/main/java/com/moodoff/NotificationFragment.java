@@ -10,6 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.moodoff.helper.StoreRetrieveDataImpl;
+import com.moodoff.helper.StoreRetrieveDataInterface;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -84,6 +88,12 @@ public class NotificationFragment extends Fragment {
     }
 
     public void fetchNotifications(){
+        // Read the mobile number of the current user from stored file
+        StoreRetrieveDataInterface userData = new StoreRetrieveDataImpl("UserData.txt");
+        userData.beginReadTransaction();
+        final String userMobileNumber = userData.getValueFor("user");
+        userData.endReadTransaction();
+        //if(userMobileNumber=="")userMobileNumber="9620332800";
         // FETCHING NOTIFICATIONS FROM THE SERVER IN JSON FORMAT.
         // Let suppose i want to populate a textview on the screen whose name is allNotitifactions
         // Remember that i would get the response in json format finally in the variable response,
@@ -97,7 +107,7 @@ public class NotificationFragment extends Fragment {
             public void run() {
                 try {
                     // Proide the URL from which you would get the JSON response
-                    URL url = new URL("http://192.168.2.4:5002/controller/moodoff/notifications/9681578989");
+                    URL url = new URL("http://192.168.2.5:5002/controller/moodoff/notifications/"+userMobileNumber);
                     urlConnection = (HttpURLConnection) url.openConnection();
                     // Now as the data would start coming asociate that with an InputStream to store it.
                     InputStream is = urlConnection.getInputStream();
@@ -110,6 +120,7 @@ public class NotificationFragment extends Fragment {
                         response.append((char)data);
                         data = isr.read();
                     }
+
                     // When you will like to print the data on any UI object you have to use the thread that is asscoiated
                     // with the UI, not the current new thread that you have started.
                     // UI thread can be accesed in this way.
@@ -125,7 +136,9 @@ public class NotificationFragment extends Fragment {
                     });
                     // If you want to see the output in the console uncomment the next line.
                     //  Log.i("TAG","Response:"+response.toString());
-                }catch(Exception ee){ee.printStackTrace();}
+                }catch(Exception ee){
+                    ee.printStackTrace();
+                }
                 // Close the Http Connection that you started in finally.
                 finally {
                     if(urlConnection!=null)

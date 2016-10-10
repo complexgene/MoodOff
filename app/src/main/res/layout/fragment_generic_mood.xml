@@ -1,89 +1,120 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:id="@+id/genericmood"
     android:layout_height="match_parent"
-    android:paddingTop="0dp"
     tools:context="com.moodoff.GenericMood">
     <!-- TODO: Update blank fragment layout -->
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
 
-
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#000000"
-        android:layout_gravity="fill_horizontal"
+        android:layout_height="wrap_content"
+        android:background="#fdfca2"
         android:id="@+id/floatingButtons"
         >
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:layout_marginRight="14dp"
-            app:backgroundTint="#ffffff"
+            android:layout_marginRight="7dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            app:backgroundTint="@color/FBtn_genericMood"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:src="@drawable/cameraicon"
-            android:id="@+id/btn_camera" />
+            android:id="@+id/btn_camera"
+            app:fabSize="mini" />
 
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="7dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
             android:src="@drawable/love_ns"
             android:id="@+id/btn_love"
-            app:backgroundTint="#ffffff"
+            app:backgroundTint="@color/FBtn_genericMood"
             android:layout_alignTop="@+id/btn_camera"
             android:layout_toLeftOf="@+id/btn_camera"
             android:layout_toStartOf="@+id/btn_camera"
-            android:layout_marginEnd="7dp" />
+            android:layout_marginEnd="7dp"
+            app:fabSize="mini" />
 
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="7dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
             android:src="@drawable/changemood"
             android:id="@+id/btn_changemood"
-            app:backgroundTint="#ffffff"
+            app:backgroundTint="@color/FBtn_genericMood"
             android:layout_alignTop="@+id/btn_love"
             android:layout_toLeftOf="@+id/btn_love"
             android:layout_toStartOf="@+id/btn_love"
-            android:layout_marginEnd="7dp" />
+            android:layout_marginEnd="7dp"
+            app:fabSize="mini" />
 
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="7dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
             android:src="@drawable/btn_dedicate"
             android:id="@+id/btn_dedicate"
-            app:backgroundTint="#ffffff"
+            app:backgroundTint="@color/FBtn_genericMood"
             android:layout_alignTop="@+id/btn_changemood"
             android:layout_toLeftOf="@+id/btn_changemood"
             android:layout_toStartOf="@+id/btn_changemood"
-            android:layout_marginEnd="7dp" />
-    </RelativeLayout>
+            android:layout_marginEnd="7dp"
+            app:fabSize="mini" />
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="59dp"
-        android:id="@+id/moodpage"
-        android:background="#000000"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/floatingButtons"
+        android:backgroundTint="#000000"
+        android:id="@+id/moodbackground"
+        android:background="#ffffff"
         >
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="500sp"
+            android:layout_height="450sp"
             app:srcCompat="@android:color/background_dark"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:paddingBottom="70dp"
             android:scaleType="fitXY"
             android:paddingRight="15dp"
             android:paddingLeft="15dp"
             android:id="@+id/photoView" />
     </RelativeLayout>
 
-</FrameLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+        android:layout_below="@id/moodbackground"
+        >
+        <TextView
+            android:id="@+id/songName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bol Do Naa Zara.mp3"
+            android:textColor="@android:color/black"
+            android:textStyle="normal|bold"
+            />
+    </RelativeLayout>
+
+</RelativeLayout>
+
+</RelativeLayout>
