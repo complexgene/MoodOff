@@ -22,7 +22,6 @@ public class ParseNotificationData {
             JSONObject jsonRootObject = new JSONObject(strJson);
 
             //Get the instance of JSONArray that contains JSONObjects
-
             JSONObject jsonTypeObject = jsonRootObject.getJSONObject("allNotifications");
             JSONArray jsonArray = jsonTypeObject.optJSONArray("entry");
             //Iterate the jsonArray and print the info of JSONObjects
