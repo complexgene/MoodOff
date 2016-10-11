@@ -63,10 +63,12 @@
             android:layout_below="@+id/record"
             android:layout_centerHorizontal="true" />
         <ScrollView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/newRecord"
             android:layout_centerHorizontal="true"
+            android:background="#fffff0"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
             >
         <ImageView
             android:layout_width="wrap_content"
@@ -80,7 +82,9 @@
             android:layout_below="@+id/newRecord"
             android:layout_alignLeft="@+id/record"
             android:layout_alignStart="@+id/record"
-            android:layout_marginTop="14dp" />
+            android:layout_marginTop="14dp"
+            android:adjustViewBounds="false"
+            android:cropToPadding="false" />
         </ScrollView>
     </RelativeLayout>
 

@@ -128,7 +128,7 @@ public class KaraokeFragment extends Fragment {
                 }
                 rec.setEnabled(false);
                 stop.setEnabled(true);
-                Toast.makeText(view.getContext(), "Recording started", Toast.LENGTH_LONG).show();
+                Toast.makeText(view.getContext(), "Recording Started", Toast.LENGTH_LONG).show();
             }
         });
         stop.setOnClickListener(new View.OnClickListener() {
@@ -143,7 +143,7 @@ public class KaraokeFragment extends Fragment {
                 catch(Exception ee){ee.printStackTrace();}
                 stop.setEnabled(false);
                 play.setEnabled(true);
-                Toast.makeText(view.getContext(), "Audio recorded successfully",Toast.LENGTH_LONG).show();
+                Toast.makeText(view.getContext(), "Audio Recorded Successfully",Toast.LENGTH_LONG).show();
             }
         });
 

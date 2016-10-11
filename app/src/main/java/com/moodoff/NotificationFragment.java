@@ -132,6 +132,7 @@ public class NotificationFragment extends Fragment {
                                 allNotificationsTextView.setText(allNotificationsTextView.getText() + eachNotification + "\n----------------------------------------------------------------------------------------\n");
                             }
 
+
                         }
                     });
                     // If you want to see the output in the console uncomment the next line.
