@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.moodoff.helper.ExpressionsImpl;
+
 import java.io.File;
 
 
@@ -81,6 +83,7 @@ public class GenericMood extends Fragment {
         folder=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
         bitmap = BitmapFactory.decodeFile(folder);
         moodpageBG.setImageBitmap(bitmap);
+
         FloatingActionButton cameraButton = (FloatingActionButton)view.findViewById(R.id.btn_camera);
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,6 +107,7 @@ public class GenericMood extends Fragment {
             @Override
             public void onClick(View v) {
                 loveButton.setImageResource(R.drawable.love_s);
+
             }
         });
 

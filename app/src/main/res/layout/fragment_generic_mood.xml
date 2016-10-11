@@ -93,7 +93,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:scaleType="matrix"
+            android:scaleType="fitXY"
             android:paddingRight="15dp"
             android:paddingLeft="15dp"
             android:id="@+id/photoView" />

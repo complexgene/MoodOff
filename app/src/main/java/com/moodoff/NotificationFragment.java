@@ -12,8 +12,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.HttpGetPostImpl;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
+import com.moodoff.model.UserDetails;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -89,70 +91,61 @@ public class NotificationFragment extends Fragment {
 
     public void fetchNotifications(){
         // Read the mobile number of the current user from stored file
-        StoreRetrieveDataInterface userData = new StoreRetrieveDataImpl("UserData.txt");
-        userData.beginReadTransaction();
-        final String userMobileNumber = userData.getValueFor("user");
-        userData.endReadTransaction();
-        //if(userMobileNumber=="")userMobileNumber="9620332800";
-        // FETCHING NOTIFICATIONS FROM THE SERVER IN JSON FORMAT.
+        final String userMobileNumber = UserDetails.getPhoneNumber();
         // Let suppose i want to populate a textview on the screen whose name is allNotitifactions
         // Remember that i would get the response in json format finally in the variable response,
         // which can be parsed for retrievng the actual values.
         allNotificationsTextView = (TextView)view.findViewById(R.id.getresponse);
         allNotificationsTextView.setText("");
+
         // Start a separate thread for Http Connection
         new Thread(new Runnable() {
             HttpURLConnection urlConnection=null;
             @Override
             public void run() {
-                try {
-                    // Proide the URL from which you would get the JSON response
-                    URL url = new URL("http://192.168.2.5:5002/controller/moodoff/notifications/"+userMobileNumber);
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    // Now as the data would start coming asociate that with an InputStream to store it.
-                    InputStream is = urlConnection.getInputStream();
-                    InputStreamReader isr = new InputStreamReader(is);
-                    int data = isr.read();
-                    // Declare a string variable inside which the entire data would be stored.
-                    final StringBuilder response = new StringBuilder("");
-                    // Until we don't encounter the end of data keep reading the data, end is marked by -1
-                    while(data!=-1){
-                        response.append((char)data);
-                        data = isr.read();
-                    }
-
-                    // When you will like to print the data on any UI object you have to use the thread that is asscoiated
-                    // with the UI, not the current new thread that you have started.
-                    // UI thread can be accesed in this way.
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArrayList<String> allNotifications = ParseNotificationData.getNotification(response.toString());
-                            for(String eachNotification:allNotifications) {
-                                allNotificationsTextView.setText(allNotificationsTextView.getText() + eachNotification + "\n----------------------------------------------------------------------------------------\n");
-                            }
-
-
+                    try {
+                        URL url = new URL("http://192.168.2.5:5002/controller/moodoff/notifications/" + userMobileNumber);
+                        urlConnection = (HttpURLConnection) url.openConnection();
+                        // Now as the data would start coming asociate that with an InputStream to store it.
+                        InputStream is = urlConnection.getInputStream();
+                        InputStreamReader isr = new InputStreamReader(is);
+                        int data = isr.read();
+                        // Declare a string variable inside which the entire data would be stored.
+                        final StringBuilder response = new StringBuilder("");
+                        // Until we don't encounter the end of data keep reading the data, end is marked by -1
+                        while (data != -1) {
+                            response.append((char) data);
+                            data = isr.read();
                         }
-                    });
-                    // If you want to see the output in the console uncomment the next line.
-                    //  Log.i("TAG","Response:"+response.toString());
-                }catch(Exception ee){
-                    ee.printStackTrace();
+
+                        // When you will like to print the data on any UI object you have to use the thread that is asscoiated
+                        // with the UI, not the current new thread that you have started.
+                        // UI thread can be accesed in this way.
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ArrayList<String> allNotifications = ParseNotificationData.getNotification(response.toString());
+                                for (String eachNotification : allNotifications) {
+                                    allNotificationsTextView.setText(allNotificationsTextView.getText() + eachNotification + "\n----------------------------------------------------------------------------------------\n");
+                                }
+
+                            }
+                        });
+                        // If you want to see the output in the console uncomment the next line.
+                        //  Log.i("TAG","Response:"+response.toString());
+                    } catch (Exception ee) {
+                        ee.printStackTrace();
+                    }
+                    // Close the Http Connection that you started in finally.
+                    finally {
+                        if (urlConnection != null)
+                            urlConnection.disconnect();
+                    }
                 }
-                // Close the Http Connection that you started in finally.
-                finally {
-                    if(urlConnection!=null)
-                        urlConnection.disconnect();
-                }
-            }
         }).start();
         // This is the entire code that would give you the json response inside the variable response.
         // Remember that response is a StringBuilder variable type, its little different from String variable
         // How to get a string representation of the StringBuilder variable then? Just use "VARIABLE_NAME.toString()"
-
-        // When the server is ON, you can represent the above URL with this ti get the actual notifications for the number 9681578989.
-        //URL url = new URL("http://192.168.2.5:5213/controller/moodoff/notifications/9681578989");
 
     }
 

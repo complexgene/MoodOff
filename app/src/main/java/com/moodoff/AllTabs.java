@@ -22,6 +22,12 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import com.moodoff.helper.HttpGetPostImpl;
+import com.moodoff.model.UserDetails;
+
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
+
 public class AllTabs extends AppCompatActivity implements Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener{
 
     /**

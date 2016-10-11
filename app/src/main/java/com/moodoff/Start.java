@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
+import com.moodoff.model.UserDetails;
 
 public class Start extends AppCompatActivity {
 
@@ -19,6 +20,13 @@ public class Start extends AppCompatActivity {
         try {
             rd = new StoreRetrieveDataImpl("UserData.txt");
             if(rd.fileExists()){
+
+                rd.beginReadTransaction();
+                UserDetails.setUserName(rd.getValueFor("user"));
+                UserDetails.setPhoneNumber(rd.getValueFor("phoneNo"));
+                UserDetails.setEmailId(rd.getValueFor("email"));
+                rd.endReadTransaction();
+
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {

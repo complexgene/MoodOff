@@ -4,14 +4,28 @@
     android:id="@+id/activity_registration"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/FBtn_genericMood"
+    android:background="@drawable/karaoke_bg7"
     tools:context="com.moodoff.RegistrationActivity">
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:hint="Phone Number"
+        android:ems="10"
+        android:layout_marginTop="74dp"
+        android:id="@+id/uname"
+        android:textStyle="normal|bold|italic"
+        android:contentDescription="YourName"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="?attr/colorButtonNormal"
+        android:hint=" Your Name" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint=" Phone Number"
         android:ems="10"
         android:layout_below="@+id/uname"
         android:layout_alignRight="@+id/uname"
@@ -19,7 +33,7 @@
         android:layout_marginTop="18dp"
         android:id="@+id/phoneNumber"
         android:background="?attr/colorButtonNormal"
-        android:textStyle="normal|bold" />
+        android:textStyle="normal|bold|italic" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -33,8 +47,21 @@
         android:layout_alignStart="@+id/phoneNumber"
         android:contentDescription="E-Mail"
         android:background="?attr/colorButtonNormal"
-        android:textStyle="normal|bold"
-        android:hint="E-Mail" />
+        android:textStyle="normal|bold|italic"
+        android:hint=" E-Mail" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:hint=" Date Of Birth"
+        android:layout_below="@+id/email"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:background="?attr/colorButtonNormal"
+        android:textStyle="normal|bold|italic"
+        android:id="@+id/editText" />
 
     <Button
         android:text="Register"
@@ -45,17 +72,17 @@
         android:layout_marginTop="72dp"
         android:id="@+id/register" />
 
-    <EditText
+    <TextView
+        android:text=" Please Register Yourself "
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:layout_marginTop="74dp"
-        android:id="@+id/uname"
-        android:textStyle="normal|bold"
-        android:contentDescription="YourName"
+        android:layout_marginTop="22dp"
+        android:id="@+id/textView"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="?attr/colorButtonNormal"
-        android:hint="Your Name" />
+        android:textSize="24sp"
+        android:textStyle="normal|bold|italic"
+        android:background="?attr/colorControlHighlight" />
+
+
 </RelativeLayout>
