@@ -1,4 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,63 +8,80 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/holo_blue_light">
+        android:background="@drawable/karaoke_bg7">
+
+        <SeekBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekBar"
+            android:clickable="false"
+            android:layout_alignParentTop="true"
+            android:layout_alignLeft="@+id/record"
+            android:layout_alignStart="@+id/record"
+            android:layout_marginTop="52dp"
+            android:layout_alignRight="@+id/play"
+            android:layout_alignEnd="@+id/play" />
 
         <Button
             android:id="@+id/record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Record"
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="51dp"
-            android:layout_marginStart="51dp"
-            android:onClick="startRecord" />
+            android:onClick="startRecord"
+            android:layout_below="@+id/seekBar"
+            android:layout_toLeftOf="@+id/newRecord"
+            android:layout_toStartOf="@+id/newRecord"
+            android:layout_marginTop="30dp" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="STOP"
             android:id="@+id/stop"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/record"
-            android:layout_toEndOf="@+id/record"
             android:onClick="stopRecord"
-            android:enabled="false" />
+            android:enabled="false"
+            android:layout_above="@+id/newRecord"
+            android:layout_centerHorizontal="true" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PLAY"
             android:id="@+id/play"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/stop"
-            android:layout_toEndOf="@+id/stop"
             android:onClick="playRecord"
-            android:enabled="false" />
+            android:enabled="false"
+            android:layout_above="@+id/newRecord"
+            android:layout_toRightOf="@+id/newRecord"
+            android:layout_toEndOf="@+id/newRecord" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New Record"
             android:id="@+id/newRecord"
+            android:onClick="newRecord"
             android:layout_below="@+id/record"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="42dp"
-            android:onClick="newRecord"/>
-
-        <SeekBar
+            android:layout_centerHorizontal="true" />
+        <ScrollView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="18dp"
-            android:id="@+id/seekBar"
-            android:layout_above="@+id/record"
+            android:layout_below="@id/newRecord"
+            android:layout_centerHorizontal="true"
+            >
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/lyrics"
+            android:scaleType="matrix"
+            android:id="@+id/imageView"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:scrollbars="vertical"
+            android:layout_below="@+id/newRecord"
             android:layout_alignLeft="@+id/record"
             android:layout_alignStart="@+id/record"
-            android:background="@android:color/holo_orange_dark"
-            android:layout_alignRight="@+id/play"
-            android:layout_alignEnd="@+id/play" />
+            android:layout_marginTop="14dp" />
+        </ScrollView>
     </RelativeLayout>
 
 </FrameLayout>

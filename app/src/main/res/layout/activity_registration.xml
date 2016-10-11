@@ -4,10 +4,7 @@
     android:id="@+id/activity_registration"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/FBtn_genericMood"
     tools:context="com.moodoff.RegistrationActivity">
 
     <EditText
@@ -21,7 +18,8 @@
         android:layout_alignEnd="@+id/uname"
         android:layout_marginTop="18dp"
         android:id="@+id/phoneNumber"
-        android:contentDescription="PhoneNumber" />
+        android:background="?attr/colorButtonNormal"
+        android:textStyle="normal|bold" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -33,7 +31,10 @@
         android:layout_below="@+id/phoneNumber"
         android:layout_alignLeft="@+id/phoneNumber"
         android:layout_alignStart="@+id/phoneNumber"
-        android:contentDescription="E-Mail" />
+        android:contentDescription="E-Mail"
+        android:background="?attr/colorButtonNormal"
+        android:textStyle="normal|bold"
+        android:hint="E-Mail" />
 
     <Button
         android:text="Register"
@@ -55,5 +56,6 @@
         android:contentDescription="YourName"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="gkgh" />
+        android:background="?attr/colorButtonNormal"
+        android:hint="Your Name" />
 </RelativeLayout>

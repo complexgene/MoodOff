@@ -33,12 +33,7 @@ public class Start extends AppCompatActivity {
                 Intent ii = new Intent(this,RegistrationActivity.class);
                 startActivity(ii);
             }
-            /*rd.beginWriteTransaction();
-            rd.createNewData("user", "9620332800");
-            rd.createNewData("email", "santanu.code@gmail.com");
-            rd.endWriteTransaction();
-            Toast.makeText(this.getApplicationContext(), "Done", Toast.LENGTH_LONG).show();
-      */  }catch(Exception e){
+            }catch(Exception e){
             Toast.makeText(getApplicationContext(), "Ex:"+e.getMessage(), Toast.LENGTH_LONG).show();
         }
 

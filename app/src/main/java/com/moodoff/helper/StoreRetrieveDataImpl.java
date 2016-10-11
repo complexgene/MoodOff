@@ -41,8 +41,9 @@ public class StoreRetrieveDataImpl implements StoreRetrieveDataInterface {
         }
     }
 
+    // Check if the user details file exists or not, return TRUE if it exists or FALSE if it doesn't.
     public boolean fileExists(){
-        File f = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString() + "/moodoff/UserData.txt");
+        File f = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString() + "/moodoff/"+fileName);
         return f.exists();
     }
 
