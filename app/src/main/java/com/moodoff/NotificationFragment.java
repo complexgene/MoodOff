@@ -104,7 +104,7 @@ public class NotificationFragment extends Fragment {
             @Override
             public void run() {
                     try {
-                        URL url = new URL("http://192.168.2.5:5002/controller/moodoff/notifications/" + userMobileNumber);
+                        URL url = new URL("http://192.168.2.4:5002/controller/moodoff/notifications/" + userMobileNumber);
                         urlConnection = (HttpURLConnection) url.openConnection();
                         // Now as the data would start coming asociate that with an InputStream to store it.
                         InputStream is = urlConnection.getInputStream();

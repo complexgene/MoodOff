@@ -31,13 +31,18 @@ public class ParseNotificationData {
                 String fromUser = jsonObject.optString("key").toString();
                 String fileWithType = jsonObject.optString("value").toString();
 
-                String[] fileNameAndType = fileWithType.split("#");
-                if (fileNameAndType[1].equals("S")) {
-                    allNotifications.add(fromUser + " has dedicated you the song " + fileNameAndType[0]);
-                } else {
-                    allNotifications.add(fromUser + " has dedicated you the karaoke " + fileNameAndType[0]);
+                Log.e("jsonObj",jsonObject.toString());
+
+                for(String eachDedicate : fileWithType.split(" ")){
+                    String[] fileNameAndType = eachDedicate.split("#");
+                    if (fileNameAndType[1].equals("S")) {
+                        allNotifications.add(fromUser + " has dedicated you the song " + fileNameAndType[0]);
+                    } else {
+                        allNotifications.add(fromUser + " has dedicated you the karaoke " + fileNameAndType[0]);
+                    }
                 }
             }
+            Log.e("seeit",allNotifications.toString());
             return allNotifications;
         } catch (JSONException e) {e.printStackTrace();}
         return null;
