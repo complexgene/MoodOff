@@ -101,7 +101,7 @@ public class NotificationFragment extends Fragment {
         allNotificationsTextView = (TextView)view.findViewById(R.id.getresponse);
         allNotificationsTextView.setText("");
 
-        // Start a separate thread for Http Connection
+        // Start a separate thread for Http Connection for DB entry for VOTE
         new Thread(new Runnable() {
             HttpURLConnection urlConnection=null;
             @Override
