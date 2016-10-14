@@ -8,6 +8,7 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -15,9 +16,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -77,6 +80,18 @@ public class KaraokeFragment extends Fragment {
     Button rec,play,stop,newRecord;
     MediaPlayer mpp;
     MediaPlayer mp;
+    Handler myHandler;
+    // Added code
+    SeekBar seekBarKaraoke;
+
+    Runnable updateSongTime = new Runnable() {
+        public void run() {
+            int startTime = mpp.getCurrentPosition();
+            Log.e("cp",mpp.getCurrentPosition()+"");
+            seekBarKaraoke.setProgress((int)startTime);
+            myHandler.postDelayed(this, 100);
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -88,6 +103,10 @@ public class KaraokeFragment extends Fragment {
         play = (Button) view.findViewById(R.id.play);
         stop = (Button) view.findViewById(R.id.stop);
         newRecord = (Button) view.findViewById(R.id.newRecord);
+        seekBarKaraoke = (SeekBar)view.findViewById(R.id.seekBar_karaoke);
+
+
+
 
         outputFile = Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+File.separator+"/moodoff"+File.separator+"sam.mp3";
 
@@ -116,6 +135,13 @@ public class KaraokeFragment extends Fragment {
                                         afd.close();
                                         mpp.start();
                                         myRec.start();
+                                        Log.e("mediaPlayer2","kkk");
+                                                        if(mpp!=null){
+                                                            Log.e("cp",mpp.getCurrentPosition()+"");
+                                                            seekBarKaraoke.setProgress(mpp.getCurrentPosition());
+                                                            myHandler.postDelayed(updateSongTime,100);
+                                                    }
+
                                     } catch (Exception ee) {
                                         ee.printStackTrace();
                                     }
@@ -131,6 +157,8 @@ public class KaraokeFragment extends Fragment {
                 Toast.makeText(view.getContext(), "Recording Started", Toast.LENGTH_LONG).show();
             }
         });
+
+
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -166,7 +194,7 @@ public class KaraokeFragment extends Fragment {
         newRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mp.stop();
+                if(mp!=null)mp.stop();
                 play.setEnabled(false);
                 //MediaPlayer mp = new MediaPlayer();
                 try {

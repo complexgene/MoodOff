@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.helper.HttpGetPostImpl;
+import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
@@ -38,6 +39,8 @@ public class NotificationFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    private String serverURL = HttpGetPostInterface.serverURL;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -104,7 +107,7 @@ public class NotificationFragment extends Fragment {
             @Override
             public void run() {
                     try {
-                        URL url = new URL("http://192.168.2.4:5002/controller/moodoff/notifications/" + userMobileNumber);
+                        URL url = new URL(serverURL+"/notifications/" + userMobileNumber);
                         urlConnection = (HttpURLConnection) url.openConnection();
                         // Now as the data would start coming asociate that with an InputStream to store it.
                         InputStream is = urlConnection.getInputStream();

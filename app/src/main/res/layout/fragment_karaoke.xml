@@ -13,7 +13,7 @@
         <SeekBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/seekBar"
+            android:id="@+id/seekBar_karaoke"
             android:clickable="false"
             android:layout_alignParentTop="true"
             android:layout_alignLeft="@+id/record"
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:text="Record"
             android:onClick="startRecord"
-            android:layout_below="@+id/seekBar"
+            android:layout_below="@+id/seekBar_karaoke"
             android:layout_toLeftOf="@+id/newRecord"
             android:layout_toStartOf="@+id/newRecord"
             android:layout_marginTop="30dp" />
@@ -74,6 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/lyrics"
+            android:layout_gravity="center_horizontal"
             android:scaleType="matrix"
             android:id="@+id/imageView"
             android:paddingBottom="10dp"

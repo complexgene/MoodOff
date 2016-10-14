@@ -10,14 +10,20 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.moodoff.helper.ExpressionsImpl;
+import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.model.UserDetails;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 
 /**
@@ -33,6 +39,8 @@ public class GenericMood extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    private String serverURL = HttpGetPostInterface.serverURL;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -106,8 +114,49 @@ public class GenericMood extends Fragment {
         loveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String currentUser = UserDetails.getPhoneNumber();
+                String currentSong = "turu_turu.mp3";
+                char type = '0';
+                final String Url = "notifications/"+currentUser+"/"+currentSong+"/"+type;
                 loveButton.setImageResource(R.drawable.love_s);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        HttpURLConnection urlConnection=null;
+                        try {
+                            // Proide the URL fto which you would fire a post
+                            URL url = new URL(serverURL+"/"+Url);
+                            urlConnection = (HttpURLConnection) url.openConnection();
 
+                            // Method is POSt, need to specify that
+                            //urlConnection.setDoOutput(false);
+                            //urlConnection.setRequestMethod("POST");
+                            //urlConnection.setRequestProperty("User-Agent","Mozilla/5.0");
+                            //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+
+                            // Send post request
+                            urlConnection.setDoOutput(true);
+
+                            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                            //wr.writeBytes(urlParameters);  //FOR EXTRA DATA
+                            wr.flush();
+                            wr.close();
+
+                            int responseCode = urlConnection.getResponseCode();
+
+                            Log.e("ResponseCode",responseCode+"");
+
+                        }catch(Exception ee){
+                            Log.e("Todayerror",Log.getStackTraceString(ee));
+                            ee.printStackTrace();
+                        }
+                        // Close the Http Connection that you started in finally.
+                        finally {
+                            if(urlConnection!=null)
+                                urlConnection.disconnect();
+                        }
+                    }
+                }).start();
             }
         });
 
