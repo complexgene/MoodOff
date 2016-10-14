@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.moodoff.helper.ExpressionsImpl;
 import com.moodoff.helper.HttpGetPostInterface;
@@ -24,6 +25,8 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Random;
 
 
 /**
@@ -115,7 +118,7 @@ public class GenericMood extends Fragment {
             @Override
             public void onClick(View v) {
                 String currentUser = UserDetails.getPhoneNumber();
-                String currentSong = "turu_turu.mp3";
+                String currentSong = "turu_turu"+new Random().nextInt(1000)+".mp3";
                 char type = '0';
                 final String Url = "notifications/"+currentUser+"/"+currentSong+"/"+type;
                 loveButton.setImageResource(R.drawable.love_s);
@@ -143,7 +146,22 @@ public class GenericMood extends Fragment {
                             wr.close();
 
                             int responseCode = urlConnection.getResponseCode();
-
+                            if(responseCode==200){
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity().getApplicationContext(),"You loved this song",Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                            else{
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Please try after sometime!!",Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
                             Log.e("ResponseCode",responseCode+"");
 
                         }catch(Exception ee){
