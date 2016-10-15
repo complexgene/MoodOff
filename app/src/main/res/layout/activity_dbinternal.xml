@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <Button
+        android:text="SHOW ALL TABLES IN INTERNAL DB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="storeData"
+        android:id="@+id/store"
+        android:layout_alignParentTop="true"
+        android:paddingLeft="10dp"
+         />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:layout_marginLeft="18dp"
+        android:layout_marginStart="18dp"
+        android:id="@+id/datatostore"
+        android:hint="Enter table name"
+        android:background="@android:color/holo_green_light"
+        android:layout_alignBottom="@+id/scrollView2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:text="GET DATA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="showData"
+            android:id="@+id/getdata"
+            android:layout_alignBaseline="@+id/store"
+            android:layout_alignBottom="@+id/store"
+            android:layout_toRightOf="@+id/store"
+            android:layout_toEndOf="@+id/store"
+            android:layout_marginLeft="11dp"
+            android:layout_marginStart="11dp" />
+
+        <Button
+            android:text="CLEAR DATA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/getdata"
+            android:layout_alignLeft="@+id/getdata"
+            android:layout_alignStart="@+id/getdata"
+            android:onClick="clearData"
+            android:id="@+id/cleardata" />
+
+        <Button
+            android:text="DELETE TABLE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button7"
+            android:layout_below="@+id/scrollView2"
+            android:layout_alignLeft="@+id/scrollView2"
+            android:layout_alignStart="@+id/scrollView2" />
+    </LinearLayout>
+
+        <EditText
+            android:id="@+id/rawquery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Type and run raw query here.."
+            android:background="#3890"
+            />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="RUN"
+            android:onClick="runRawQuery"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:textStyle="bold"
+            android:text="Allowed opearations are CREATE, DELETE, DROP, SELECT for raw query."
+            />
+
+    </LinearLayout>
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/store"
+        android:layout_alignLeft="@id/store"
+        android:scrollbarAlwaysDrawHorizontalTrack="true"
+        >
+    <TextView
+        android:text="..."
+        android:paddingLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/store"
+        android:layout_alignLeft="@id/store"
+        android:layout_alignStart="@id/store"
+        android:layout_marginTop="37dp"
+        android:id="@+id/alldata" />
+    </ScrollView>
+
+</LinearLayout>

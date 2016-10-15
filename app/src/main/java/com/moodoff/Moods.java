@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.RelativeLayout;
 
+import com.moodoff.helper.DBInternal;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -89,6 +91,13 @@ public class Moods extends Fragment {
         btnMissU = (Button)rootView.findViewById(R.id.btn_missu);
         layout = (RelativeLayout)rootView.findViewById(R.id.relativeLayout);
 
+        btnOnTour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent openInternalDBActivity = new Intent(getActivity(), DBInternal.class);
+                startActivity(openInternalDBActivity);
+            }
+        });
         btnRomantic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
