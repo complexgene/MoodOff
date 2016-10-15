@@ -584,10 +584,10 @@ public class GenericMood extends Fragment implements View.OnClickListener{
     public void releaseMediaPlayerObject(MediaPlayer mediaPlayer) {
         try {
             if (mediaPlayer != null) {
-                if(mediaPlayer.isPlaying()) {
-                    mediaPlayer.release();
-                    mediaPlayer = null;
-                }
+                if(mediaPlayer.isPlaying())
+                {mediaPlayer.stop();}
+                mediaPlayer.release();
+                mediaPlayer = null;
             }
         } catch(Exception e){toastError(e);}
     }
