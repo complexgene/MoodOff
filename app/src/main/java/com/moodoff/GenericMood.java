@@ -466,7 +466,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             currentIndex = currentplayList.indexOf(currentPlayingSongs);
         } catch(Exception e){
             toastError(e.getMessage());
-            releaseMediaPlayerObject();}
+            releaseMediaPlayerObject();
+        }
     }
 
     //Read the text file similar to activityName and return an listOfSong
@@ -479,10 +480,10 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             InputStreamReader isr = new InputStreamReader(assMgr.open("playlist.txt"));
             BufferedReader br = new BufferedReader(isr);
             String song = "";
-            song=br.readLine();
             while((song=br.readLine())!=null) {
                 listOfSong.add(song);
             }
+            Collections.shuffle(listOfSong);
             return(listOfSong);
         } catch(Exception e){toastError(e.getMessage()); return(null);}
     }

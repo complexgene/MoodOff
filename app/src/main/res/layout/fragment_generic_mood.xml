@@ -9,9 +9,9 @@
     <!-- TODO: Update blank fragment layout -->
 
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="#000000"
         android:layout_gravity="fill_horizontal"
         android:id="@+id/floatingButtons"
@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
-            android:layout_marginRight="7dp"
+            android:layout_marginRight="14dp"
             app:backgroundTint="#ffffff"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
@@ -63,12 +63,12 @@
             android:layout_toLeftOf="@+id/btn_changemood"
             android:layout_toStartOf="@+id/btn_changemood"
             android:layout_marginEnd="7dp" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <RelativeLayout
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="59dp"
         android:id="@+id/moodpage"
         android:background="#000000"
         >
