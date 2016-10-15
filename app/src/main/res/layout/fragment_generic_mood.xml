@@ -1,130 +1,203 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:id="@+id/genericmood"
     android:layout_height="match_parent"
+    android:paddingTop="0dp"
     tools:context="com.moodoff.GenericMood">
     <!-- TODO: Update blank fragment layout -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/newsPanel">
-        <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:paddingBottom="5dp"
-                android:paddingTop="5dp"
-                android:layout_centerHorizontal="true"
-                android:text="Here is the news for which you were waiting long."
-                android:textStyle="bold|italic"
-            />
-    </RelativeLayout>
 
-    <RelativeLayout
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/newsPanel"
-        android:backgroundTint="#000000"
-        android:id="@+id/moodbackground"
-        android:background="#ffffff"
+        android:background="#000000"
+        android:layout_gravity="fill_horizontal"
+        android:id="@+id/floatingButtons"
         >
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/floatingButtonsLeft"
-            >
-            <android.support.design.widget.FloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"
-                app:backgroundTint="@color/FBtn_genericMood"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:src="@drawable/cameraicon"
-                android:id="@+id/btn_camera"
-                app:fabSize="mini" />
-            <android.support.design.widget.FloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="3dp"
-                android:layout_marginLeft="3dp"
-                android:layout_marginBottom="3dp"
-                android:src="@drawable/changemood"
-                android:id="@+id/btn_changemood"
-                app:backgroundTint="@color/FBtn_genericMood"
-                app:fabSize="mini" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/moodbg_image"
-            android:layout_toRightOf="@id/floatingButtonsLeft"
-            >
-            <ImageView
-                android:layout_width="270dp"
-                android:layout_height="match_parent"
-                app:srcCompat="@drawable/karaoke_bg"
-                android:scaleType="fitXY"
-                android:id="@+id/photoView" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/floatingButtonsRight"
-            android:layout_toRightOf="@id/moodbg_image"
-            >
-            <android.support.design.widget.FloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:layout_marginLeft="3dp"
-                android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"
-                android:src="@drawable/love_ns"
-                android:id="@+id/btn_love"
-                app:backgroundTint="@color/FBtn_genericMood"
-                app:fabSize="mini" />
-            <android.support.design.widget.FloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"
-                android:src="@drawable/btn_dedicate"
-                android:id="@+id/btn_dedicate"
-                app:backgroundTint="@color/FBtn_genericMood"
-                app:fabSize="mini" />
-        </LinearLayout>
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffffff"
-        android:layout_below="@id/moodbackground"
-        >
-        <TextView
-            android:id="@+id/songName"
+        <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bol Do Naa Zara.mp3"
-            android:textColor="@android:color/black"
-            android:textStyle="normal|bold"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="7dp"
+            app:backgroundTint="#ffffff"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/cameraicon"
+            android:id="@+id/btn_camera" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="7dp"
+            android:src="@drawable/love_ns"
+            android:id="@+id/btn_love"
+            app:backgroundTint="#ffffff"
+            android:layout_alignTop="@+id/btn_camera"
+            android:layout_toLeftOf="@+id/btn_camera"
+            android:layout_toStartOf="@+id/btn_camera"
+            android:layout_marginEnd="7dp" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="7dp"
+            android:src="@drawable/changemood"
+            android:id="@+id/btn_changemood"
+            app:backgroundTint="#ffffff"
+            android:layout_alignTop="@+id/btn_love"
+            android:layout_toLeftOf="@+id/btn_love"
+            android:layout_toStartOf="@+id/btn_love"
+            android:layout_marginEnd="7dp" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="7dp"
+            android:src="@drawable/btn_dedicate"
+            android:id="@+id/btn_dedicate"
+            app:backgroundTint="#ffffff"
+            android:layout_alignTop="@+id/btn_changemood"
+            android:layout_toLeftOf="@+id/btn_changemood"
+            android:layout_toStartOf="@+id/btn_changemood"
+            android:layout_marginEnd="7dp" />
+    </LinearLayout>
+
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/moodpage"
+        android:background="#000000"
+        >
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@android:color/background_dark"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:paddingBottom="70dp"
+            android:scaleType="fitXY"
+            android:paddingRight="15dp"
+            android:paddingLeft="15dp"
+            android:id="@+id/photoView" />
+
+        <TextView
+            android:id="@+id/nameOfSong"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/seekBar"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="[ Click Play button to play Random Song ]"
+            android:textColor="#FFFF00"
+            android:background="#000000"
+            android:textSize="18sp"
+            android:textStyle="italic"
             />
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/buttons"
+            android:background="#CFFF00" />
+
+        <LinearLayout
+            android:id="@+id/buttons"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_centerHorizontal="true"
+            >
+
+            <Button
+                android:id="@+id/repeatButton"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@mipmap/repeat_none"
+                android:layout_weight="1"
+                android:text=""
+                android:onClick="onClickRepeatButton" />
+            <Button
+                android:id="@+id/prevButton"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@mipmap/prev"
+                android:layout_weight="1"
+                android:text=""
+                android:onClick="onClickPrevButton" />
+            <Button
+                android:id="@+id/playPauseBtn"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@mipmap/play"
+                android:layout_weight="1"
+                android:text=""
+                android:visibility="visible"
+                android:onClick="onClickPlayOrPauseButton" />
+            <!--<Button-->
+            <!--android:id="@+id/pauseButton"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginTop="3dp"-->
+            <!--android:layout_width="60dp"-->
+            <!--android:layout_height="60dp"-->
+            <!--android:background="@drawable/pause"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text=""-->
+            <!--android:visibility="gone"-->
+            <!--android:onClick="onClickPauseButton" />-->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"/>
+            <Button
+                android:id="@+id/stopButton"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@mipmap/stop"
+                android:layout_weight="1"
+                android:text=""
+                android:onClick="onClickStopButton" />
+            <Button
+                android:id="@+id/nextButton"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@mipmap/next"
+                android:layout_weight="1"
+                android:text=""
+                android:onClick="onClickNextButton" />
+            <Button
+                android:id="@+id/shuffleButton"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@mipmap/shuffle"
+                android:layout_weight="1"
+                android:text=""
+                android:onClick="onClickShuffleButton" />
+        </LinearLayout>
     </RelativeLayout>
 
-</RelativeLayout>
+</FrameLayout>

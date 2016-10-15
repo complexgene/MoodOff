@@ -2,11 +2,15 @@ package com.moodoff;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -14,18 +18,26 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.helper.ExpressionsImpl;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.model.UserDetails;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 
@@ -37,7 +49,7 @@ import java.util.Random;
  * Use the {@link GenericMood#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GenericMood extends Fragment {
+public class GenericMood extends Fragment implements View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -84,15 +96,72 @@ public class GenericMood extends Fragment {
     }
     View view;
     Bitmap bitmap;
-    String folder;
+    String imageFilePath;
+    ImageView moodpageBG;
+
+    //Player variables
+    MediaPlayer mp;
+    Context context;
+    //Buttons
+    Button playPauseBtn, stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
+    ProgressBar spinner;
+    SeekBar seekBar;
+    TextView songName = null;
+    Handler seekHandler = new Handler();
+    ArrayList<String> currentplayList = null;
+    String currentSong = "", currentMood = "", playListFilePath = "";
+    int currentIndex = 0, repParm = 0, playOrPauseParm = 0;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
+
+        songName = (TextView) view.findViewById(R.id.nameOfSong);
+        playPauseBtn = (Button) view.findViewById(R.id.playPauseBtn);
+        stopBtn = (Button) view.findViewById(R.id.stopButton);
+        nextBtn = (Button) view.findViewById(R.id.nextButton);
+        prevBtn = (Button) view.findViewById(R.id.prevButton);
+        repBtn = (Button) view.findViewById(R.id.repeatButton);
+        shuffleBtn = (Button) view.findViewById(R.id.shuffleButton);
+        spinner = (ProgressBar) view.findViewById(R.id.progressBar);
+        seekBar = (SeekBar) view.findViewById(R.id.seekBar);
+        playPauseBtn.setOnClickListener(this);
+        stopBtn.setOnClickListener(this);
+        nextBtn.setOnClickListener(this);
+        prevBtn.setOnClickListener(this);
+        repBtn.setOnClickListener(this);
+        shuffleBtn.setOnClickListener(this);
+        seekBar.setOnClickListener(this);
+        disableButton(prevBtn);
+        currentMood = "romantic";
+        if (currentMood != "") {
+            currentplayList = readList(currentMood);
+            checkRepeatButtonStatus(currentIndex);
+        }
+        if (currentplayList != null) {
+            //onClickShuffleButton(view);
+            currentSong = songNameFromList(currentplayList, currentIndex);
+            displaySongName(songName, "Tap play button to listen song");
+        }
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mp.seekTo(seekBar.getProgress());
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+        });
+
+
         moodpageBG = (ImageView) view.findViewById(R.id.photoView);
-        folder=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
-        bitmap = BitmapFactory.decodeFile(folder);
+        imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
+        bitmap = BitmapFactory.decodeFile(imageFilePath);
         moodpageBG.setImageBitmap(bitmap);
 
         FloatingActionButton cameraButton = (FloatingActionButton)view.findViewById(R.id.btn_camera);
@@ -118,8 +187,8 @@ public class GenericMood extends Fragment {
             @Override
             public void onClick(View v) {
                 String currentUser = UserDetails.getPhoneNumber();
-                String currentSong = "turu_turu"+new Random().nextInt(1000)+".mp3";
-                char type = '0';
+                //String currentSong = "turu_turu"+new Random().nextInt(1000)+".mp3";
+                char type = '1';
                 final String Url = "notifications/"+currentUser+"/"+currentSong+"/"+type;
                 loveButton.setImageResource(R.drawable.love_s);
                 new Thread(new Runnable() {
@@ -181,23 +250,391 @@ public class GenericMood extends Fragment {
         return view;
     }
 
-    ImageView moodpageBG;
     static String getPictureName(){
         return "mogambo.jpg";
     }
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        folder=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
-        bitmap = BitmapFactory.decodeFile(folder);
+        imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
+        bitmap = BitmapFactory.decodeFile(imageFilePath);
         moodpageBG.setImageBitmap(bitmap);
-
         //iv.setImageBitmap(bitmap);
-
         // Either you can take the captured image as biitmap or you can save it to external directory.
         // Now choose what you want to do.
         // I wanted to save the image in the External HDD so i wrote the above code.
+    }
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.playPauseBtn:
+                onClickPlayButton(view);
+                break;
+            case R.id.prevButton:
+                onClickPrevButton(view);
+                break;
+            case R.id.nextButton:
+                onClickNextButton(view);
+                break;
+            case R.id.stopButton:
+                onClickStopButton(view);
+                break;
+            case R.id.repeatButton:
+                onClickRepeatButton(view);
+                break;
+            case R.id.shuffleButton:
+                onClickShuffleButton(view);
+                break;
+        }
+    }
 
+    /*On click method for previous button: play previous song*/
+    public void onClickPrevButton(View v) {
+        try{
+            onClickStopButton(v);
+            currentIndex = decrementIndex(currentIndex);
+            showSpinner();
+            onClickPlayButton(v);
+        } catch (Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);
+        }
+    }
+
+    /*On click method for next button: play next song*/
+    public void onClickNextButton(View v) {
+        try{
+            onClickStopButton(v);
+            currentIndex = incrementIndex(currentIndex);
+            showSpinner();
+            onClickPlayButton(v);
+        } catch (Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);
+        }
+    }
+
+    /*On click method for play/pause button*/
+    public void onClickPlayButton(View v) {
+        try{
+            if (playOrPauseParm == 0) {
+                playSong();
+            } else if (playOrPauseParm == 1) {
+                pauseSong();
+            } else {
+                toastError(new Exception("Unexpected condition !!!"));
+            }
+        } catch (Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);
+        }
+    }
+
+    /*play a new or currently paused song*/
+    public void playSong() {
+        try {
+            if (mp == null) {
+                //for playing new song
+                showSpinner();
+                currentSong = (String) songNameFromList(currentplayList, currentIndex);
+                displaySongName(songName, "Downloading the song...please wait");
+                setSongSource(currentIndex, currentMood);
+                //after the song is prepared in asynchronous mode
+                mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    public void onPrepared(MediaPlayer mediaPlayer) {
+                        showPlayPauseButton("pause");
+                        displaySongName(songName, currentIndex + " " + currentSong + " " + getCurrentSongDuration(mediaPlayer));
+                        seekBar.setMax(mediaPlayer.getDuration());
+                        seekUpdation();
+                        mediaPlayer.start();
+                    }
+                });
+                //call next on completion of the song
+                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mediaPlayer) {
+                        currentIndex = incrementIndex(currentIndex);
+                        onClickNextButton(view);
+                    }
+                });
+            } else {
+                //for playing paused song
+                if(!mp.isPlaying()) {
+                    showPlayPauseButton("pause");
+                    currentSong = (String)songNameFromList(currentplayList,currentIndex);
+                    displaySongName(songName, currentIndex + " " + currentSong + " " + getCurrentSongDuration(mp));
+                    seekBar.setMax(mp.getDuration());
+                    seekUpdation();
+                    mp.start();
+                }
+            }
+        } catch (Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);
+        }
+    }
+
+    /*pause the currently playing song*/
+    public void pauseSong() {
+        try {
+            if(mp.isPlaying()) {
+                mp.pause();
+            }
+            showPlayPauseButton("play");
+        } catch (Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);
+        }
+    }
+
+    /*Return current playing song's duration in mm:ss format*/
+    public String getCurrentSongDuration(MediaPlayer mediaPlayer) {
+        try {
+            int duration = 0;
+            if (mediaPlayer != null) {
+                duration = (mediaPlayer.getDuration()/1000);
+            }
+            return ((duration/60) + "." + ((duration%60 > 9) ? (duration % 60) : ("0"+(duration%60)) ));
+        } catch (Exception e) {
+            toastError(e);
+            return "00:00";
+        }
+    }
+
+    /*On click method for stop button: stops music here*/
+    public void onClickStopButton(View v) {
+        try{
+            releaseMediaPlayerObject(mp);
+            showPlayPauseButton("play");
+            seekBar.setMax(0);
+        } catch (Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);
+        }
+    }
+
+    /*show spinner in place of play/pause button*/
+    public void showSpinner() {
+        try {
+            playPauseBtn.setVisibility(Button.GONE);
+            spinner.setVisibility(ProgressBar.VISIBLE);
+        } catch(Exception e){toastError(e);}
+    }
+
+    /*set play or pause button for display*/
+    public void showPlayPauseButton(String playOrPause) {
+        try {
+            playOrPause = playOrPause.toLowerCase();
+            if (playOrPause == "play") {
+                playOrPauseParm = 0;
+                playPauseBtn.setBackgroundResource(R.mipmap.play);
+            } else {
+                playOrPauseParm = 1;
+                playPauseBtn.setBackgroundResource(R.mipmap.pause);
+            }
+            playPauseBtn.setVisibility(Button.VISIBLE);
+            spinner.setVisibility(ProgressBar.GONE);
+        } catch(Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);
+        }
+    }
+
+    /*On click method for shuffle button: Change repeat button and status*/
+    public void onClickRepeatButton(View v) {
+        try {
+            repParm = (repParm+1)%3;
+            checkRepeatButtonStatus(currentIndex);
+            if (repParm == 1) {
+                repBtn.setBackgroundResource(R.mipmap.repeat_one);
+            } else if (repParm == 2) {
+                repBtn.setBackgroundResource(R.mipmap.repeat_all);
+            } else {
+                repBtn.setBackgroundResource(R.mipmap.repeat_none);
+            }
+        } catch(Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);
+        }
+    }
+
+    /*On click method for shuffle button: Shuffle the playlist*/
+    public void onClickShuffleButton(View v) {
+        try {
+            //Shuffle the collection
+            String currentPlayingSongs = currentplayList.get(currentIndex);
+            Collections.shuffle(currentplayList);
+            currentIndex = currentplayList.indexOf(currentPlayingSongs);
+        } catch(Exception e){
+            toastError(e);
+            releaseMediaPlayerObject(mp);}
+    }
+
+    //Read the text file similar to activityName and return an listOfSong
+    public ArrayList<String> readList(String mood) {
+        ArrayList<String> listOfSong = new ArrayList<String>();
+        try{
+            AssetManager assMgr = getActivity().getAssets();
+            //playListFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/"+mood+"/playlist.txt";
+            //InputStreamReader isr = new InputStreamReader(new FileInputStream(playListFilePath));
+            InputStreamReader isr = new InputStreamReader(assMgr.open("playlist.txt"));
+            BufferedReader br = new BufferedReader(isr);
+            String song = "";
+            song=br.readLine();
+            while((song=br.readLine())!=null) {
+                listOfSong.add(song);
+            }
+            return(listOfSong);
+        } catch(Exception e){toastError(e); return(null);}
+    }
+
+    /*Set data source with the currentSong*/
+    public void setSongSource(int index, String mood) {
+        String currentSong = currentplayList.get(index);
+        releaseMediaPlayerObject(mp);
+        mp = new MediaPlayer();
+        String url = "http://www.hipilab.com/songs/"+ mood + "/" + currentSong;
+        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try{
+            //mp = MediaPlayer.create(this, Uri.parse(url));
+            mp.setDataSource(url);
+            mp.prepareAsync();
+        } catch (IllegalArgumentException e) {toastError(e); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (IllegalStateException e) {toastError(e); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (IOException e) {toastError(e); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (Exception e) {toastError(e); releaseMediaPlayerObject(mp); e.printStackTrace();
+        }
+    }
+
+    /*Return the currentSong at an index from the playList*/
+    public String songNameFromList(ArrayList<String> playList, int index) {
+        try {
+            return playList.get(index);
+        } catch(Exception e){toastError(e); return null;}
+    }
+
+    /*Set the text with currentSong*/
+    public void displaySongName(TextView textToDisplaySong, String currentSong) {
+        try {
+            if (currentSong.contains("_")) {
+                currentSong = currentSong.split(".", 1)[0].replaceAll("_", " ");
+            } else if (!currentSong.contains("_")) {
+                currentSong = currentSong.split(".", 1)[0];
+            }
+            textToDisplaySong.setText(currentSong);
+        } catch(Exception e){toastError(e);}
+    }
+
+    /*check repeat button status and enable/disable next/previous button*/
+    public void checkRepeatButtonStatus(int index) {
+        try {
+            if (repParm == 0 || repParm == 1) {
+                if (index == 0) {
+                    disableButton(prevBtn);
+                } else if (index == getLastIndex(currentplayList)) {
+                    disableButton(nextBtn);
+                } else {
+                    enableButton(nextBtn);
+                    enableButton(prevBtn);
+                }
+            } else {
+                enableButton(nextBtn);
+                enableButton(prevBtn);
+            }
+        } catch(Exception e){toastError(e);}
+    }
+
+    /*return the decremented index as per repeat button status*/
+    public int decrementIndex(int index) {
+        try {
+            int lastIndex = getLastIndex(currentplayList);
+            index--;
+            if (repParm == 0 || repParm == 1) {
+                if (index <= 0) {
+                    index = 0;
+                }
+            } else {
+                //decrement index in a circular queue order
+                index = (index+(lastIndex+1))%(lastIndex+1);
+            }
+            checkRepeatButtonStatus(index);
+            return index;
+        } catch(Exception e){toastError(e); return -1;}
+    }
+
+    /*return the incremented index as per repeat button status*/
+    public int incrementIndex(int index) {
+        try {
+            int lastIndex = getLastIndex(currentplayList);
+            index++;
+            if (repParm == 0 || repParm == 1) {
+                if (index >= lastIndex) {
+                    index = lastIndex;
+                }
+            } else {
+                //increment index in a circular queue order
+                index = (index+(lastIndex+1))%(lastIndex+1);
+            }
+            checkRepeatButtonStatus(index);
+            return index;
+        } catch(Exception e){toastError(e); return -1;}
+
+    }
+
+    /*release and return the nullified mediaplayer object*/
+    public void releaseMediaPlayerObject(MediaPlayer mediaPlayer) {
+        try {
+            if (mediaPlayer != null) {
+                if(mediaPlayer.isPlaying()) {
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
+            }
+        } catch(Exception e){toastError(e);}
+    }
+
+    /*return the last index of the playlist*/
+    public  int getLastIndex(ArrayList<String> playList) {
+        try {
+            int lastIndex;
+            lastIndex = (playList.size() - 1);
+            return lastIndex;
+        } catch(Exception e){toastError(e); return -1;}
+    }
+
+    /*enable clickability of a button*/
+    public void enableButton (Button button) {
+        try {
+            button.setClickable(true);
+            button.setEnabled(true);
+        } catch(Exception e){toastError(e);}
+    }
+
+    /*disable clickability of a button*/
+    public void disableButton (Button button) {
+        try {
+            button.setClickable(false);
+            button.setEnabled(false);
+        } catch(Exception e){toastError(e);}
+    }
+
+    /*Toast error message*/
+    public void toastError(Exception error) {
+        //Toast.makeText(view.getContext(), "Oops! Somehing went wrong\n"+error.toString(), Toast.LENGTH_LONG).show();
+        Log.e("MPissue",error.toString());
+        error.fillInStackTrace().printStackTrace();
+    }
+
+    Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            seekUpdation();
+        }
+    };
+    public void seekUpdation() {
+        if (mp!=null) {
+            seekBar.setProgress(mp.getCurrentPosition());
+            seekHandler.postDelayed(run, 10);
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
