@@ -189,61 +189,73 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 String currentUser = UserDetails.getPhoneNumber();
                 //String currentSong = "turu_turu"+new Random().nextInt(1000)+".mp3";
                 char type = '1';
-                final String Url = "notifications/"+currentUser+"/"+currentSong+"/"+type;
-                loveButton.setImageResource(R.drawable.love_s);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        HttpURLConnection urlConnection=null;
-                        try {
-                            // Proide the URL fto which you would fire a post
-                            URL url = new URL(serverURL+"/"+Url);
-                            urlConnection = (HttpURLConnection) url.openConnection();
+                if(mp==null || !mp.isPlaying()){
+                    Toast.makeText(getActivity().getApplicationContext(),"Please play a song to like it.",Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    final String Url = "notifications/"+currentUser+"/"+currentSong+"/"+type;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            HttpURLConnection urlConnection=null;
+                            try {
+                                // Proide the URL fto which you would fire a post
+                                URL url = new URL(serverURL+"/"+Url);
+                                urlConnection = (HttpURLConnection) url.openConnection();
 
-                            // Method is POSt, need to specify that
-                            //urlConnection.setDoOutput(false);
-                            //urlConnection.setRequestMethod("POST");
-                            //urlConnection.setRequestProperty("User-Agent","Mozilla/5.0");
-                            //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+                                // Method is POSt, need to specify that
+                                //urlConnection.setDoOutput(false);
+                                //urlConnection.setRequestMethod("POST");
+                                //urlConnection.setRequestProperty("User-Agent","Mozilla/5.0");
+                                //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
 
-                            // Send post request
-                            urlConnection.setDoOutput(true);
+                                // Send post request
+                                urlConnection.setDoOutput(true);
 
-                            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                            //wr.writeBytes(urlParameters);  //FOR EXTRA DATA
-                            wr.flush();
-                            wr.close();
+                                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                                //wr.writeBytes(urlParameters);  //FOR EXTRA DATA
+                                wr.flush();
+                                wr.close();
 
-                            int responseCode = urlConnection.getResponseCode();
-                            if(responseCode==200){
+                                int responseCode = urlConnection.getResponseCode();
+                                if(responseCode==200){
+                                    loveButton.setImageResource(R.drawable.love_s);
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getActivity().getApplicationContext(),"You loved this song",Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                                else{
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Server is not SWITCHED ON!!",Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                                Log.e("ResponseCode",responseCode+"");
+
+                            }
+                            catch(Exception ee){
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(getActivity().getApplicationContext(),"You loved this song",Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Server is not SWITCHED ON!! Call Santanu!!",Toast.LENGTH_SHORT).show();
                                     }
                                 });
+                                Log.e("Todayerror",Log.getStackTraceString(ee));
+                                ee.printStackTrace();
                             }
-                            else{
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Please try after sometime!!",Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                            // Close the Http Connection that you started in finally.
+                            finally {
+                                if(urlConnection!=null)
+                                    urlConnection.disconnect();
                             }
-                            Log.e("ResponseCode",responseCode+"");
-
-                        }catch(Exception ee){
-                            Log.e("Todayerror",Log.getStackTraceString(ee));
-                            ee.printStackTrace();
                         }
-                        // Close the Http Connection that you started in finally.
-                        finally {
-                            if(urlConnection!=null)
-                                urlConnection.disconnect();
-                        }
-                    }
-                }).start();
+                    }).start();
+                }
             }
         });
 
