@@ -296,8 +296,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             showSpinner();
             onClickPlayButton(v);
         } catch (Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();
         }
     }
 
@@ -309,8 +309,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             showSpinner();
             onClickPlayButton(v);
         } catch (Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();
         }
     }
 
@@ -322,11 +322,11 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             } else if (playOrPauseParm == 1) {
                 pauseSong();
             } else {
-                toastError(new Exception("Unexpected condition !!!"));
+                toastError("Unexpected condition !!!");
             }
         } catch (Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();
         }
     }
 
@@ -368,8 +368,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 }
             }
         } catch (Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();
         }
     }
 
@@ -381,8 +381,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             }
             showPlayPauseButton("play");
         } catch (Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();
         }
     }
 
@@ -395,7 +395,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             }
             return ((duration/60) + "." + ((duration%60 > 9) ? (duration % 60) : ("0"+(duration%60)) ));
         } catch (Exception e) {
-            toastError(e);
+            toastError(e.getMessage());
             return "00:00";
         }
     }
@@ -403,12 +403,12 @@ public class GenericMood extends Fragment implements View.OnClickListener{
     /*On click method for stop button: stops music here*/
     public void onClickStopButton(View v) {
         try{
-            releaseMediaPlayerObject(mp);
+            releaseMediaPlayerObject();
             showPlayPauseButton("play");
             seekBar.setMax(0);
         } catch (Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();
         }
     }
 
@@ -417,7 +417,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         try {
             playPauseBtn.setVisibility(Button.GONE);
             spinner.setVisibility(ProgressBar.VISIBLE);
-        } catch(Exception e){toastError(e);}
+        } catch(Exception e){toastError(e.getMessage());}
     }
 
     /*set play or pause button for display*/
@@ -434,8 +434,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             playPauseBtn.setVisibility(Button.VISIBLE);
             spinner.setVisibility(ProgressBar.GONE);
         } catch(Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();
         }
     }
 
@@ -452,8 +452,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 repBtn.setBackgroundResource(R.mipmap.repeat_none);
             }
         } catch(Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();
         }
     }
 
@@ -465,8 +465,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             Collections.shuffle(currentplayList);
             currentIndex = currentplayList.indexOf(currentPlayingSongs);
         } catch(Exception e){
-            toastError(e);
-            releaseMediaPlayerObject(mp);}
+            toastError(e.getMessage());
+            releaseMediaPlayerObject();}
     }
 
     //Read the text file similar to activityName and return an listOfSong
@@ -484,13 +484,13 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 listOfSong.add(song);
             }
             return(listOfSong);
-        } catch(Exception e){toastError(e); return(null);}
+        } catch(Exception e){toastError(e.getMessage()); return(null);}
     }
 
     /*Set data source with the currentSong*/
     public void setSongSource(int index, String mood) {
         String currentSong = currentplayList.get(index);
-        releaseMediaPlayerObject(mp);
+        releaseMediaPlayerObject();
         mp = new MediaPlayer();
         String url = "http://www.hipilab.com/songs/"+ mood + "/" + currentSong;
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -498,10 +498,10 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             //mp = MediaPlayer.create(this, Uri.parse(url));
             mp.setDataSource(url);
             mp.prepareAsync();
-        } catch (IllegalArgumentException e) {toastError(e); releaseMediaPlayerObject(mp); e.printStackTrace();
-        } catch (IllegalStateException e) {toastError(e); releaseMediaPlayerObject(mp); e.printStackTrace();
-        } catch (IOException e) {toastError(e); releaseMediaPlayerObject(mp); e.printStackTrace();
-        } catch (Exception e) {toastError(e); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (IllegalArgumentException e) {toastError(e.getMessage()); releaseMediaPlayerObject(); e.printStackTrace();
+        } catch (IllegalStateException e) {toastError(e.getMessage()); releaseMediaPlayerObject(); e.printStackTrace();
+        } catch (IOException e) {toastError(e.getMessage()); releaseMediaPlayerObject(); e.printStackTrace();
+        } catch (Exception e) {toastError(e.getMessage()); releaseMediaPlayerObject(); e.printStackTrace();
         }
     }
 
@@ -509,7 +509,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
     public String songNameFromList(ArrayList<String> playList, int index) {
         try {
             return playList.get(index);
-        } catch(Exception e){toastError(e); return null;}
+        } catch(Exception e){toastError(e.getMessage()); return null;}
     }
 
     /*Set the text with currentSong*/
@@ -521,7 +521,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 currentSong = currentSong.split(".", 1)[0];
             }
             textToDisplaySong.setText(currentSong);
-        } catch(Exception e){toastError(e);}
+        } catch(Exception e){toastError(e.getMessage());}
     }
 
     /*check repeat button status and enable/disable next/previous button*/
@@ -540,7 +540,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 enableButton(nextBtn);
                 enableButton(prevBtn);
             }
-        } catch(Exception e){toastError(e);}
+        } catch(Exception e){toastError(e.getMessage());}
     }
 
     /*return the decremented index as per repeat button status*/
@@ -558,7 +558,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             }
             checkRepeatButtonStatus(index);
             return index;
-        } catch(Exception e){toastError(e); return -1;}
+        } catch(Exception e){toastError(e.getMessage()); return -1;}
     }
 
     /*return the incremented index as per repeat button status*/
@@ -576,20 +576,19 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             }
             checkRepeatButtonStatus(index);
             return index;
-        } catch(Exception e){toastError(e); return -1;}
+        } catch(Exception e){toastError(e.getMessage()); return -1;}
 
     }
 
     /*release and return the nullified mediaplayer object*/
-    public void releaseMediaPlayerObject(MediaPlayer mediaPlayer) {
+    public void releaseMediaPlayerObject() {
         try {
-            if (mediaPlayer != null) {
-                if(mediaPlayer.isPlaying())
-                {mediaPlayer.stop();}
-                mediaPlayer.release();
-                mediaPlayer = null;
+            if (mp != null) {
+                if(mp.isPlaying()){mp.stop();}
+                mp.release();
+                mp = null;
             }
-        } catch(Exception e){toastError(e);}
+        } catch(Exception e){toastError(e.getMessage());}
     }
 
     /*return the last index of the playlist*/
@@ -598,7 +597,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             int lastIndex;
             lastIndex = (playList.size() - 1);
             return lastIndex;
-        } catch(Exception e){toastError(e); return -1;}
+        } catch(Exception e){toastError(e.getMessage()); return -1;}
     }
 
     /*enable clickability of a button*/
@@ -606,7 +605,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         try {
             button.setClickable(true);
             button.setEnabled(true);
-        } catch(Exception e){toastError(e);}
+        } catch(Exception e){toastError(e.getMessage());}
     }
 
     /*disable clickability of a button*/
@@ -614,14 +613,13 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         try {
             button.setClickable(false);
             button.setEnabled(false);
-        } catch(Exception e){toastError(e);}
+        } catch(Exception e){toastError(e.getMessage());}
     }
 
     /*Toast error message*/
-    public void toastError(Exception error) {
+    public void toastError(String error) {
         //Toast.makeText(view.getContext(), "Oops! Somehing went wrong\n"+error.toString(), Toast.LENGTH_LONG).show();
-        Log.e("MPissue",error.toString());
-        error.fillInStackTrace().printStackTrace();
+        Log.e("MPissue",error);
     }
 
     Runnable run = new Runnable() {
