@@ -4,5 +4,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="mp_buttons_hw">50dp</dimen>
     <dimen name="design_fab_image_size" tools:override="true">25dp</dimen>
 </resources>

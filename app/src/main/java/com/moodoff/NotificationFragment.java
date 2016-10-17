@@ -9,6 +9,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,13 +84,42 @@ public class NotificationFragment extends Fragment {
 
     View view;
     TextView allNotificationsTextView;
+    FrameLayout mainParentLayout;
+    ArrayList<String> allNotifications = new ArrayList<>();
+    boolean setDoorClosed=true;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_notification, container, false);
+        try {
+            mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
+            LinearLayout mainParent = new LinearLayout(getContext());
 
-        fetchNotifications();
+                fetchNotifications();
+
+                while(setDoorClosed);
+                mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+                mainParent.setOrientation(LinearLayout.VERTICAL);
+
+                for (int i = 0; i < allNotifications.size(); i++) {
+                    LinearLayout parent = new LinearLayout(getContext());
+                    parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                    parent.setOrientation(LinearLayout.HORIZONTAL);
+
+
+                    EditText allN = new EditText(getContext());
+                    allN.setText(allNotifications.get(i));
+                    parent.addView(allN);
+
+                    mainParent.addView(parent);
+                }
+
+                mainParentLayout.addView(mainParent);
+        }
+        catch (Exception ei){
+            Log.e("Dynamic",ei.getMessage());
+        }
 
         return view;
     }
@@ -124,16 +156,15 @@ public class NotificationFragment extends Fragment {
                         // When you will like to print the data on any UI object you have to use the thread that is asscoiated
                         // with the UI, not the current new thread that you have started.
                         // UI thread can be accesed in this way.
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ArrayList<String> allNotifications = ParseNotificationData.getNotification(response.toString());
-                                for (String eachNotification : allNotifications) {
-                                    allNotificationsTextView.setText(allNotificationsTextView.getText() + eachNotification + "\n----------------------------------------------------------------------------------------\n");
-                                }
 
-                            }
-                        });
+                        //getActivity().runOnUiThread(new Runnable() {
+                         //   @Override
+                          //  public void run() {
+                                allNotifications = ParseNotificationData.getNotification(response.toString());
+                                setDoorClosed=false;
+
+                        //    }
+                        //});
                         // If you want to see the output in the console uncomment the next line.
                         //  Log.i("TAG","Response:"+response.toString());
                     } catch (Exception ee) {

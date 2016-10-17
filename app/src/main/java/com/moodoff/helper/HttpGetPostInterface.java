@@ -8,7 +8,7 @@ import java.util.HashMap;
  */
 
 public interface HttpGetPostInterface {
-    final String serverURL = "http://192.168.2.5:5002/controller/moodoff";
+    final String serverURL = "http://192.168.2.4:5002/controller/moodoff";
     public void postDataToServer(String Url, HashMap<String,String> extraParameters);
     public String getNotificationsFromServer(String phoneNumber);
 }

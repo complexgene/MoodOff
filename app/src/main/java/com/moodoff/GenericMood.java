@@ -355,7 +355,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     public void onPrepared(MediaPlayer mediaPlayer) {
                         showPlayPauseButton("pause");
-                        displaySongName(songName, currentIndex + " " + currentSong + " " + getCurrentSongDuration(mediaPlayer));
+                        displaySongName(songName, "Song No."+currentIndex+1 + " | " + currentSong + " | " + getCurrentSongDuration(mediaPlayer));
                         seekBar.setMax(mediaPlayer.getDuration());
                         seekUpdation();
                         mediaPlayer.start();

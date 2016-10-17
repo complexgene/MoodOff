@@ -80,11 +80,9 @@ public class KaraokeFragment extends Fragment {
     Button rec,play,stop,newRecord;
     MediaPlayer mpp;
     MediaPlayer mp;
-    Handler seekHandler;
+    Handler seekHandler= new Handler();;
     // Added code
     SeekBar seekBar;
-    Runnable run;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -97,8 +95,6 @@ public class KaraokeFragment extends Fragment {
         stop = (Button) view.findViewById(R.id.stop);
         newRecord = (Button) view.findViewById(R.id.newRecord);
         seekBar = (SeekBar)view.findViewById(R.id.seekBar_karaoke);
-
-
 
 
         outputFile = Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+File.separator+"/moodoff"+File.separator+"sam.mp3";
@@ -126,15 +122,18 @@ public class KaraokeFragment extends Fragment {
                                         mpp.prepare();
                                         myRec.prepare();
                                         afd.close();
-                                        mpp.start();
-                                        myRec.start();
-                                        run = new Runnable() {
+                                        seekBar.setMax(mpp.getDuration());
+                                        new Thread(new Runnable() {
                                             @Override
                                             public void run() {
                                                 seekUpdation();
                                             }
-                                        };
+                                        }).start();
+                                        mpp.start();
+                                        myRec.start();
+                                        Log.e("Here","I am2");
 
+                                        Log.e("Here","I am");
                                     } catch (Exception ee) {
                                         ee.printStackTrace();
                                     }
@@ -214,12 +213,21 @@ public class KaraokeFragment extends Fragment {
 
         return view;
     }
+
+    Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            seekUpdation();
+        }
+    };
     public void seekUpdation() {
-        if (mp != null) {
-            seekBar.setProgress(mp.getCurrentPosition());
+        if (mpp!=null) {
+            seekBar.setProgress(mpp.getCurrentPosition());
             seekHandler.postDelayed(run, 10);
         }
     }
+
+
     // ABCD
 
     // TODO: Rename method, update argument and hook method into UI event
