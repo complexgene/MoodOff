@@ -57,6 +57,10 @@
             android:layout_marginEnd="7dp"
             app:fabSize="mini"
             />
+        <ListView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/contactlist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"

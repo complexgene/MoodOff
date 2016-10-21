@@ -189,11 +189,12 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 String currentUser = UserDetails.getPhoneNumber();
                 //String currentSong = "turu_turu"+new Random().nextInt(1000)+".mp3";
                 char type = '1';
-                if(mp==null || !mp.isPlaying()){
+                if(!mp.isPlaying()){
                     Toast.makeText(getActivity().getApplicationContext(),"Please play a song to like it.",Toast.LENGTH_SHORT).show();
                 }
                 else {
                     final String Url = "notifications/"+currentUser+"/"+currentSong+"/"+type;
+                    loveButton.setImageResource(R.drawable.love_s);
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -219,7 +220,6 @@ public class GenericMood extends Fragment implements View.OnClickListener{
 
                                 int responseCode = urlConnection.getResponseCode();
                                 if(responseCode==200){
-                                    loveButton.setImageResource(R.drawable.love_s);
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -231,7 +231,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Server is not SWITCHED ON!!",Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Please try after sometime!!",Toast.LENGTH_SHORT).show();
                                         }
                                     });
                                 }
@@ -239,12 +239,6 @@ public class GenericMood extends Fragment implements View.OnClickListener{
 
                             }
                             catch(Exception ee){
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Server is not SWITCHED ON!! Call Santanu!!",Toast.LENGTH_SHORT).show();
-                                    }
-                                });
                                 Log.e("Todayerror",Log.getStackTraceString(ee));
                                 ee.printStackTrace();
                             }
@@ -355,7 +349,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     public void onPrepared(MediaPlayer mediaPlayer) {
                         showPlayPauseButton("pause");
-                        displaySongName(songName, "Song No."+currentIndex+1 + " | " + currentSong + " | " + getCurrentSongDuration(mediaPlayer));
+                        displaySongName(songName, currentIndex + " " + currentSong + " " + getCurrentSongDuration(mediaPlayer));
                         seekBar.setMax(mediaPlayer.getDuration());
                         seekUpdation();
                         mediaPlayer.start();

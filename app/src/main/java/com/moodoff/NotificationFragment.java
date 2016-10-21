@@ -94,11 +94,16 @@ public class NotificationFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_notification, container, false);
         try {
             mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
-            LinearLayout mainParent = new LinearLayout(getContext());
 
                 fetchNotifications();
 
+            Log.e("Door","K");
+                //Infinitely wait here until the arraylist gets populated.
                 while(setDoorClosed);
+                //Once the door is open go and create the dynamic views.
+            Log.e("Door","K1");
+
+                LinearLayout mainParent = new LinearLayout(getContext());
                 mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
                 mainParent.setOrientation(LinearLayout.VERTICAL);
 
@@ -120,7 +125,6 @@ public class NotificationFragment extends Fragment {
         catch (Exception ei){
             Log.e("Dynamic",ei.getMessage());
         }
-
         return view;
     }
 
@@ -142,6 +146,8 @@ public class NotificationFragment extends Fragment {
                         URL url = new URL(serverURL+"/notifications/" + userMobileNumber);
                         urlConnection = (HttpURLConnection) url.openConnection();
                         // Now as the data would start coming asociate that with an InputStream to store it.
+                        Log.e("Door",urlConnection.getReadTimeout()+"");
+                        if(urlConnection.getReadTimeout()==0)throw new Exception("abc");
                         InputStream is = urlConnection.getInputStream();
                         InputStreamReader isr = new InputStreamReader(is);
                         int data = isr.read();
@@ -151,6 +157,7 @@ public class NotificationFragment extends Fragment {
                         while (data != -1) {
                             response.append((char) data);
                             data = isr.read();
+                            Log.e("Door","lol");
                         }
 
                         // When you will like to print the data on any UI object you have to use the thread that is asscoiated
@@ -160,20 +167,25 @@ public class NotificationFragment extends Fragment {
                         //getActivity().runOnUiThread(new Runnable() {
                          //   @Override
                           //  public void run() {
+                        Log.e("Door","CT");
                                 allNotifications = ParseNotificationData.getNotification(response.toString());
+                                // All notification retrived, now open the door for display
                                 setDoorClosed=false;
-
+                        Log.e("Door","OT");
                         //    }
                         //});
                         // If you want to see the output in the console uncomment the next line.
                         //  Log.i("TAG","Response:"+response.toString());
                     } catch (Exception ee) {
                         ee.printStackTrace();
+                        setDoorClosed=false;
+
                     }
                     // Close the Http Connection that you started in finally.
                     finally {
                         if (urlConnection != null)
                             urlConnection.disconnect();
+                        setDoorClosed=false;
                     }
                 }
         }).start();
