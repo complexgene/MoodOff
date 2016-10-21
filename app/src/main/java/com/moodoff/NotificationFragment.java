@@ -146,8 +146,12 @@ public class NotificationFragment extends Fragment {
                         URL url = new URL(serverURL+"/notifications/" + userMobileNumber);
                         urlConnection = (HttpURLConnection) url.openConnection();
                         // Now as the data would start coming asociate that with an InputStream to store it.
+
+                        // LINES ADDED
                         Log.e("Door",urlConnection.getReadTimeout()+"");
                         if(urlConnection.getReadTimeout()==0)throw new Exception("abc");
+                        // Above 2 lines
+
                         InputStream is = urlConnection.getInputStream();
                         InputStreamReader isr = new InputStreamReader(is);
                         int data = isr.read();

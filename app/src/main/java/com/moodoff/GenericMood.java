@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import static android.app.Activity.RESULT_OK;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -104,6 +106,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
     Context context;
     //Buttons
     Button playPauseBtn, stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
+    FloatingActionButton dedicateButton;
     ProgressBar spinner;
     SeekBar seekBar;
     TextView songName = null;
@@ -125,6 +128,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         prevBtn = (Button) view.findViewById(R.id.prevButton);
         repBtn = (Button) view.findViewById(R.id.repeatButton);
         shuffleBtn = (Button) view.findViewById(R.id.shuffleButton);
+        dedicateButton = (FloatingActionButton) view.findViewById(R.id.btn_dedicate);
         spinner = (ProgressBar) view.findViewById(R.id.progressBar);
         seekBar = (SeekBar) view.findViewById(R.id.seekBar);
         playPauseBtn.setOnClickListener(this);
@@ -133,6 +137,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         prevBtn.setOnClickListener(this);
         repBtn.setOnClickListener(this);
         shuffleBtn.setOnClickListener(this);
+        dedicateButton.setOnClickListener(this);
         seekBar.setOnClickListener(this);
         disableButton(prevBtn);
         currentMood = "romantic";
@@ -189,7 +194,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 String currentUser = UserDetails.getPhoneNumber();
                 //String currentSong = "turu_turu"+new Random().nextInt(1000)+".mp3";
                 char type = '1';
-                if(!mp.isPlaying()){
+                if(mp==null || !mp.isPlaying()){
                     Toast.makeText(getActivity().getApplicationContext(),"Please play a song to like it.",Toast.LENGTH_SHORT).show();
                 }
                 else {
@@ -256,14 +261,32 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         return view;
     }
 
+
+    public void navigateContacts(View v)
+
+    {
+        Intent it=new Intent(getContext(),ContactList.class);
+        startActivityForResult(it,1);
+    }
+
     static String getPictureName(){
         return "mogambo.jpg";
     }
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
-        bitmap = BitmapFactory.decodeFile(imageFilePath);
-        moodpageBG.setImageBitmap(bitmap);
+        if (requestCode == 1) {
+            if(resultCode == RESULT_OK){
+                String stredittext=data.getStringExtra("selectedContact");
+                //Log.e("selectedContact",stredittext);
+            }
+        }
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/moodoff/mogambo.jpg";
+                bitmap = BitmapFactory.decodeFile(imageFilePath);
+                moodpageBG.setImageBitmap(bitmap);
+            }
+        }
         //iv.setImageBitmap(bitmap);
         // Either you can take the captured image as biitmap or you can save it to external directory.
         // Now choose what you want to do.
@@ -290,6 +313,9 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 break;
             case R.id.shuffleButton:
                 onClickShuffleButton(view);
+                break;
+            case R.id.btn_dedicate:
+                navigateContacts(view);
                 break;
         }
     }
