@@ -113,7 +113,7 @@ public class NotificationFragment extends Fragment {
                     parent.setOrientation(LinearLayout.HORIZONTAL);
 
 
-                    EditText allN = new EditText(getContext());
+                    TextView allN = new TextView(getContext());
                     allN.setText(allNotifications.get(i));
                     parent.addView(allN);
 
@@ -149,7 +149,7 @@ public class NotificationFragment extends Fragment {
 
                         // LINES ADDED
                         Log.e("Door",urlConnection.getReadTimeout()+"");
-                        if(urlConnection.getReadTimeout()==0)throw new Exception("abc");
+                        //if(urlConnection.getReadTimeout()==0)throw new Exception("abc");
                         // Above 2 lines
 
                         InputStream is = urlConnection.getInputStream();
@@ -161,7 +161,7 @@ public class NotificationFragment extends Fragment {
                         while (data != -1) {
                             response.append((char) data);
                             data = isr.read();
-                            Log.e("Door","lol");
+                           // Log.e("Door","lol");
                         }
 
                         // When you will like to print the data on any UI object you have to use the thread that is asscoiated

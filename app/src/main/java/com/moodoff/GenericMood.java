@@ -263,10 +263,14 @@ public class GenericMood extends Fragment implements View.OnClickListener{
 
 
     public void navigateContacts(View v)
-
     {
-        Intent it=new Intent(getContext(),ContactList.class);
-        startActivityForResult(it,1);
+        if(mp==null || !mp.isPlaying()){
+            Toast.makeText(getActivity().getApplicationContext(),"You have to play a song to dedicate.",Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Intent it = new Intent(getContext(), ContactList.class);
+            startActivityForResult(it, 1);
+        }
     }
 
     static String getPictureName(){
@@ -277,6 +281,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
                 String stredittext=data.getStringExtra("selectedContact");
+                Toast.makeText(getActivity().getApplicationContext(),"Dedicated to "+stredittext,Toast.LENGTH_LONG).show();
                 //Log.e("selectedContact",stredittext);
             }
         }
