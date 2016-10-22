@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -139,6 +140,7 @@ public class ContactList extends AppCompatActivity {
                             //Log.i("Number", phoneNumber);
                         }
                     }
+                    Collections.sort(contacts);
                     phones.close();
                 }
             }
