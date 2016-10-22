@@ -135,7 +135,7 @@ public class ContactList extends AppCompatActivity {
                         phoneNumber = phoneNumber.replaceAll("[\\-]", "");
                         if ( phoneNumber.replaceAll("[^0-9]", "").length()>=10 && Pattern.matches("^((0091)|(\\+91)|0?)[789]{1}\\d{9}$",phoneNumber) ){
                             phoneNumber = phoneNumber.substring(phoneNumber.length() - 10);
-                            contacts.add(name + "\n" + phoneNumber);
+                            contacts.add(name + " " + phoneNumber);
                             //Log.i("Number", phoneNumber);
                         }
                     }

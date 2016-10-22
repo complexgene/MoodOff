@@ -280,8 +280,66 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
-                String stredittext=data.getStringExtra("selectedContact");
-                Toast.makeText(getActivity().getApplicationContext(),"Dedicated to "+stredittext,Toast.LENGTH_LONG).show();
+                String currentUser = UserDetails.getPhoneNumber();
+                char type = '1';
+                final String stredittext=data.getStringExtra("selectedContact");
+                final String Url = "notifications/"+currentUser+"/"+stredittext.split(" ")[1]+"/"+currentSong+"/"+type;
+                //Log.e("STR",Url+stredittext.split(" ")[1]);/*
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        HttpURLConnection urlConnection=null;
+                        try {
+                            // Proide the URL fto which you would fire a post
+                            URL url = new URL(serverURL+"/"+Url);
+                            urlConnection = (HttpURLConnection) url.openConnection();
+
+                            // Method is POSt, need to specify that
+                            //urlConnection.setDoOutput(false);
+                            //urlConnection.setRequestMethod("POST");
+                            //urlConnection.setRequestProperty("User-Agent","Mozilla/5.0");
+                            //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+
+                            // Send post request
+                            urlConnection.setDoOutput(true);
+
+                            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                            //wr.writeBytes(urlParameters);  //FOR EXTRA DATA
+                            wr.flush();
+                            wr.close();
+
+                            int responseCode = urlConnection.getResponseCode();
+                            if(responseCode==200){
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity().getApplicationContext(),"Dedicated to "+stredittext,Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                            else{
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Please try after sometime!!",Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                            Log.e("ResponseCode",responseCode+"");
+
+                        }
+                        catch(Exception ee){
+                            Log.e("Todayerror",Log.getStackTraceString(ee));
+                            ee.printStackTrace();
+                        }
+                        // Close the Http Connection that you started in finally.
+                        finally {
+                            if(urlConnection!=null)
+                                urlConnection.disconnect();
+                        }
+                    }
+                }).start();
+                //Toast.makeText(getActivity().getApplicationContext(),"Dedicated to "+stredittext,Toast.LENGTH_LONG).show();
                 //Log.e("selectedContact",stredittext);
             }
         }
