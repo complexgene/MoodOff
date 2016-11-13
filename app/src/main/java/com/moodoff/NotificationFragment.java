@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.AllNotifications;
 import com.moodoff.helper.HttpGetPostImpl;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.StoreRetrieveDataImpl;
@@ -85,7 +86,7 @@ public class NotificationFragment extends Fragment {
     View view;
     TextView allNotificationsTextView;
     FrameLayout mainParentLayout;
-    ArrayList<String> allNotifications = new ArrayList<>();
+    ArrayList<String> allNotifications = AllNotifications.allNotifications;
     boolean setDoorClosed=true;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -95,17 +96,11 @@ public class NotificationFragment extends Fragment {
         try {
             mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
 
-                fetchNotifications();
-
-            Log.e("Door","K");
-                //Infinitely wait here until the arraylist gets populated.
-                while(setDoorClosed);
-                //Once the door is open go and create the dynamic views.
-            Log.e("Door","K1");
-
                 LinearLayout mainParent = new LinearLayout(getContext());
                 mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
                 mainParent.setOrientation(LinearLayout.VERTICAL);
+
+                //while(allNotifications.size()==0){allNotifications = AllNotifications.allNotifications;}
 
                 for (int i = 0; i < allNotifications.size(); i++) {
                     LinearLayout parent = new LinearLayout(getContext());
@@ -127,78 +122,6 @@ public class NotificationFragment extends Fragment {
         }
         return view;
     }
-
-    public void fetchNotifications(){
-        // Read the mobile number of the current user from stored file
-        final String userMobileNumber = UserDetails.getPhoneNumber();
-        // Let suppose i want to populate a textview on the screen whose name is allNotitifactions
-        // Remember that i would get the response in json format finally in the variable response,
-        // which can be parsed for retrievng the actual values.
-        allNotificationsTextView = (TextView)view.findViewById(R.id.getresponse);
-        allNotificationsTextView.setText("");
-
-        // Start a separate thread for Http Connection for DB entry for VOTE
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection=null;
-            @Override
-            public void run() {
-                    try {
-                        URL url = new URL(serverURL+"/notifications/" + userMobileNumber);
-                        urlConnection = (HttpURLConnection) url.openConnection();
-                        // Now as the data would start coming asociate that with an InputStream to store it.
-
-                        // LINES ADDED
-                        Log.e("Door",urlConnection.getReadTimeout()+"");
-                        //if(urlConnection.getReadTimeout()==0)throw new Exception("abc");
-                        // Above 2 lines
-
-                        InputStream is = urlConnection.getInputStream();
-                        InputStreamReader isr = new InputStreamReader(is);
-                        int data = isr.read();
-                        // Declare a string variable inside which the entire data would be stored.
-                        final StringBuilder response = new StringBuilder("");
-                        // Until we don't encounter the end of data keep reading the data, end is marked by -1
-                        while (data != -1) {
-                            response.append((char) data);
-                            data = isr.read();
-                           // Log.e("Door","lol");
-                        }
-
-                        // When you will like to print the data on any UI object you have to use the thread that is asscoiated
-                        // with the UI, not the current new thread that you have started.
-                        // UI thread can be accesed in this way.
-
-                        //getActivity().runOnUiThread(new Runnable() {
-                         //   @Override
-                          //  public void run() {
-                        Log.e("Door","CT");
-                                allNotifications = ParseNotificationData.getNotification(response.toString());
-                                // All notification retrived, now open the door for display
-                                setDoorClosed=false;
-                        Log.e("Door","OT");
-                        //    }
-                        //});
-                        // If you want to see the output in the console uncomment the next line.
-                        //  Log.i("TAG","Response:"+response.toString());
-                    } catch (Exception ee) {
-                        ee.printStackTrace();
-                        setDoorClosed=false;
-
-                    }
-                    // Close the Http Connection that you started in finally.
-                    finally {
-                        if (urlConnection != null)
-                            urlConnection.disconnect();
-                        setDoorClosed=false;
-                    }
-                }
-        }).start();
-        // This is the entire code that would give you the json response inside the variable response.
-        // Remember that response is a StringBuilder variable type, its little different from String variable
-        // How to get a string representation of the StringBuilder variable then? Just use "VARIABLE_NAME.toString()"
-
-    }
-
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

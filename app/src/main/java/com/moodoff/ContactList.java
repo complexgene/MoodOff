@@ -19,6 +19,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.moodoff.helper.DBInternal;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,14 +36,14 @@ public class ContactList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contact_list);
-        Intent intent=getIntent();
-        this.lstNames = (ListView) findViewById(R.id.contactlist);
+        ///Intent intent=getIntent();
+        //this.lstNames = (ListView) findViewById(R.id.contactlist);
 
         // Read and show the contacts
-        showContacts();
+//        getContactNames();
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        lstNames.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        /*lstNames.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
@@ -59,7 +61,6 @@ public class ContactList extends AppCompatActivity {
                                 setResult(RESULT_OK, it);
                                 finish();
                                 break;
-
                             case DialogInterface.BUTTON_NEGATIVE:
                                 //No button clicked Do Nothing
                                 break;
@@ -77,7 +78,7 @@ public class ContactList extends AppCompatActivity {
 
 
             }
-        });
+        });*/
 
     }
 
@@ -90,9 +91,11 @@ public class ContactList extends AppCompatActivity {
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
-            List<String> contacts = getContactNames();
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contacts);
-            lstNames.setAdapter(adapter);
+            ArrayList<String> contacts = getContactNames(getContentResolver());
+            DBInternal dbInternal = new DBInternal();
+            dbInternal.checkAndPopulateContactsTable(contacts);
+            //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contacts);
+            //lstNames.setAdapter(adapter);
         }
     }
 
@@ -114,10 +117,10 @@ public class ContactList extends AppCompatActivity {
      *
      * @return a list of names+mobile_number.
      */
-    private List<String> getContactNames() {
-        List<String> contacts = new ArrayList<>();
+    public ArrayList<String> getContactNames(ContentResolver cr) {
+        ArrayList<String> contacts = new ArrayList<>();
         // Get the ContentResolver
-        ContentResolver cr = getContentResolver();
+        //ContentResolver cr = getContentResolver();
         // Get the Cursor of all the contacts
         Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 

@@ -2,6 +2,6 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#fff540</color>
-    <color name="FBtn_genericMood">#83facf</color>
+    <color name="colorAccent">#f7d5d4</color>
+    <color name="FBtn_genericMood">#fff45e</color>
 </resources>

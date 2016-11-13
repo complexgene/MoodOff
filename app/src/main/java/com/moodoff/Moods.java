@@ -26,12 +26,9 @@ import com.moodoff.helper.DBInternal;
  * create an instance of this fragment.
  */
 public class Moods extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // Local variables
     MoodsListAdapter moodsListAdapter;
 
 
@@ -45,14 +42,6 @@ public class Moods extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Moods.
-     */
     // TODO: Rename and change types and number of parameters
     public static Moods newInstance(String param1, String param2) {
         Moods fragment = new Moods();
@@ -89,36 +78,49 @@ public class Moods extends Fragment {
         btnInLove = (Button)rootView.findViewById(R.id.btn_inlove);
         btnDance = (Button)rootView.findViewById(R.id.btn_dance);
         btnMissU = (Button)rootView.findViewById(R.id.btn_missu);
-        layout = (RelativeLayout)rootView.findViewById(R.id.relativeLayout);
 
         btnOnTour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent openInternalDBActivity = new Intent(getActivity(), DBInternal.class);
-                startActivity(openInternalDBActivity);
+                /*Intent openInternalDBActivity = new Intent(getActivity(), DBInternal.class);
+                startActivity(openInternalDBActivity);*/
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                Fragment newFragment = GenericMood.newInstance("on_tour","b");
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack if needed
+                transaction.replace(R.id.allmoods, newFragment);
+                transaction.addToBackStack(null);
+                transaction.commitAllowingStateLoss();
+                putAllButtonsOff();
             }
         });
         btnRomantic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment newFragment = new GenericMood();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                Fragment newFragment = GenericMood.newInstance("romantic","b");
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack if needed
                 transaction.replace(R.id.allmoods, newFragment);
                 transaction.addToBackStack(null);
+                transaction.commitAllowingStateLoss();
                 putAllButtonsOff();
-
-// Commit the transaction
-                transaction.commit();
+            }
+        });
+        btnParty.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                Fragment newFragment = GenericMood.newInstance("party","b");
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack if needed
+                transaction.replace(R.id.allmoods, newFragment);
+                transaction.addToBackStack(null);
+                transaction.commitAllowingStateLoss();
+                putAllButtonsOff();
             }
         });
 
-        /*
-        moodlist = (ExpandableListView)rootView.findViewById(R.id.moodlist);
-        moodsListAdapter = new MoodsListAdapter(getContext());
-        moodlist.setAdapter(moodsListAdapter);
-        */
         return rootView;
     }
     public void putAllButtonsOff(){
@@ -128,7 +130,7 @@ public class Moods extends Fragment {
         btnInLove.setVisibility(View.INVISIBLE);
         btnDance.setVisibility(View.INVISIBLE);
         btnMissU.setVisibility(View.INVISIBLE);
-        layout.setVisibility(View.VISIBLE);
+//        layout.setVisibility(View.VISIBLE);
     }
 /*
     public void putmeoff(View v){

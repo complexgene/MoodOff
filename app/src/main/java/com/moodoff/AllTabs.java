@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,14 +23,20 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import com.moodoff.helper.AllNotifications;
 import com.moodoff.helper.HttpGetPostImpl;
+import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.StoreRetrieveDataImpl;
+import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
-public class AllTabs extends AppCompatActivity implements Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener{
-
+public class AllTabs extends AppCompatActivity implements Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -49,7 +56,6 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_tabs);
-
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -128,7 +134,7 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
             return rootView;
         }
     }
-
+    private boolean doorClosed = true;
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -145,6 +151,7 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
             if(position == 0)return Moods.newInstance("a","b");
             else if(position == 1)return NotificationFragment.newInstance("x","y");
             else if(position == 2)return KaraokeFragment.newInstance("p","q");
+            //else if(position == 3)return ContactsFragment.newInstance("p","q");
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
         }
@@ -152,7 +159,7 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 4;
         }
 
         @Override
@@ -161,11 +168,13 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
                 case 0:
                     return "Moods";
                 case 1: {
-                    int count = 2;  // No of notifications for the particular person
-                    return "MSGS("+count+")";
+                    return "Messages";
                 }
                 case 2: {
                     return "Sing";
+                }
+                case 3: {
+                    return "Contacts";
                 }
             }
             return null;

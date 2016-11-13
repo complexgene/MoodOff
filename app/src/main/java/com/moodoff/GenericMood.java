@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -43,6 +44,7 @@ import java.util.Random;
 import static android.app.Activity.RESULT_OK;
 
 
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -51,13 +53,14 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link GenericMood#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GenericMood extends Fragment implements View.OnClickListener{
+public class GenericMood extends Moods implements View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
     private String serverURL = HttpGetPostInterface.serverURL;
+    private String serverSongURL = HttpGetPostInterface.serverSongURL;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -121,6 +124,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
 
+        Toast.makeText(getContext(),"You selected mood: "+(char)(mParam1.charAt(0)-32)+mParam1.substring(1),Toast.LENGTH_LONG).show();
+
         songName = (TextView) view.findViewById(R.id.nameOfSong);
         playPauseBtn = (Button) view.findViewById(R.id.playPauseBtn);
         stopBtn = (Button) view.findViewById(R.id.stopButton);
@@ -140,14 +145,16 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         dedicateButton.setOnClickListener(this);
         seekBar.setOnClickListener(this);
         disableButton(prevBtn);
-        currentMood = "romantic";
+        currentMood = mParam1;
         if (currentMood != "") {
             currentplayList = readList(currentMood);
             checkRepeatButtonStatus(currentIndex);
         }
         if (currentplayList != null) {
             //onClickShuffleButton(view);
+            Log.e("SongCur",currentplayList.get(0));
             currentSong = songNameFromList(currentplayList, currentIndex);
+            Log.e("SongCur",currentSong);
             displaySongName(songName, "Tap play button to listen song");
         }
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -165,7 +172,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
 
 
         moodpageBG = (ImageView) view.findViewById(R.id.photoView);
-        imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/mogambo.jpg";
+        imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/"+currentMood+"/mogambo.jpg";
         bitmap = BitmapFactory.decodeFile(imageFilePath);
         moodpageBG.setImageBitmap(bitmap);
 
@@ -174,7 +181,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             @Override
             public void onClick(View v) {
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/");
+                File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/"+currentMood);
                 pictureDirectory.mkdirs();
                 String pictureName = getPictureName();
                 File imageFile = new File(pictureDirectory,pictureName);
@@ -192,7 +199,6 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             @Override
             public void onClick(View v) {
                 String currentUser = UserDetails.getPhoneNumber();
-                //String currentSong = "turu_turu"+new Random().nextInt(1000)+".mp3";
                 char type = '1';
                 if(mp==null || !mp.isPlaying()){
                     Toast.makeText(getActivity().getApplicationContext(),"Please play a song to like it.",Toast.LENGTH_SHORT).show();
@@ -208,21 +214,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                                 // Proide the URL fto which you would fire a post
                                 URL url = new URL(serverURL+"/"+Url);
                                 urlConnection = (HttpURLConnection) url.openConnection();
-
-                                // Method is POSt, need to specify that
-                                //urlConnection.setDoOutput(false);
-                                //urlConnection.setRequestMethod("POST");
-                                //urlConnection.setRequestProperty("User-Agent","Mozilla/5.0");
-                                //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
-
-                                // Send post request
                                 urlConnection.setDoOutput(true);
-
-                                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                                //wr.writeBytes(urlParameters);  //FOR EXTRA DATA
-                                wr.flush();
-                                wr.close();
-
                                 int responseCode = urlConnection.getResponseCode();
                                 if(responseCode==200){
                                     getActivity().runOnUiThread(new Runnable() {
@@ -240,11 +232,9 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                                         }
                                     });
                                 }
-                                Log.e("ResponseCode",responseCode+"");
-
                             }
                             catch(Exception ee){
-                                Log.e("Todayerror",Log.getStackTraceString(ee));
+                                Log.e("GenericMood_LoveButton",Log.getStackTraceString(ee));
                                 ee.printStackTrace();
                             }
                             // Close the Http Connection that you started in finally.
@@ -281,10 +271,9 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
                 String currentUser = UserDetails.getPhoneNumber();
-                char type = '1';
+                char type = 'S';
                 final String stredittext=data.getStringExtra("selectedContact");
                 final String Url = "notifications/"+currentUser+"/"+stredittext.split(" ")[1]+"/"+currentSong+"/"+type;
-                //Log.e("STR",Url+stredittext.split(" ")[1]);/*
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -293,21 +282,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                             // Proide the URL fto which you would fire a post
                             URL url = new URL(serverURL+"/"+Url);
                             urlConnection = (HttpURLConnection) url.openConnection();
-
-                            // Method is POSt, need to specify that
-                            //urlConnection.setDoOutput(false);
-                            //urlConnection.setRequestMethod("POST");
-                            //urlConnection.setRequestProperty("User-Agent","Mozilla/5.0");
-                            //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
-
-                            // Send post request
                             urlConnection.setDoOutput(true);
-
-                            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                            //wr.writeBytes(urlParameters);  //FOR EXTRA DATA
-                            wr.flush();
-                            wr.close();
-
                             int responseCode = urlConnection.getResponseCode();
                             if(responseCode==200){
                                 getActivity().runOnUiThread(new Runnable() {
@@ -325,11 +300,8 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                                     }
                                 });
                             }
-                            Log.e("ResponseCode",responseCode+"");
-
                         }
                         catch(Exception ee){
-                            Log.e("Todayerror",Log.getStackTraceString(ee));
                             ee.printStackTrace();
                         }
                         // Close the Http Connection that you started in finally.
@@ -339,8 +311,6 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                         }
                     }
                 }).start();
-                //Toast.makeText(getActivity().getApplicationContext(),"Dedicated to "+stredittext,Toast.LENGTH_LONG).show();
-                //Log.e("selectedContact",stredittext);
             }
         }
         if (requestCode == 0) {
@@ -350,10 +320,6 @@ public class GenericMood extends Fragment implements View.OnClickListener{
                 moodpageBG.setImageBitmap(bitmap);
             }
         }
-        //iv.setImageBitmap(bitmap);
-        // Either you can take the captured image as biitmap or you can save it to external directory.
-        // Now choose what you want to do.
-        // I wanted to save the image in the External HDD so i wrote the above code.
     }
 
     @Override
@@ -564,20 +530,36 @@ public class GenericMood extends Fragment implements View.OnClickListener{
             releaseMediaPlayerObject();
         }
     }
-
+    boolean doorClosed = true;
+    ArrayList<String> listOfSong = new ArrayList<String>();
     //Read the text file similar to activityName and return an listOfSong
-    public ArrayList<String> readList(String mood) {
-        ArrayList<String> listOfSong = new ArrayList<String>();
+    public ArrayList<String> readList(final String mood) {
         try{
-            AssetManager assMgr = getActivity().getAssets();
-            //playListFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/"+mood+"/playlist.txt";
-            //InputStreamReader isr = new InputStreamReader(new FileInputStream(playListFilePath));
-            InputStreamReader isr = new InputStreamReader(assMgr.open("playlist.txt"));
-            BufferedReader br = new BufferedReader(isr);
-            String song = "";
-            while((song=br.readLine())!=null) {
-                listOfSong.add(song);
-            }
+            final String userMobileNumber = UserDetails.getPhoneNumber();
+            final String serverURL = HttpGetPostInterface.serverURL;
+            new Thread(new Runnable() {
+                HttpURLConnection urlConnection = null;
+                @Override
+                public void run() {
+                    try {
+                        URL url = new URL(serverSongURL + "/playlist_"+mood+".txt");
+                        Log.e("SongURL",url.toString());
+                        urlConnection = (HttpURLConnection) url.openConnection();
+                        InputStream is = urlConnection.getInputStream();
+                        InputStreamReader isr = new InputStreamReader(is);
+                        BufferedReader br = new BufferedReader(isr);
+                        String song = "";
+                        while ((song = br.readLine()) != null) {
+                            Log.e("Song",song);
+                            listOfSong.add(song);
+                        }
+                        doorClosed = false;
+                    } catch (Exception ee) {
+
+                    }
+                }
+            }).start();
+            while(doorClosed);
             Collections.shuffle(listOfSong);
             return(listOfSong);
         } catch(Exception e){toastError(e.getMessage()); return(null);}
@@ -589,6 +571,7 @@ public class GenericMood extends Fragment implements View.OnClickListener{
         releaseMediaPlayerObject();
         mp = new MediaPlayer();
         String url = "http://www.hipilab.com/songs/"+ mood + "/" + currentSong;
+        Log.e("SongSet",url);
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try{
             //mp = MediaPlayer.create(this, Uri.parse(url));

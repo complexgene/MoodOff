@@ -3,194 +3,87 @@
     android:id="@+id/allmoods"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/karaoke_bg7"
+    android:background="@color/colorPrimary"
     tools:context="com.moodoff.Moods">
 
-
-    <!-- TODO: Update blank fragment layout -->
-
-    <RelativeLayout
-        android:layout_width="200dp"
-        android:layout_height="match_parent"
-        android:id="@+id/relativeLayout"
-        android:visibility="gone"
-        >
-        <!--
-    <ExpandableListView
-        android:id="@+id/moodlist"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:clickable="true"
-        />
-        -->
-    </RelativeLayout>
-
-    <Button
-        android:text="Romantic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
-        android:id="@+id/btn_romantic"
-        android:height="80dp"
-        android:width="100dp"
-        android:onClick="putmeoff"
-        android:layout_marginLeft="17dp"
-        android:layout_marginStart="17dp"
-        android:layout_below="@+id/relativeLayout"
-        android:layout_toRightOf="@+id/relativeLayout"
-        android:layout_toEndOf="@+id/relativeLayout" />
-    <Button
-        android:text="in love"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_inlove"
-        android:layout_below="@+id/btn_romantic"
-        android:layout_alignLeft="@+id/btn_romantic"
-        android:height="80dp"
-        android:width="100dp"
-        android:onClick="putmeoff"
-        android:layout_alignStart="@+id/btn_romantic" />
-    <Button
-        android:text="Family"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_family"
-        android:layout_below="@+id/btn_inlove"
-        android:layout_alignLeft="@+id/btn_romantic"
-        android:height="80dp"
-        android:width="100dp"
-        android:onClick="putmeoff"
-        android:layout_alignStart="@+id/btn_romantic" />
-    <Button
-        android:text="WORKOUT"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_workout"
-        android:layout_below="@+id/btn_family"
-        android:layout_alignLeft="@+id/btn_romantic"
-        android:height="80dp"
-        android:width="100dp"
-        android:onClick="putmeoff"
-        android:layout_alignStart="@+id/btn_romantic" />
 
     <Button
         android:id="@+id/btn_ontour"
         android:text="On tour"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/btn_party"
-        android:layout_toRightOf="@+id/btn_party"
-        android:layout_toEndOf="@+id/btn_party"
-        android:layout_marginRight="17dp"
+        android:layout_marginRight="23dp"
         android:height="80dp"
         android:width="100dp"
         android:onClick="putmeoff"
-         />
+        android:layout_alignBaseline="@+id/btn_party"
+        android:layout_alignBottom="@+id/btn_party"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="23dp" />
 
     <Button
         android:id="@+id/btn_party"
         android:text="Party"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/btn_romantic"
         android:height="80dp"
         android:width="100dp"
         android:onClick="putmeoff"
-        android:layout_alignBottom="@+id/btn_romantic"
-        android:layout_toRightOf="@+id/btn_romantic"
-        android:layout_toEndOf="@+id/btn_romantic" />
-
-
-
-
+        android:layout_above="@+id/btn_dance"
+        android:layout_centerHorizontal="true" />
 
     <Button
-        android:text="dance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_dance"
-        android:layout_below="@+id/btn_romantic"
-        android:layout_toRightOf="@+id/btn_romantic"
-        android:height="80dp"
-        android:width="100dp"
-        android:onClick="putmeoff"
-        android:layout_toEndOf="@+id/btn_romantic" />
-    <Button
-        android:text="heart break"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_heart_break"
-        android:layout_below="@+id/btn_dance"
-        android:layout_toRightOf="@+id/btn_family"
-        android:height="80dp"
-        android:width="100dp"
-        android:onClick="putmeoff"
-        android:layout_toEndOf="@+id/btn_romantic" />
-    <Button
-        android:text="siblings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_siblings"
-        android:layout_below="@+id/btn_heart_break"
-        android:layout_toRightOf="@+id/btn_family"
-        android:height="80dp"
-        android:width="100dp"
-        android:onClick="putmeoff"
-        android:layout_toEndOf="@+id/btn_romantic" />
+       android:text="Romantic"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="64dp"
+       android:id="@+id/btn_romantic"
+       android:height="80dp"
+       android:width="100dp"
+       android:onClick="putmeoff"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/btn_party"
+        android:layout_toStartOf="@+id/btn_party"
+        android:layout_marginRight="12dp"
+        android:layout_marginEnd="12dp" />
 
     <Button
         android:text="miss u"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btn_missu"
-        android:layout_marginRight="17dp"
         android:height="80dp"
         android:width="100dp"
         android:onClick="putmeoff"
         android:layout_below="@+id/btn_ontour"
-        android:layout_toRightOf="@+id/btn_party"
-        android:layout_toEndOf="@+id/btn_party" />
+        android:layout_alignLeft="@+id/btn_ontour"
+        android:layout_alignStart="@+id/btn_ontour" />
+
     <Button
-        android:text="ALONE"
+        android:text="dance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_alone"
-        android:layout_marginRight="17dp"
+        android:id="@+id/btn_dance"
         android:height="80dp"
         android:width="100dp"
         android:onClick="putmeoff"
-        android:layout_below="@+id/btn_missu"
-        android:layout_toRightOf="@+id/btn_heart_break"
-        android:layout_toEndOf="@+id/btn_party" />
+        android:layout_alignBaseline="@+id/btn_inlove"
+        android:layout_alignBottom="@+id/btn_inlove"
+        android:layout_alignLeft="@+id/btn_party"
+        android:layout_alignStart="@+id/btn_party" />
+
     <Button
-        android:text="FOREVER"
+        android:text="in love"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_forever"
-        android:layout_marginRight="17dp"
+        android:id="@+id/btn_inlove"
         android:height="80dp"
         android:width="100dp"
         android:onClick="putmeoff"
-        android:layout_below="@+id/btn_alone"
-        android:layout_toRightOf="@+id/btn_siblings"
-        android:layout_toEndOf="@+id/btn_party" />
-
-    <TextView
-        android:text="Just Tell Us Your Mood"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView2"
-        android:fontFamily="sans-serif"
-        tools:fontFamily="casual"
-        tools:textStyle="bold"
-        android:typeface="normal"
-        android:textSize="18sp"
-        android:layout_above="@+id/btn_ontour"
-        android:layout_centerHorizontal="true" />
-
+        android:layout_below="@+id/btn_romantic"
+        android:layout_alignLeft="@+id/btn_romantic"
+        android:layout_alignStart="@+id/btn_romantic" />
 
 
 </RelativeLayout>

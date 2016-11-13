@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:id="@+id/genericmood"
     android:layout_height="match_parent"
-    android:paddingTop="0dp"
+    android:background="@color/colorPrimary"
     tools:context="com.moodoff.GenericMood">
     <!-- TODO: Update blank fragment layout -->
 

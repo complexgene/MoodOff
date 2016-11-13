@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -18,6 +18,7 @@
         <activity android:name=".Start">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -25,10 +26,9 @@
             android:name=".AllTabs"
             android:label="@string/title_activity_all_tabs"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".RegistrationActivity"></activity>
-        <activity android:name=".helper.DBInternal"></activity>
-        <activity android:name=".ContactList"></activity>
-
+        <activity android:name=".RegistrationActivity" />
+        <activity android:name=".helper.DBInternal" />
+        <activity android:name=".ContactList" />
     </application>
 
 </manifest>
