@@ -181,7 +181,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             @Override
             public void onClick(View v) {
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/"+currentMood);
+                File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/"+currentMood+"/");
                 pictureDirectory.mkdirs();
                 String pictureName = getPictureName();
                 File imageFile = new File(pictureDirectory,pictureName);

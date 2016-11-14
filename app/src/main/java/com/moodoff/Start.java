@@ -1,8 +1,10 @@
 package com.moodoff;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ProgressBar;
@@ -31,6 +33,11 @@ public class Start extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+
+        ActivityCompat.requestPermissions(Start.this,
+                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.INTERNET,Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_CONTACTS},
+                1);
+
         StoreRetrieveDataInterface rd=null;
 
         spinner = (ProgressBar)findViewById(R.id.spinner);
@@ -50,6 +57,14 @@ public class Start extends AppCompatActivity {
                 UserDetails.setEmailId(rd.getValueFor("email"));
                 rd.endReadTransaction();
 
+                Calendar c = Calendar.getInstance();
+                specialDate.setText("Today is: "+c.get(Calendar.DATE)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.YEAR));
+                int hour = c.get(Calendar.HOUR_OF_DAY);
+                String greetStr = "- Good Morning -";
+                if(hour>=12 && hour<=18)greetStr = "- Good Afternoon -";
+                if(hour>=18 && hour<=23)greetStr = "- Good Evening -";
+                greet.setText(greetStr);
+
                 try{
                     final String userMobileNumber = UserDetails.getPhoneNumber();
                     final String serverURL = HttpGetPostInterface.serverURL;
@@ -68,7 +83,6 @@ public class Start extends AppCompatActivity {
                                     response.append((char) data);
                                     data = isr.read();
                                 }
-
                                 AllNotifications.allNotifications = ParseNotificationData.getNotification(response.toString());
                               //  AllNotifications.totalNoOfNot = AllNotifications.allNotifications.size();
                                 doorClosed = false;
@@ -90,22 +104,13 @@ public class Start extends AppCompatActivity {
                         Start.this.finish();
                     }
                 }, 4000);
-
-                Calendar c = Calendar.getInstance();
-                specialDate.setText("Today is: "+c.get(Calendar.DATE)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.YEAR));
-                int hour = c.get(Calendar.HOUR_OF_DAY);
-                String greetStr = "- Good Morning -";
-                if(hour>=12 && hour<=18)greetStr = "- Good Afternoon -";
-                if(hour>=18 && hour<=23)greetStr = "- Good Evening -";
-                greet.setText(greetStr);
-
             }
             else{
                 Intent ii = new Intent(this,RegistrationActivity.class);
                 startActivity(ii);
             }
             }catch(Exception e){
-            Toast.makeText(getApplicationContext(), "Ex:"+e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e("Start_Error",e.getMessage());
         }
     }
 }

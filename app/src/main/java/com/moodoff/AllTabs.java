@@ -68,9 +68,7 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
         tabLayout.setupWithViewPager(mViewPager);
 
         //Request all the dangerous permissions over here
-        ActivityCompat.requestPermissions(AllTabs.this,
-                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.INTERNET,Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_CONTACTS},
-                1);
+
 
     }
 
@@ -168,13 +166,13 @@ public class AllTabs extends AppCompatActivity implements Moods.OnFragmentIntera
                 case 0:
                     return "Moods";
                 case 1: {
-                    return "Messages";
+                    return "Activity";
                 }
                 case 2: {
                     return "Sing";
                 }
                 case 3: {
-                    return "Contacts";
+                    return "Profiles";
                 }
             }
             return null;
