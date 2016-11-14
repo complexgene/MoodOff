@@ -1,6 +1,7 @@
 package com.moodoff;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -96,10 +98,12 @@ public class NotificationFragment extends Fragment {
         try {
             mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
 
-                LinearLayout mainParent = new LinearLayout(getContext());
+                ScrollView mainParent = new ScrollView(getContext());
                 mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-                mainParent.setOrientation(LinearLayout.VERTICAL);
-
+            mainParent.setBackgroundResource(R.drawable.karaoke_bg7);
+                //mainParent.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout ll = new LinearLayout(getContext());
+                ll.setOrientation(LinearLayout.VERTICAL);
                 //while(allNotifications.size()==0){allNotifications = AllNotifications.allNotifications;}
 
                 for (int i = 0; i < allNotifications.size(); i++) {
@@ -107,18 +111,17 @@ public class NotificationFragment extends Fragment {
                     parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                     parent.setOrientation(LinearLayout.HORIZONTAL);
 
-
                     TextView allN = new TextView(getContext());
                     allN.setText(allNotifications.get(i));
                     parent.addView(allN);
 
-                    mainParent.addView(parent);
+                    ll.addView(parent);
                 }
-
-                mainParentLayout.addView(mainParent);
+            mainParent.addView(ll);
+            mainParentLayout.addView(mainParent);
         }
         catch (Exception ei){
-            Log.e("Dynamic",ei.getMessage());
+            Log.e("NotificationFragment_Er",ei.getMessage());
         }
         return view;
     }

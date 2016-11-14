@@ -20,46 +20,54 @@
             android:layout_alignStart="@+id/record"
             android:layout_marginTop="52dp"
             android:layout_alignRight="@+id/play"
-            android:layout_alignEnd="@+id/play" />
+            android:layout_alignEnd="@+id/play"
+            style="@style/Widget.AppCompat.SeekBar.Discrete" />
 
-        <Button
+        <android.support.design.widget.FloatingActionButton
             android:id="@+id/record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Record"
             android:onClick="startRecord"
+            android:src="@drawable/record"
+            android:layout_marginRight="10dp"
             android:layout_below="@+id/seekBar_karaoke"
             android:layout_toLeftOf="@+id/newRecord"
             android:layout_toStartOf="@+id/newRecord"
             android:layout_marginTop="30dp" />
 
-        <Button
+        <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="STOP"
             android:id="@+id/stop"
+            android:src="@drawable/stop"
             android:onClick="stopRecord"
             android:enabled="false"
             android:layout_above="@+id/newRecord"
             android:layout_centerHorizontal="true" />
 
-        <Button
+        <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PLAY"
             android:id="@+id/play"
+            android:src="@drawable/play"
+            android:layout_marginLeft="10dp"
             android:onClick="playRecord"
             android:enabled="false"
             android:layout_above="@+id/newRecord"
             android:layout_toRightOf="@+id/newRecord"
             android:layout_toEndOf="@+id/newRecord" />
 
-        <Button
+        <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New Record"
             android:id="@+id/newRecord"
+            android:layout_marginTop="5dp"
             android:onClick="newRecord"
+            android:src="@drawable/new_record"
             android:layout_below="@+id/record"
             android:layout_centerHorizontal="true" />
         <ScrollView

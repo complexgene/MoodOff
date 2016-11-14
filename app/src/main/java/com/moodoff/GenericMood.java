@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.moodoff.helper.ExpressionsImpl;
 import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.PlaylistSongs;
 import com.moodoff.model.UserDetails;
 
 import java.io.BufferedReader;
@@ -537,29 +538,10 @@ public class GenericMood extends Moods implements View.OnClickListener{
         try{
             final String userMobileNumber = UserDetails.getPhoneNumber();
             final String serverURL = HttpGetPostInterface.serverURL;
-            new Thread(new Runnable() {
-                HttpURLConnection urlConnection = null;
-                @Override
-                public void run() {
-                    try {
-                        URL url = new URL(serverSongURL + "/playlist_"+mood+".txt");
-                        Log.e("SongURL",url.toString());
-                        urlConnection = (HttpURLConnection) url.openConnection();
-                        InputStream is = urlConnection.getInputStream();
-                        InputStreamReader isr = new InputStreamReader(is);
-                        BufferedReader br = new BufferedReader(isr);
-                        String song = "";
-                        while ((song = br.readLine()) != null) {
-                            Log.e("Song",song);
-                            listOfSong.add(song);
-                        }
-                        doorClosed = false;
-                    } catch (Exception ee) {
 
-                    }
-                }
-            }).start();
-            while(doorClosed);
+            // Access the collection of songs that has already been read in Start.java and stored in variable of file PlaylistSongs.java
+            listOfSong = PlaylistSongs.allMoodPlayList.get(mood);
+
             Collections.shuffle(listOfSong);
             return(listOfSong);
         } catch(Exception e){toastError(e.getMessage()); return(null);}
@@ -570,8 +552,8 @@ public class GenericMood extends Moods implements View.OnClickListener{
         String currentSong = currentplayList.get(index);
         releaseMediaPlayerObject();
         mp = new MediaPlayer();
-        String url = "http://www.hipilab.com/songs/"+ mood + "/" + currentSong;
-        Log.e("SongSet",url);
+        String url = serverSongURL + mood + "/" + currentSong;
+        Log.e("GenericMood_SongPlayURL",url);
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try{
             //mp = MediaPlayer.create(this, Uri.parse(url));
@@ -600,7 +582,9 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 currentSong = currentSong.split(".", 1)[0];
             }
             textToDisplaySong.setText(currentSong);
-        } catch(Exception e){toastError(e.getMessage());}
+        } catch(Exception e){
+            Log.e("GenericMood_displaySon.",e.getMessage());
+        }
     }
 
     /*check repeat button status and enable/disable next/previous button*/

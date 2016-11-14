@@ -3,7 +3,7 @@
     android:id="@+id/allmoods"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@drawable/karaoke_bg7"
     tools:context="com.moodoff.Moods">
 
 
@@ -20,7 +20,8 @@
         android:layout_alignBottom="@+id/btn_party"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="23dp" />
+        android:layout_marginEnd="23dp"
+        style="@style/Widget.AppCompat.Button.Colored" />
 
     <Button
         android:id="@+id/btn_party"
@@ -31,7 +32,8 @@
         android:width="100dp"
         android:onClick="putmeoff"
         android:layout_above="@+id/btn_dance"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        style="@style/Widget.AppCompat.Button.Colored" />
 
     <Button
        android:text="Romantic"
@@ -46,7 +48,8 @@
         android:layout_toLeftOf="@+id/btn_party"
         android:layout_toStartOf="@+id/btn_party"
         android:layout_marginRight="12dp"
-        android:layout_marginEnd="12dp" />
+        android:layout_marginEnd="12dp"
+        style="@style/Widget.AppCompat.Button.Colored" />
 
     <Button
         android:text="miss u"
@@ -58,7 +61,8 @@
         android:onClick="putmeoff"
         android:layout_below="@+id/btn_ontour"
         android:layout_alignLeft="@+id/btn_ontour"
-        android:layout_alignStart="@+id/btn_ontour" />
+        android:layout_alignStart="@+id/btn_ontour"
+        style="@style/Widget.AppCompat.Button.Colored" />
 
     <Button
         android:text="dance"
@@ -71,7 +75,8 @@
         android:layout_alignBaseline="@+id/btn_inlove"
         android:layout_alignBottom="@+id/btn_inlove"
         android:layout_alignLeft="@+id/btn_party"
-        android:layout_alignStart="@+id/btn_party" />
+        android:layout_alignStart="@+id/btn_party"
+        style="@style/Widget.AppCompat.Button.Colored" />
 
     <Button
         android:text="in love"
@@ -83,7 +88,8 @@
         android:onClick="putmeoff"
         android:layout_below="@+id/btn_romantic"
         android:layout_alignLeft="@+id/btn_romantic"
-        android:layout_alignStart="@+id/btn_romantic" />
+        android:layout_alignStart="@+id/btn_romantic"
+        style="@style/Widget.AppCompat.Button.Colored" />
 
 
 </RelativeLayout>

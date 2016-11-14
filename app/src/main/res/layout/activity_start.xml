@@ -4,7 +4,7 @@
     android:id="@+id/activity_start"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/karaoke_bg7"
+    android:background="@drawable/master_bg"
     tools:context="com.moodoff.Start">
 
     <ProgressBar
@@ -16,7 +16,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="63dp" />
 
-    <TextView
+    <!--<TextView
         android:text="- MoodOff -"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:textAlignment="center" />
-
+-->
     <TextView
         android:text="Good Morning"
         android:layout_width="wrap_content"
@@ -40,57 +40,56 @@
         android:textSize="18sp"
         android:textStyle="normal|bold"
         android:textColor="@android:color/black"
+        android:layout_marginBottom="38dp"
         android:layout_above="@+id/spinner"
-        android:layout_alignLeft="@+id/weather"
-        android:layout_alignStart="@+id/weather"
-        android:layout_marginBottom="42dp" />
-
-    <TextView
-        android:text="specialDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/specialDate"
-        android:textSize="18sp"
-        android:textStyle="normal|bold"
-        android:textColor="@android:color/black"
-        android:layout_alignBottom="@+id/greet"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="59dp" />
-
-    <TextView
-        android:text="Temperature: 37degC"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/temp"
-        android:textSize="18sp"
-        android:textStyle="normal|bold"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="33dp"
-        android:layout_above="@+id/weather"
-        android:layout_alignLeft="@+id/textView3"
-        android:layout_alignStart="@+id/textView3" />
-
-    <TextView
-        android:text="Partly Cloudy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/weather"
-        android:textStyle="normal|bold"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="21dp"
-        android:layout_above="@+id/specialDate"
         android:layout_centerHorizontal="true" />
+    <!--
+        <TextView
+            android:text="specialDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/specialDate"
+            android:textSize="18sp"
+            android:textStyle="normal|bold"
+            android:textColor="@android:color/black"
+            android:layout_alignBottom="@+id/greet"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="59dp" />
 
-    <TextView
-        android:text="Just When you want to put it ON..."
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView8"
-        android:textStyle="normal|italic"
-        android:textColor="@android:color/black"
-        android:layout_below="@+id/textView3"
-        android:layout_centerHorizontal="true" />
+        <TextView
+            android:text="Temperature: 37degC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/temp"
+            android:textSize="18sp"
+            android:textStyle="normal|bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="33dp"
+            android:layout_above="@+id/weather"
+            android:layout_alignLeft="@+id/textView3"
+            android:layout_alignStart="@+id/textView3" />
+
+        <TextView
+            android:text="Partly Cloudy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/weather"
+            android:textStyle="normal|bold"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="21dp"
+            android:layout_above="@+id/specialDate"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:text="Just When you want to put it ON..."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView8"
+            android:textStyle="normal|italic"
+            android:textColor="@android:color/black"
+            android:layout_below="@+id/textView3"
+            android:layout_centerHorizontal="true" />-->
 
 
 </RelativeLayout>

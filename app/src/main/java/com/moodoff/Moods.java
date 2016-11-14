@@ -13,7 +13,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.moodoff.helper.AllNotifications;
 import com.moodoff.helper.DBInternal;
 
 
@@ -79,6 +81,9 @@ public class Moods extends Fragment {
         btnDance = (Button)rootView.findViewById(R.id.btn_dance);
         btnMissU = (Button)rootView.findViewById(R.id.btn_missu);
 
+        showAllButtons();
+        //Toast.makeText(getContext(), "here I am", Toast.LENGTH_SHORT).show();
+
         btnOnTour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,6 +136,15 @@ public class Moods extends Fragment {
         btnDance.setVisibility(View.INVISIBLE);
         btnMissU.setVisibility(View.INVISIBLE);
 //        layout.setVisibility(View.VISIBLE);
+    }
+    public void showAllButtons(){
+        btnRomantic.setVisibility(View.VISIBLE);
+        btnParty.setVisibility(View.VISIBLE);
+        btnOnTour.setVisibility(View.VISIBLE);
+        btnInLove.setVisibility(View.VISIBLE);
+        btnDance.setVisibility(View.VISIBLE);
+        btnMissU.setVisibility(View.VISIBLE);
+        //layout.setVisibility(View.VISIBLE);
     }
 /*
     public void putmeoff(View v){

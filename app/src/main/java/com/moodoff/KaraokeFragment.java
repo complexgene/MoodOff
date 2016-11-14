@@ -9,18 +9,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.File;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -77,7 +76,7 @@ public class KaraokeFragment extends Fragment {
     View view;
     private MediaRecorder myRec;
     private String outputFile;
-    Button rec,play,stop,newRecord;
+    FloatingActionButton rec,play,stop,newRecord;
     MediaPlayer mpp;
     MediaPlayer mp;
     Handler seekHandler= new Handler();;
@@ -90,10 +89,10 @@ public class KaraokeFragment extends Fragment {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_karaoke, container, false);
 
-        rec = (Button) view.findViewById(R.id.record);
-        play = (Button) view.findViewById(R.id.play);
-        stop = (Button) view.findViewById(R.id.stop);
-        newRecord = (Button) view.findViewById(R.id.newRecord);
+        rec = (FloatingActionButton) view.findViewById(R.id.record);
+        play = (FloatingActionButton) view.findViewById(R.id.play);
+        stop = (FloatingActionButton) view.findViewById(R.id.stop);
+        newRecord = (FloatingActionButton) view.findViewById(R.id.newRecord);
         seekBar = (SeekBar)view.findViewById(R.id.seekBar_karaoke);
 
 
@@ -109,7 +108,7 @@ public class KaraokeFragment extends Fragment {
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-                                public void onClick(DialogInterface dialog, int whichButton) {
+                                public void onClick(DialogInterface dialog, int whichFloatingActionButton) {
                                     try {
                                         myRec = new MediaRecorder();
                                         myRec.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -231,7 +230,7 @@ public class KaraokeFragment extends Fragment {
     // ABCD
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onFloatingActionButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }

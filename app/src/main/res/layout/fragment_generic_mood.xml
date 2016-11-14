@@ -129,7 +129,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/buttons"
-            android:background="#CFFF00" />
+            android:background="#CFFF00"
+            style="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 
         <LinearLayout
