@@ -1,25 +1,43 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/allContactDisplay"
+    android:orientation="vertical"
+    android:background="@drawable/karaoke_bg7"
     tools:context="com.moodoff.ContactsFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
-
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
+        android:tint="@color/FBtn_genericMood"
+        android:src="@drawable/refresh_contacts"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginTop="5dp"
         android:layout_marginRight="5dp"
-        android:src="@drawable/btn_dedicate"
-        />
+        android:id="@+id/refreshContacts" />
 
-    <TextView
-        android:text="TextView"
+    <ProgressBar
+        style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/contacts" />
+        android:visibility="invisible"
+        android:id="@+id/refreshSpin"
+        android:layout_marginRight="5dp"
+        android:layout_alignTop="@+id/refreshContacts"
+        android:layout_toLeftOf="@+id/refreshContacts"
+        android:layout_toStartOf="@+id/refreshContacts" />
+<ScrollView
+    android:id="@+id/contactsScroll"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/refreshContacts"
+    android:layout_marginLeft="20dp"
+    >
 
-</FrameLayout>
+</ScrollView>
+</RelativeLayout>

@@ -7,17 +7,28 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.moodoff.helper.DBInternal;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.regex.Pattern;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -78,6 +89,10 @@ public class ContactsFragment extends Fragment{
     EditText tableName;
     TextView tv = null;
     TextView contacts;
+    ProgressBar spinner;
+    FloatingActionButton refreshContacts;
+    ArrayList<String> allC = new ArrayList<>();
+    boolean contactReadingStatusNotComplete = true;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -85,37 +100,141 @@ public class ContactsFragment extends Fragment{
         v = inflater.inflate(R.layout.fragment_contacts, container, false);
         ctx = v.getContext();
 
-        contacts = (TextView)v.findViewById(R.id.contacts);
-        ArrayList<String> allC = getContactsTableData();
-        contacts.setText(allC.get(0));
+        spinner = (ProgressBar)v.findViewById(R.id.refreshSpin);
+        //DBInternal dbInternal = new DBInternal();
+        if(checkIfATableExists("allcontacts")){
+            Log.e("ContactsFragment_TBLEXT","table exists");
+            allC = getOrStoreContactsTableData(0,allC);
+            populatePageWithContacts();
+        }
+        else{
+            Log.e("ContactsFragment_cntcts","Not present");
+            Toast.makeText(getContext(),"Reading your Contacts. Wait.",Toast.LENGTH_LONG).show();
+            spinner.setVisibility(View.VISIBLE);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    allC = ContactList.getContactNames(ctx.getContentResolver());
+                    getOrStoreContactsTableData(1,allC);
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getContext(),"Contacts Reading Finished..",Toast.LENGTH_SHORT).show();
+                            spinner.setVisibility(View.INVISIBLE);
+                            populatePageWithContacts();
+                        }
+                    });
+                }
+            }).start();
+        }
+
+//        mainLayout.addView(contactsScroll);
+        //contacts.setText(allC.get(0));
+        refreshContacts = (FloatingActionButton)v.findViewById(R.id.refreshContacts);
+        refreshContacts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                spinner.setVisibility(View.VISIBLE);
+                Toast.makeText(getContext(),"Reading your Contacts. Wait.",Toast.LENGTH_LONG).show();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        allC = ContactList.getContactNames(ctx.getContentResolver());
+                        getOrStoreContactsTableData(1,allC);
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getContext(),"Contacts Reading Finished..",Toast.LENGTH_SHORT).show();
+                                spinner.setVisibility(View.INVISIBLE);
+                                populatePageWithContacts();
+                            }
+                        });
+                    }
+                }).start();
+            }
+        });
 
         return v;
     }
 
-    public ArrayList<String> getContactsTableData(){
-        ArrayList allContacts = new ArrayList<String>();
+    public void populatePageWithContacts(){
+        RelativeLayout mainLayout = (RelativeLayout)v.findViewById(R.id.allContactDisplay);
+        ScrollView contactsScroll = (ScrollView)v.findViewById(R.id.contactsScroll);
+        contactsScroll.removeAllViews();
+        LinearLayout eachContact = new LinearLayout(ctx);
+        eachContact.setOrientation(LinearLayout.VERTICAL);
+        eachContact.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        int noOfContacts = allC.size();
+        for(int i=0;i<noOfContacts;i++){
+            TextView tv = new TextView(ctx);
+            tv.setText(allC.get(i));
+            eachContact.addView(tv);
+        }
+        contactsScroll.addView(eachContact);
+    }
+
+    public boolean checkIfATableExists(String tableName){
+        mydatabase = ctx.openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
-            mydatabase = ctx.openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
-            Cursor allTables = mydatabase.rawQuery("SELECT name from sqlite_master WHERE type='table' and name='allcontacts'", null);
-            Log.e("DBInternal",""+allTables.getCount());
-            allTables.moveToFirst();
-            ContentResolver sR = ctx.getContentResolver();
-            if(allTables.getCount()==0) {
-                ContactList contactList = new ContactList();
-                DBInternal dbInternal = new DBInternal();
-                dbInternal.checkAndPopulateContactsTable(contactList.getContactNames(sR));
+            Cursor allTables = mydatabase.rawQuery("SELECT name from sqlite_master WHERE type='table' and name='"+tableName+"'", null);
+            if(allTables.getCount()==1) {
+                Log.e("ContactsFragment_chkTbl",tableName+" exists");
+                mydatabase.close();
+                return true;
             }
+            else{
+                Log.e("ContactsFragment_chkTbl",tableName+" doesn't exist");
+                mydatabase.close();
+                return false;
+            }
+        }
+        catch(Exception ee){
+            Log.e("ContactsFragment_chkEr",ee.getMessage());
+        }
+        mydatabase.close();
+        return false;
+    }
+    public ArrayList<String> getOrStoreContactsTableData(int status, ArrayList<String> allContacts){
+        ArrayList<String> allContactsPresent = new ArrayList<String>();
+        mydatabase = getActivity().openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
+        try {
+            // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
+            if(status == 0){
+                //READ and RETURN data
                 Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
-                    allContacts.add(resultSet.getString(0) + " " + resultSet.getString(1));
+                    String eachRow = resultSet.getString(0)+" "+resultSet.getString(1);
+                    allContactsPresent.add(eachRow);
                     resultSet.moveToNext();
                 }
+            }
+            // First time conatct table create or REFRESH done.
+            else{
+                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(user_id VARCHAR,phone_no VARCHAR);";
+                mydatabase.execSQL(createQuery);
+                String deleteQuery = "DELETE FROM allcontacts;";
+                mydatabase.execSQL(deleteQuery);
+                String insertQuery = "";
+                for(String eachContact:allContacts){
+                    //Log.e("ContactsFragment_CntErr",eachContact);
+                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact.split("#")[0]+"','"+eachContact.split("#")[1]+"');";
+                    //Log.e("ContactsFragment_CntErr",insertQuery);
+                    mydatabase.execSQL(insertQuery);
+                }
+                return null;
+            }
             mydatabase.close();
+
         }catch (Exception ee){
-            Log.e("DBInternal23",ee.getMessage());
+            Log.e("ContactsFragment_StrErr",ee.getMessage());
+            ee.fillInStackTrace();
         }
-        return allContacts;
+        mydatabase.close();
+        //allContactsPresent.add("santanu");
+        return allContactsPresent;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -125,6 +125,13 @@ public class Moods extends Fragment {
                 putAllButtonsOff();
             }
         });
+        btnDance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent openInternalDBActivity = new Intent(getActivity(), DBInternal.class);
+                startActivity(openInternalDBActivity);
+            }
+        });
 
         return rootView;
     }

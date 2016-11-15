@@ -394,6 +394,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
 
     /*play a new or currently paused song*/
     public void playSong() {
+        Log.e("GenericMood_MPPlaySong","MediaPlayer Play Initiated");
         try {
             if (mp == null) {
                 //for playing new song
@@ -411,6 +412,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                         mediaPlayer.start();
                     }
                 });
+                Log.e("GenericMood_MPPause","MediaPlayer PLay Done");
                 //call next on completion of the song
                 mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     public void onCompletion(MediaPlayer mediaPlayer) {
@@ -418,6 +420,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                         onClickNextButton(view);
                     }
                 });
+
             } else {
                 //for playing paused song
                 if(!mp.isPlaying()) {
@@ -437,11 +440,13 @@ public class GenericMood extends Moods implements View.OnClickListener{
 
     /*pause the currently playing song*/
     public void pauseSong() {
+        Log.e("GenericMood_MPPause","MediaPlayer Paused Initiated");
         try {
             if(mp.isPlaying()) {
                 mp.pause();
             }
             showPlayPauseButton("play");
+        Log.e("GenericMood_MPPause","MediaPlayer Paused Done");
         } catch (Exception e){
             toastError(e.getMessage());
             releaseMediaPlayerObject();

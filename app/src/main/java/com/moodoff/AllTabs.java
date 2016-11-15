@@ -149,7 +149,7 @@ public class AllTabs extends AppCompatActivity implements BlankFragment.OnFragme
             if(position == 0)return Moods.newInstance("a","b");
             else if(position == 1)return NotificationFragment.newInstance("x","y");
             else if(position == 2)return KaraokeFragment.newInstance("p","q");
-            //else if(position == 3)return ContactsFragment.newInstance("p","q");
+            else if(position == 3)return ContactsFragment.newInstance("p","q");
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
         }

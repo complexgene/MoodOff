@@ -141,28 +141,62 @@ public class DBInternal extends AppCompatActivity{
         }
     }
 
-    public void checkAndPopulateContactsTable(ArrayList<String> allContacts){
+    public boolean checkIfATableExists(String tableName){
+        mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
+        try {
+            Cursor allTables = mydatabase.rawQuery("SELECT name from sqlite_master WHERE type='table' and name='"+tableName+"'", null);
+            if(allTables.getCount()==1) {
+                Log.e("DBInternal_chkTbl",tableName+" exists");
+                mydatabase.close();
+                return true;
+            }
+            else{
+                Log.e("DBInternal_chkTbl",tableName+" doesn't exist");
+                mydatabase.close();
+                return false;
+            }
+        }
+        catch(Exception ee){
+            Log.e("DBInternal_chkIfTbl_Er",ee.getMessage());
+        }
+        mydatabase.close();
+        return false;
+    }
+
+    public ArrayList<String> getOrStoreContactsTableData(int status, ArrayList<String> allContacts){
+        ArrayList<String> allContactsPresent = new ArrayList<String>();
         try {
             mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
-
-                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(user_id VARCHAR,phone_no VARCHAR);";
-                String insertQuery = "";
-                mydatabase.execSQL(createQuery);
-                ContactList contactList = new ContactList();
-                tv.setText(allContacts.get(0));
-                for(String eachContact:allContacts){
-                    Log.e("Connnn",eachContact);
-                    insertQuery = "INSERT INTO allcontacts values('"+eachContact.split(" ")[0]+"','"+eachContact.split(" ")[1]+"');";
+            // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
+                if(status == 0){
+                    //READ and RETURN data
+                    Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
+                    resultSet.moveToFirst();
+                    while (!resultSet.isAfterLast()) {
+                        allContactsPresent.add(resultSet.getString(0)+" "+resultSet.getString(1));
+                    }
+                }
+                // First time conatct table create or REFRESH done.
+                else{
+                    String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(user_id VARCHAR,phone_no VARCHAR);";
                     mydatabase.execSQL(createQuery);
+                    String deleteQuery = "DELETE FROM allcontacts;";
+                    mydatabase.execSQL(deleteQuery);
+                    String insertQuery = "";
+                    for(String eachContact:allContacts){
+                        Log.e("DBInternal_Contact",eachContact);
+                        insertQuery = "INSERT INTO allcontacts values('"+eachContact.split(" ")[0]+"','"+eachContact.split(" ")[1]+"');";
+                        mydatabase.execSQL(createQuery);
+                    }
+                    return null;
                 }
                 mydatabase.close();
-                tv.setText("Created contacts table");
-
 
         }catch (Exception ee){
-            Log.e("DBInternal1",ee.getMessage());
+            Log.e("DBInternal_getStoreErr",ee.getMessage());
             ee.fillInStackTrace();
         }
+        return allContactsPresent;
     }
 
     public void checkAndPopulateNotificationsTable(ArrayList<String> allContacts){

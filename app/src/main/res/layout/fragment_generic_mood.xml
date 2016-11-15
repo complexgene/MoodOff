@@ -130,7 +130,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/buttons"
             android:background="#CFFF00"
-            style="@style/Widget.AppCompat.SeekBar.Discrete" />
+            style="@style/Widget.AppCompat.SeekBar" />
 
 
         <LinearLayout

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v7.app.AlertDialog;
@@ -28,22 +29,22 @@ import java.util.regex.Pattern;
 
 public class ContactList extends AppCompatActivity {
 
-
     private ListView lstNames;
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     String val=null;
+    SQLiteDatabase mydatabase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contact_list);
-        ///Intent intent=getIntent();
-        //this.lstNames = (ListView) findViewById(R.id.contactlist);
+        Intent intent=getIntent();
+        this.lstNames = (ListView) findViewById(R.id.contactlist);
 
         // Read and show the contacts
-//        getContactNames();
+       showContacts();
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        /*lstNames.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        lstNames.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
@@ -78,12 +79,12 @@ public class ContactList extends AppCompatActivity {
 
 
             }
-        });*/
+        });
 
     }
 
 
-
+    ArrayList<String> allC = new ArrayList<>();
     public void showContacts() {
         // Check the SDK version and whether the permission is already granted or not.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
@@ -91,11 +92,15 @@ public class ContactList extends AppCompatActivity {
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
-            ArrayList<String> contacts = getContactNames(getContentResolver());
-            DBInternal dbInternal = new DBInternal();
-            dbInternal.checkAndPopulateContactsTable(contacts);
-            //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contacts);
-            //lstNames.setAdapter(adapter);
+            if(checkIfATableExists("allcontacts")) {
+                allC = getOrStoreContactsTableData(0, allC);
+            }
+            else {
+                allC = ContactList.getContactNames(getContentResolver());
+                getOrStoreContactsTableData(1,allC);
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, allC);
+            lstNames.setAdapter(adapter);
         }
     }
 
@@ -117,10 +122,10 @@ public class ContactList extends AppCompatActivity {
      *
      * @return a list of names+mobile_number.
      */
-    public ArrayList<String> getContactNames(ContentResolver cr) {
+    public static ArrayList<String> getContactNames(ContentResolver contentResolver) {
         ArrayList<String> contacts = new ArrayList<>();
         // Get the ContentResolver
-        //ContentResolver cr = getContentResolver();
+        ContentResolver cr = contentResolver;
         // Get the Cursor of all the contacts
         Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 
@@ -133,13 +138,13 @@ public class ContactList extends AppCompatActivity {
                 //Log.i("Names", name);
                 if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
                     // Query phone here. Covered next
-                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + id, null, null);
+                    Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + id, null, null);
                     while (phones.moveToNext()) {
                         String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                         phoneNumber = phoneNumber.replaceAll("[\\-]", "");
                         if ( phoneNumber.replaceAll("[^0-9]", "").length()>=10 && Pattern.matches("^((0091)|(\\+91)|0?)[789]{1}\\d{9}$",phoneNumber) ){
                             phoneNumber = phoneNumber.substring(phoneNumber.length() - 10);
-                            contacts.add(name + " " + phoneNumber);
+                            contacts.add(name + "#" + phoneNumber);
                             //Log.i("Number", phoneNumber);
                         }
                     }
@@ -150,8 +155,70 @@ public class ContactList extends AppCompatActivity {
         }
         // Close the curosor
         cursor.close();
-
+        Log.e("ContactList",contacts.get(0));
         return contacts;
+    }
+
+    public boolean checkIfATableExists(String tableName){
+        mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
+        try {
+            Cursor allTables = mydatabase.rawQuery("SELECT name from sqlite_master WHERE type='table' and name='"+tableName+"'", null);
+            if(allTables.getCount()==1) {
+                Log.e("ContactsFragment_chkTbl",tableName+" exists");
+                mydatabase.close();
+                return true;
+            }
+            else{
+                Log.e("ContactsFragment_chkTbl",tableName+" doesn't exist");
+                mydatabase.close();
+                return false;
+            }
+        }
+        catch(Exception ee){
+            Log.e("ContactsFragment_chkEr",ee.getMessage());
+        }
+        mydatabase.close();
+        return false;
+    }
+    public ArrayList<String> getOrStoreContactsTableData(int status, ArrayList<String> allContacts){
+        ArrayList<String> allContactsPresent = new ArrayList<String>();
+        mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
+        try {
+            // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
+            if(status == 0){
+                //READ and RETURN data
+                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
+                resultSet.moveToFirst();
+                while (!resultSet.isAfterLast()) {
+                    String eachRow = resultSet.getString(0)+" "+resultSet.getString(1);
+                    allContactsPresent.add(eachRow);
+                    resultSet.moveToNext();
+                }
+            }
+            // First time conatct table create or REFRESH done.
+            else{
+                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(user_id VARCHAR,phone_no VARCHAR);";
+                mydatabase.execSQL(createQuery);
+                String deleteQuery = "DELETE FROM allcontacts;";
+                mydatabase.execSQL(deleteQuery);
+                String insertQuery = "";
+                for(String eachContact:allContacts){
+                    //Log.e("ContactsFragment_CntErr",eachContact);
+                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact.split("#")[0]+"','"+eachContact.split("#")[1]+"');";
+                    //Log.e("ContactsFragment_CntErr",insertQuery);
+                    mydatabase.execSQL(insertQuery);
+                }
+                return null;
+            }
+            mydatabase.close();
+
+        }catch (Exception ee){
+            Log.e("ContactsFragment_StrErr",ee.getMessage());
+            ee.fillInStackTrace();
+        }
+        mydatabase.close();
+        //allContactsPresent.add("santanu");
+        return allContactsPresent;
     }
 }
 

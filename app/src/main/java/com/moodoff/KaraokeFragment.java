@@ -130,9 +130,6 @@ public class KaraokeFragment extends Fragment {
                                         }).start();
                                         mpp.start();
                                         myRec.start();
-                                        Log.e("Here","I am2");
-
-                                        Log.e("Here","I am");
                                     } catch (Exception ee) {
                                         ee.printStackTrace();
                                     }
