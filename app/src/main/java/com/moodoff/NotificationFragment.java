@@ -101,12 +101,13 @@ public class NotificationFragment extends Fragment {
 
     int i= 0;
     View view;
+    MediaPlayer mp;
     TextView allNotificationsTextView;
     FrameLayout mainParentLayout;
     ArrayList<String> allNotifications = AllNotifications.allNotifications;
     boolean setDoorClosed=true;
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_notification, container, false);
@@ -173,12 +174,22 @@ public class NotificationFragment extends Fragment {
                     parent.addView(linearLayout);
 
                     final FloatingActionButton floatingActionButton2 = new FloatingActionButton(getContext());
+                    floatingActionButton2.setId(i);
                     final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
+
                     floatingActionButton2.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            //if(floatingActionButton2.getIma)
-                            MediaPlayer mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
+                            Log.e("Not_Frag",v.getId()+"");
+                            if(mp!=null){
+                                for(int j=0;j<allNotifications.size();j++){
+                                        FloatingActionButton otherButon = (FloatingActionButton)view.findViewById(j);
+                                        otherButon.setImageResource(R.drawable.play);
+                                    }
+                                mp.reset();
+                            }
+
+                            mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
                             String url = serverSongURL+"romantic/"+songFileName;
                             Log.e("Not_Frag_SongURL",url.toString());
                             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -190,7 +201,7 @@ public class NotificationFragment extends Fragment {
                                 floatingActionButton2.setImageResource(R.mipmap.pause);
                             }
                             catch (Exception ee){
-                                Log.e("Not_Frag_Err",ee.getMessage());
+                                Log.e("Not_Frag_Err","abc"+ee.getMessage());
                             }
 
                         }
