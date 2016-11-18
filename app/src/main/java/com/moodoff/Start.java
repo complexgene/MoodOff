@@ -1,9 +1,12 @@
 package com.moodoff;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
@@ -37,11 +40,19 @@ public class Start extends AppCompatActivity {
     private String serverURL = HttpGetPostInterface.serverURL;
     private boolean doorClosed1 = true, doorClosed2 = true, letMeReadAllTheMoods = true, contactReadFinished = true;
     private static int readAllPlaylistComplete = 0;
-    private HashMap<String,ArrayList<String>> allMoodPlayList = new HashMap<>();
+    private HashMap<String, ArrayList<String>> allMoodPlayList = new HashMap<>();
     ProgressBar spinner;
-    TextView temp,weather,specialDate,greet;
+    TextView temp, weather, specialDate, greet;
     SQLiteDatabase mydatabase;
-    ArrayList<String> allC = new ArrayList<>();
+    HashMap<String,String> allC = new HashMap<>();
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,211 +62,238 @@ public class Start extends AppCompatActivity {
                 new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_CONTACTS},
                 1);
 
-        StoreRetrieveDataInterface rd = null;
+        if (!isNetworkAvailable()) {
+            Toast.makeText(getApplicationContext(),"Sorry! You need Internet Connection",Toast.LENGTH_LONG).show();
+            spinner.setVisibility(View.INVISIBLE);
 
-        spinner = (ProgressBar) findViewById(R.id.spinner);
-        //specialDate = (TextView) findViewById(R.id.specialDate);
-        greet = (TextView) findViewById(R.id.greet);
+        } else {
 
-        spinner.setVisibility(ProgressBar.VISIBLE);
+            StoreRetrieveDataInterface rd = null;
 
-        try {
-            rd = new StoreRetrieveDataImpl("UserData.txt");
-            if (rd.fileExists()) {
+            spinner = (ProgressBar) findViewById(R.id.spinner);
+            //specialDate = (TextView) findViewById(R.id.specialDate);
+            greet = (TextView) findViewById(R.id.greet);
 
-                rd.beginReadTransaction();
-                UserDetails.setUserName(rd.getValueFor("user"));
-                UserDetails.setPhoneNumber(rd.getValueFor("phoneNo"));
-                UserDetails.setEmailId(rd.getValueFor("email"));
-                rd.endReadTransaction();
+            spinner.setVisibility(ProgressBar.VISIBLE);
 
-                Calendar c = Calendar.getInstance();
-                //specialDate.setText("Today is: " + c.get(Calendar.DATE) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.YEAR));
-                int hour = c.get(Calendar.HOUR_OF_DAY);
-                String greetStr = "- Good Morning -";
-                if (hour >= 12 && hour <= 18) greetStr = "- Good Afternoon -";
-                if (hour >= 18 && hour <= 23) greetStr = "- Good Evening -";
-                greet.setText(greetStr);
+            try {
+                rd = new StoreRetrieveDataImpl("UserData.txt");
+                if (rd.fileExists()) {
 
-                try {
-                    final String userMobileNumber = UserDetails.getPhoneNumber();
-                    final String serverURL = HttpGetPostInterface.serverURL;
+                    rd.beginReadTransaction();
+                    UserDetails.setUserName(rd.getValueFor("user"));
+                    UserDetails.setPhoneNumber(rd.getValueFor("phoneNo"));
+                    UserDetails.setEmailId(rd.getValueFor("email"));
+                    rd.endReadTransaction();
 
-                    new Thread(new Runnable() {
-                        HttpURLConnection urlConnection = null;
-                        InputStreamReader isr = null;
-                        @Override
-                        public void run() {
-                            try {
-                                URL url = new URL(serverURL + "/notifications/" + userMobileNumber);
-                                Log.e("Start_Notf_Read","Notitification");
-                                urlConnection = (HttpURLConnection) url.openConnection();
-                                InputStream is = urlConnection.getInputStream();
-                                isr = new InputStreamReader(is);
-                                int data = isr.read();
-                                final StringBuilder response = new StringBuilder("");
-                                while (data != -1) {
-                                    response.append((char) data);
-                                    data = isr.read();
-                                }
-                                AllNotifications.allNotifications = ParseNotificationData.getNotification(response.toString());
-                                //  AllNotifications.totalNoOfNot = AllNotifications.allNotifications.size();
-                                doorClosed1 = false;
-                                Log.e("Start_Notif_Read","Notification read complete..");
-                            } catch (Exception ee) {
-                                Log.e("Start_notification_Read",ee.getMessage());
-                            }
-                            finally {
-                                try {
-                                    isr.close();
-                                }catch (Exception ee){Log.e("Start_Err","InputStreamReader couldn't be closed");}
-                                urlConnection.disconnect();
+                    Calendar c = Calendar.getInstance();
+                    //specialDate.setText("Today is: " + c.get(Calendar.DATE) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.YEAR));
+                    int hour = c.get(Calendar.HOUR_OF_DAY);
+                    String greetStr = "- Good Morning -";
+                    if (hour >= 12 && hour <= 18) greetStr = "- Good Afternoon -";
+                    if (hour >= 18 && hour <= 23) greetStr = "- Good Evening -";
+                    greet.setText(greetStr);
 
-                            }
-                        }
-                    }).start();
 
                     //Contacts Read and store in local DB
-                    if(!checkIfATableExists("allcontacts")){
-                        Log.e("Start_cntcts","Not present");
-                        Toast.makeText(this,"You look just awesome today!!",Toast.LENGTH_SHORT).show();
+                    if (!checkIfATableExists("allcontacts")) {
+                        Log.e("Start_cntcts", "Not present");
+                        Toast.makeText(this, "You look just awesome today!!", Toast.LENGTH_SHORT).show();
+                        allC = ContactList.getContactNames(getContentResolver());
+                        contactReadFinished = false;
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                allC = ContactList.getContactNames(getContentResolver());
-                                getOrStoreContactsTableData(1,allC);
-                                contactReadFinished=false;
+                                getOrStoreContactsTableData(1, allC);
                             }
                         }).start();
+                    } else {
+                        Toast.makeText(this, "You look awesome today!!", Toast.LENGTH_SHORT).show();
+                        allC = getOrStoreContactsTableData(0,allC);
+                        contactReadFinished = false;
                     }
-                    else{
-                        Toast.makeText(this,"You look just awesome today!!",Toast.LENGTH_SHORT).show();
-                        contactReadFinished=false;
-                    }
+                    while(contactReadFinished);
+                    try {
+                        final String userMobileNumber = UserDetails.getPhoneNumber();
+                        final String serverURL = HttpGetPostInterface.serverURL;
 
-                    final ArrayList<String> allMoods = new ArrayList<String>();
-                    //allMoods.add("romantic");
-                    //allMoods.add("on_tour");
-                    new Thread(new Runnable() {
-                        HttpURLConnection urlConnection = null;
-                        BufferedReader bufferedReader = null;
-                        @Override
-                        public void run() {
-                            try {
-                                URL url = new URL(HttpGetPostInterface.serverSongURL + "allmoods.txt");
-                                Log.e("Start_allmoods_url",url.toString());
-                                urlConnection = (HttpURLConnection) url.openConnection();
-                                InputStream is = urlConnection.getInputStream();
-                                InputStreamReader isr = new InputStreamReader(is);
-                                bufferedReader = new BufferedReader(isr);
-                                String line="";
-                                while ((line=bufferedReader.readLine())!=null) {
-                                    allMoods.add(line);
-                                }
-                                letMeReadAllTheMoods = false;
-                                Log.e("Start_allmoods_Read","AllMoods read complete.."+allMoods.toString());
-                            } catch (Exception ee) {
-                                Log.e("Start_notification_Read",ee.getMessage());
-                            }
-                            finally {
-                                try {
-                                    bufferedReader.close();
-                                }catch (Exception ee){Log.e("Start_allmoodsReadErr","BufferedReader couldn't be closed");}
-                                urlConnection.disconnect();
-
-                            }
-                        }
-                    }).start();
-                    while(letMeReadAllTheMoods);
-                    int noOfMoods = allMoods.size();
-                    //Keeps track if all the playlist file has been read or not.
-                    readAllPlaylistComplete = noOfMoods;
-
-                    // Read each playlist file from server to be used later.
-                    for (int i = 0; i < noOfMoods; i++) {
-                        final String mood = allMoods.get(i);
-                        final ArrayList<String> songList = new ArrayList<>();
                         new Thread(new Runnable() {
                             HttpURLConnection urlConnection = null;
-                            BufferedReader bufferedReader = null;
+                            InputStreamReader isr = null;
                             @Override
                             public void run() {
                                 try {
-                                    URL url = new URL(HttpGetPostInterface.serverSongURL + "playlist_"+ mood +".txt");
-                                    Log.e("Start_Playlist_url",url.toString());
+                                    URL url = new URL(serverURL + "/notifications/" + userMobileNumber);
+                                    Log.e("Start_Notf_Read", "Notitification");
                                     urlConnection = (HttpURLConnection) url.openConnection();
                                     InputStream is = urlConnection.getInputStream();
-                                    InputStreamReader isr = new InputStreamReader(is);
-                                    bufferedReader = new BufferedReader(isr);
-                                    String line="";
-                                    while ((line=bufferedReader.readLine())!=null) {
-                                        songList.add(line);
+                                    isr = new InputStreamReader(is);
+                                    int data = isr.read();
+                                    final StringBuilder response = new StringBuilder("");
+                                    while (data != -1) {
+                                        response.append((char) data);
+                                        data = isr.read();
                                     }
-                                    // Populate the variable in the PlayListSongs.java file which is to be accessed by MediaPlayer
-                                    PlaylistSongs.allMoodPlayList.put(mood,songList);
-                                    // Tracks if all the files have been read or not, once complete its reaches ZERO(0)
-                                    readAllPlaylistComplete--;
-                                    Log.e("Start_PL_ReadStatus",mood+" read complete");
+                                    ArrayList<String> allYourNotification = new ArrayList<String>();
+                                    //Log.e("Start_allC",allC.toString());
+                                    for(String eachNotification : ParseNotificationData.getNotification(response.toString())){
+                                        String mobNo = eachNotification.substring(0,10);
+                                        if(allC.get(mobNo)!=null) {
+                                            allYourNotification.add(mobNo+" Dedicated By: "+allC.get(mobNo) + "\n"+eachNotification.substring(10));
+                                        }
+                                        else{
+                                            allYourNotification.add(mobNo+" Dedicated By: "+mobNo + "\n"+eachNotification.substring(10));
+                                        }
+                                        Log.e("Start_allNot",allYourNotification.toString());
+                                    }
+                                    AllNotifications.allNotifications = allYourNotification;
+                                    //  AllNotifications.totalNoOfNot = AllNotifications.allNotifications.size();
+                                    doorClosed1 = false;
+                                    Log.e("Start_Notif_Read", "Notification read complete..");
                                 } catch (Exception ee) {
-                                    Log.e("Start_Playlist_Read",songList.toString());
-                                }
-                                finally {
+                                    Log.e("Start_notification_Read", ee.getMessage());
+                                } finally {
                                     try {
-                                        bufferedReader.close();
-                                    }catch (Exception ee){Log.e("Start_Err","BufferedReader couldn't be closed");}
+                                        isr.close();
+                                    } catch (Exception ee) {
+                                        Log.e("Start_Err", "InputStreamReader couldn't be closed");
+                                    }
                                     urlConnection.disconnect();
 
                                 }
                             }
                         }).start();
+
+
+                        final ArrayList<String> allMoods = new ArrayList<String>();
+                        //allMoods.add("romantic");
+                        //allMoods.add("on_tour");
+                        new Thread(new Runnable() {
+                            HttpURLConnection urlConnection = null;
+                            BufferedReader bufferedReader = null;
+
+                            @Override
+                            public void run() {
+                                try {
+                                    URL url = new URL(HttpGetPostInterface.serverSongURL + "allmoods.txt");
+                                    Log.e("Start_allmoods_url", url.toString());
+                                    urlConnection = (HttpURLConnection) url.openConnection();
+                                    InputStream is = urlConnection.getInputStream();
+                                    InputStreamReader isr = new InputStreamReader(is);
+                                    bufferedReader = new BufferedReader(isr);
+                                    String line = "";
+                                    while ((line = bufferedReader.readLine()) != null) {
+                                        allMoods.add(line);
+                                    }
+                                    letMeReadAllTheMoods = false;
+                                    Log.e("Start_allmoods_Read", "AllMoods read complete.." + allMoods.toString());
+                                } catch (Exception ee) {
+                                    Log.e("Start_notification_Read", ee.getMessage());
+                                } finally {
+                                    try {
+                                        bufferedReader.close();
+                                    } catch (Exception ee) {
+                                        Log.e("Start_allmoodsReadErr", "BufferedReader couldn't be closed");
+                                    }
+                                    urlConnection.disconnect();
+
+                                }
+                            }
+                        }).start();
+                        while (letMeReadAllTheMoods) ;
+                        int noOfMoods = allMoods.size();
+                        //Keeps track if all the playlist file has been read or not.
+                        readAllPlaylistComplete = noOfMoods;
+
+                        // Read each playlist file from server to be used later.
+                        for (int i = 0; i < noOfMoods; i++) {
+                            final String mood = allMoods.get(i);
+                            final ArrayList<String> songList = new ArrayList<>();
+                            new Thread(new Runnable() {
+                                HttpURLConnection urlConnection = null;
+                                BufferedReader bufferedReader = null;
+
+                                @Override
+                                public void run() {
+                                    try {
+                                        URL url = new URL(HttpGetPostInterface.serverSongURL + "playlist_" + mood + ".txt");
+                                        Log.e("Start_Playlist_url", url.toString());
+                                        urlConnection = (HttpURLConnection) url.openConnection();
+                                        InputStream is = urlConnection.getInputStream();
+                                        InputStreamReader isr = new InputStreamReader(is);
+                                        bufferedReader = new BufferedReader(isr);
+                                        String line = "";
+                                        while ((line = bufferedReader.readLine()) != null) {
+                                            songList.add(line);
+                                        }
+                                        // Populate the variable in the PlayListSongs.java file which is to be accessed by MediaPlayer
+                                        PlaylistSongs.allMoodPlayList.put(mood, songList);
+                                        // Tracks if all the files have been read or not, once complete its reaches ZERO(0)
+                                        readAllPlaylistComplete--;
+                                        Log.e("Start_PL_ReadStatus", mood + " read complete");
+                                    } catch (Exception ee) {
+                                        Log.e("Start_Playlist_Read", songList.toString());
+                                    } finally {
+                                        try {
+                                            bufferedReader.close();
+                                        } catch (Exception ee) {
+                                            Log.e("Start_Err", "BufferedReader couldn't be closed");
+                                        }
+                                        urlConnection.disconnect();
+
+                                    }
+                                }
+                            }).start();
+                        }
+
+                    } catch (Exception ee) {
+                        Log.e("Start_Notifications", ee.getMessage());
                     }
 
-                } catch (Exception ee) {
-                    Log.e("Start_Notifications", ee.getMessage());
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            final Intent mainIntent = new Intent(Start.this, AllTabs.class);
+                            while (doorClosed1 || contactReadFinished || readAllPlaylistComplete > 0)
+                                ;
+                            Log.e("Start_AllTabsLaunch", "AllTabs will be launched");
+                            Start.this.startActivity(mainIntent);
+                            Start.this.finish();
+                        }
+                    }, 4000);
+                } else {
+                    Intent ii = new Intent(this, RegistrationActivity.class);
+                    startActivity(ii);
                 }
-
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        final Intent mainIntent = new Intent(Start.this, AllTabs.class);
-                        while (doorClosed1 || contactReadFinished || readAllPlaylistComplete>0) ;
-                        Log.e("Start_AllTabsLaunch","AllTabs will be launched");
-                        Start.this.startActivity(mainIntent);
-                        Start.this.finish();
-                    }
-                }, 4000);
-            } else {
-                Intent ii = new Intent(this, RegistrationActivity.class);
-                startActivity(ii);
+            } catch (Exception e) {
+                Log.e("Start_Error", e.getMessage());
             }
-        } catch (Exception e) {
-            Log.e("Start_Error", e.getMessage());
         }
     }
-    public boolean checkIfATableExists(String tableName){
+
+    public boolean checkIfATableExists(String tableName) {
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
-            Cursor allTables = mydatabase.rawQuery("SELECT name from sqlite_master WHERE type='table' and name='"+tableName+"'", null);
-            if(allTables.getCount()==1) {
-                Log.e("Start_chkTbl",tableName+" exists");
+            Cursor allTables = mydatabase.rawQuery("SELECT name from sqlite_master WHERE type='table' and name='" + tableName + "'", null);
+            if (allTables.getCount() == 1) {
+                Log.e("Start_chkTbl", tableName + " exists");
                 mydatabase.close();
                 return true;
-            }
-            else{
-                Log.e("Start_chkTbl",tableName+" doesn't exist");
+            } else {
+                Log.e("Start_chkTbl", tableName + " doesn't exist");
                 mydatabase.close();
                 return false;
             }
-        }
-        catch(Exception ee){
-            Log.e("Start_chkEr",ee.getMessage());
+        } catch (Exception ee) {
+            Log.e("Start_chkEr", ee.getMessage());
         }
         mydatabase.close();
         return false;
     }
-    public ArrayList<String> getOrStoreContactsTableData(int status, ArrayList<String> allContacts){
-        ArrayList<String> allContactsPresent = new ArrayList<String>();
+
+    public HashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
+        HashMap<String,String> allContactsPresent = new HashMap<>();
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
             // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
@@ -264,34 +302,30 @@ public class Start extends AppCompatActivity {
                 Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
-                    String eachRow = resultSet.getString(0)+" "+resultSet.getString(1);
-                    allContactsPresent.add(eachRow);
+                    allContactsPresent.put(resultSet.getString(0),resultSet.getString(1));
                     resultSet.moveToNext();
                 }
             }
             // First time conatct table create or REFRESH done.
             else{
-                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(user_id VARCHAR,phone_no VARCHAR);";
+                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(phone_no VARCHAR,name VARCHAR);";
                 mydatabase.execSQL(createQuery);
-                String deleteQuery = "DELETE FROM allcontacts;";
-                mydatabase.execSQL(deleteQuery);
+                Log.e("Start_TBLCRT","allcontacts table created..");
                 String insertQuery = "";
-                for(String eachContact:allContacts){
-                    //Log.e("Start_CntErr",eachContact);
-                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact.split("#")[0]+"','"+eachContact.split("#")[1]+"');";
-                    //Log.e("Start_CntErr",insertQuery);
+                for(String eachContact:allContacts.keySet()){
+                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
+                    //Log.e("ContactsFragment_CntErr",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }
+                mydatabase.close();
                 return null;
             }
-            mydatabase.close();
-
         }catch (Exception ee){
-            Log.e("Start_StrErr",ee.getMessage());
+            Log.e("ContactsFragment_StrErr",ee.getMessage());
             ee.fillInStackTrace();
         }
         mydatabase.close();
-        //allContactsPresent.add("santanu");
         return allContactsPresent;
     }
 }
+

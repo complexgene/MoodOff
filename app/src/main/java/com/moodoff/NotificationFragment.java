@@ -1,19 +1,33 @@
 package com.moodoff;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.Settings;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,7 +60,7 @@ public class NotificationFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private String serverURL = HttpGetPostInterface.serverURL;
+    private String serverURL = HttpGetPostInterface.serverURL,serverSongURL = HttpGetPostInterface.serverSongURL;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -85,6 +99,7 @@ public class NotificationFragment extends Fragment {
         }
     }
 
+    int i= 0;
     View view;
     TextView allNotificationsTextView;
     FrameLayout mainParentLayout;
@@ -95,25 +110,102 @@ public class NotificationFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_notification, container, false);
+
+        setSizes();
+
         try {
             mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
 
                 ScrollView mainParent = new ScrollView(getContext());
                 mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-            mainParent.setBackgroundResource(R.drawable.karaoke_bg7);
-                //mainParent.setOrientation(LinearLayout.VERTICAL);
                 LinearLayout ll = new LinearLayout(getContext());
                 ll.setOrientation(LinearLayout.VERTICAL);
-                //while(allNotifications.size()==0){allNotifications = AllNotifications.allNotifications;}
 
-                for (int i = 0; i < allNotifications.size(); i++) {
+                for (i = 0; i < allNotifications.size(); i++) {
                     LinearLayout parent = new LinearLayout(getContext());
-                    parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                    parent.setBackgroundColor(Color.GREEN);
+                    parent.setGravity(Gravity.CENTER_VERTICAL);
+                    parent.setGravity(Gravity.CENTER_HORIZONTAL);
+
+                    LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                    layoutDetails.topMargin=20;
+                    parent.setLayoutParams(layoutDetails);
                     parent.setOrientation(LinearLayout.HORIZONTAL);
 
+                    final ImageButton floatingActionButton = new ImageButton(getContext());
+                    final String mobNo = allNotifications.get(i).substring(0,10);
+                    floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getContext(),mobNo,Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    floatingActionButton.setBackgroundResource(R.drawable.snaskar_9620332800);
+                    layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutDetails.width=leftButtonWidth;
+                    layoutDetails.height=leftButtonHeight;
+                    layoutDetails.weight=1;
+                    layoutDetails.rightMargin=15;
+                    layoutDetails.topMargin = 25;
+                    layoutDetails.leftMargin=15;
+                    floatingActionButton.setLayoutParams(layoutDetails);
+                    parent.addView(floatingActionButton);
+
+                    LinearLayout linearLayout = new LinearLayout(getContext());
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
                     TextView allN = new TextView(getContext());
-                    allN.setText(allNotifications.get(i));
-                    parent.addView(allN);
+                    allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
+                    allN.setGravity(Gravity.TOP);
+                    allN.setBackgroundColor(Color.YELLOW);
+                    allN.setPadding(22,0,10,0);
+                    allN.setTypeface(Typeface.DEFAULT_BOLD);
+                    layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutDetails.weight=1;
+                    layoutDetails.width=textViewWidth;
+                    layoutDetails.height=textViewHeight;
+                    allN.setLayoutParams(layoutDetails);
+                    allN.setTextColor(Color.BLACK);
+                    allN.setText(allNotifications.get(i).substring(10));
+                    SeekBar seekBar = new SeekBar(getContext());
+                    seekBar.setBackgroundColor(Color.YELLOW);
+                    linearLayout.addView(allN);
+                    linearLayout.addView(seekBar);
+                    parent.addView(linearLayout);
+
+                    final FloatingActionButton floatingActionButton2 = new FloatingActionButton(getContext());
+                    final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
+                    floatingActionButton2.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //if(floatingActionButton2.getIma)
+                            MediaPlayer mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
+                            String url = serverSongURL+"romantic/"+songFileName;
+                            Log.e("Not_Frag_SongURL",url.toString());
+                            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                            try{
+                                //mp = MediaPlayer.create(this, Uri.parse(url));
+                                mp.setDataSource(url);
+                                mp.prepare();
+                                mp.start();
+                                floatingActionButton2.setImageResource(R.mipmap.pause);
+                            }
+                            catch (Exception ee){
+                                Log.e("Not_Frag_Err",ee.getMessage());
+                            }
+
+                        }
+                    });
+                    floatingActionButton2.setImageResource(R.drawable.play);
+                    floatingActionButton2.setSize(FloatingActionButton.SIZE_MINI);
+                    layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutDetails.weight=1;
+                    layoutDetails.width=rightButtonWidth;
+                    layoutDetails.height=rightButtonHeight;
+                    layoutDetails.rightMargin=20;
+                    layoutDetails.topMargin = 25;
+                    layoutDetails.leftMargin=10;
+                    floatingActionButton2.setLayoutParams(layoutDetails);
+                    parent.addView(floatingActionButton2);
 
                     ll.addView(parent);
                 }
@@ -124,6 +216,20 @@ public class NotificationFragment extends Fragment {
             Log.e("NotificationFragment_Er",ei.getMessage());
         }
         return view;
+    }
+    public int leftButtonHeight,leftButtonWidth,rightButtonHeight,rightButtonWidth,textViewWidth,textViewHeight;
+    public void setSizes(){
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        Log.e("NotFrag",height+"");
+        leftButtonWidth = (int)Math.floor(0.15*width);
+        textViewWidth = (int)Math.floor(0.70*width);
+        rightButtonWidth = (int)Math.floor(0.2*width);
+        leftButtonHeight = rightButtonHeight = textViewHeight = (int)Math.ceil(.0625*height);
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

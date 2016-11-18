@@ -214,6 +214,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                             try {
                                 // Proide the URL fto which you would fire a post
                                 URL url = new URL(serverURL+"/"+Url);
+                                Log.e("GenericMood_LOVEButton",url.toString());
                                 urlConnection = (HttpURLConnection) url.openConnection();
                                 urlConnection.setDoOutput(true);
                                 int responseCode = urlConnection.getResponseCode();
@@ -235,7 +236,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                                 }
                             }
                             catch(Exception ee){
-                                Log.e("GenericMood_LoveButton",Log.getStackTraceString(ee));
+                                Log.e("GenericMood_LoveButton",ee.getMessage());
                                 ee.printStackTrace();
                             }
                             // Close the Http Connection that you started in finally.

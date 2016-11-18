@@ -3,16 +3,13 @@
     android:id="@+id/containsallN"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/karaoke_bg7"
     tools:context="com.moodoff.NotificationFragment">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text=""
-            android:id="@+id/getresponse" />
 
 
 
-    <!-- TODO: Update blank fragment layout -->
+        <!-- TODO: Update blank fragment layout -->
+
 
 </FrameLayout>

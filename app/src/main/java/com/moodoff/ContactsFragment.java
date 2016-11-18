@@ -28,6 +28,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -91,7 +92,7 @@ public class ContactsFragment extends Fragment{
     TextView contacts;
     ProgressBar spinner;
     FloatingActionButton refreshContacts;
-    ArrayList<String> allC = new ArrayList<>();
+    HashMap<String,String> allC = new HashMap<>();
     boolean contactReadingStatusNotComplete = true;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -167,9 +168,10 @@ public class ContactsFragment extends Fragment{
         eachContact.setOrientation(LinearLayout.VERTICAL);
         eachContact.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         int noOfContacts = allC.size();
-        for(int i=0;i<noOfContacts;i++){
+        for(String eachCntct:allC.keySet()){
             TextView tv = new TextView(ctx);
-            tv.setText(allC.get(i));
+            tv.setTextSize(16.0f);
+            tv.setText(allC.get(eachCntct)+" "+eachCntct);
             eachContact.addView(tv);
         }
         contactsScroll.addView(eachContact);
@@ -196,8 +198,8 @@ public class ContactsFragment extends Fragment{
         mydatabase.close();
         return false;
     }
-    public ArrayList<String> getOrStoreContactsTableData(int status, ArrayList<String> allContacts){
-        ArrayList<String> allContactsPresent = new ArrayList<String>();
+    public HashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
+        HashMap<String,String> allContactsPresent = new HashMap<>();
         mydatabase = getActivity().openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
             // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
@@ -206,8 +208,7 @@ public class ContactsFragment extends Fragment{
                 Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
-                    String eachRow = resultSet.getString(0)+" "+resultSet.getString(1);
-                    allContactsPresent.add(eachRow);
+                    allContactsPresent.put(resultSet.getString(0),resultSet.getString(1));
                     resultSet.moveToNext();
                 }
             }
@@ -218,10 +219,10 @@ public class ContactsFragment extends Fragment{
                 String deleteQuery = "DELETE FROM allcontacts;";
                 mydatabase.execSQL(deleteQuery);
                 String insertQuery = "";
-                for(String eachContact:allContacts){
-                    //Log.e("ContactsFragment_CntErr",eachContact);
-                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact.split("#")[0]+"','"+eachContact.split("#")[1]+"');";
-                    //Log.e("ContactsFragment_CntErr",insertQuery);
+                for(String eachContact:allContacts.keySet()){
+                    Log.e("ContactsFragment_CntErr",eachContact);
+                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
+                    Log.e("ContactsFragment_CntErr",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }
                 return null;

@@ -24,6 +24,7 @@ import com.moodoff.helper.DBInternal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -84,7 +85,7 @@ public class ContactList extends AppCompatActivity {
     }
 
 
-    ArrayList<String> allC = new ArrayList<>();
+    HashMap<String,String> allC = new HashMap<>();
     public void showContacts() {
         // Check the SDK version and whether the permission is already granted or not.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
@@ -99,7 +100,11 @@ public class ContactList extends AppCompatActivity {
                 allC = ContactList.getContactNames(getContentResolver());
                 getOrStoreContactsTableData(1,allC);
             }
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, allC);
+            ArrayList<String> contactsInList = new ArrayList<>();
+            for(String eachContact:allC.keySet()){
+                contactsInList.add(allC.get(eachContact)+" "+eachContact);
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contactsInList);
             lstNames.setAdapter(adapter);
         }
     }
@@ -122,8 +127,8 @@ public class ContactList extends AppCompatActivity {
      *
      * @return a list of names+mobile_number.
      */
-    public static ArrayList<String> getContactNames(ContentResolver contentResolver) {
-        ArrayList<String> contacts = new ArrayList<>();
+    public static HashMap<String,String> getContactNames(ContentResolver contentResolver) {
+        HashMap<String,String> contacts = new HashMap<>();
         // Get the ContentResolver
         ContentResolver cr = contentResolver;
         // Get the Cursor of all the contacts
@@ -144,18 +149,18 @@ public class ContactList extends AppCompatActivity {
                         phoneNumber = phoneNumber.replaceAll("[\\-]", "");
                         if ( phoneNumber.replaceAll("[^0-9]", "").length()>=10 && Pattern.matches("^((0091)|(\\+91)|0?)[789]{1}\\d{9}$",phoneNumber) ){
                             phoneNumber = phoneNumber.substring(phoneNumber.length() - 10);
-                            contacts.add(name + "#" + phoneNumber);
+                            contacts.put(phoneNumber,name);
                             //Log.i("Number", phoneNumber);
                         }
                     }
-                    Collections.sort(contacts);
+                    //Collections.sort(contacts);
                     phones.close();
                 }
             }
         }
         // Close the curosor
         cursor.close();
-        Log.e("ContactList",contacts.get(0));
+        //Log.e("ContactList",contacts.get(0));
         return contacts;
     }
 
@@ -180,8 +185,8 @@ public class ContactList extends AppCompatActivity {
         mydatabase.close();
         return false;
     }
-    public ArrayList<String> getOrStoreContactsTableData(int status, ArrayList<String> allContacts){
-        ArrayList<String> allContactsPresent = new ArrayList<String>();
+    public HashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
+        HashMap<String,String> allContactsPresent = new HashMap<>();
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
             // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
@@ -190,21 +195,20 @@ public class ContactList extends AppCompatActivity {
                 Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
-                    String eachRow = resultSet.getString(0)+" "+resultSet.getString(1);
-                    allContactsPresent.add(eachRow);
+                    allContactsPresent.put(resultSet.getString(0),resultSet.getString(1));
                     resultSet.moveToNext();
                 }
             }
             // First time conatct table create or REFRESH done.
             else{
-                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(user_id VARCHAR,phone_no VARCHAR);";
+                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(phone_no VARCHAR,name VARCHAR);";
                 mydatabase.execSQL(createQuery);
                 String deleteQuery = "DELETE FROM allcontacts;";
                 mydatabase.execSQL(deleteQuery);
                 String insertQuery = "";
-                for(String eachContact:allContacts){
+                for(String eachContact:allContacts.keySet()){
                     //Log.e("ContactsFragment_CntErr",eachContact);
-                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact.split("#")[0]+"','"+eachContact.split("#")[1]+"');";
+                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
                     //Log.e("ContactsFragment_CntErr",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }

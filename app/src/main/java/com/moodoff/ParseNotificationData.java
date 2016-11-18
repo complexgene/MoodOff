@@ -36,9 +36,9 @@ public class ParseNotificationData {
                 for(String eachDedicate : fileWithType.split(" ")){
                     String[] fileNameAndType = eachDedicate.split("#");
                     if (fileNameAndType[1].equals("S")) {
-                        allNotifications.add(fromUser + " has dedicated you the song " + fileNameAndType[0]);
+                        allNotifications.add(fromUser + "Type: Song " + fileNameAndType[0]);
                     } else {
-                        allNotifications.add(fromUser + " has dedicated you the karaoke " + fileNameAndType[0]);
+                        allNotifications.add(fromUser + "Type: Karaoke " + fileNameAndType[0]);
                     }
                 }
             }
