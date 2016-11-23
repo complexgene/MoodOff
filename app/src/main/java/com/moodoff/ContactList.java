@@ -25,6 +25,7 @@ import com.moodoff.helper.DBInternal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -37,7 +38,7 @@ public class ContactList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.contact_list);
+        //setContentView(R.layout.contact_list);
         Intent intent=getIntent();
         this.lstNames = (ListView) findViewById(R.id.contactlist);
 
@@ -185,14 +186,14 @@ public class ContactList extends AppCompatActivity {
         mydatabase.close();
         return false;
     }
-    public HashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
-        HashMap<String,String> allContactsPresent = new HashMap<>();
+    public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
+        LinkedHashMap<String,String> allContactsPresent = new LinkedHashMap<>();
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
             // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
             if(status == 0){
                 //READ and RETURN data
-                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
+                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts order by name", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
                     allContactsPresent.put(resultSet.getString(0),resultSet.getString(1));

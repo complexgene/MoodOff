@@ -105,7 +105,8 @@ public class NotificationFragment extends Fragment {
     TextView allNotificationsTextView;
     FrameLayout mainParentLayout;
     ArrayList<String> allNotifications = AllNotifications.allNotifications;
-    boolean setDoorClosed=true;
+    int idOfTheLastPlayButtonClicked=-1;
+    boolean isPlaying = false;
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -129,18 +130,18 @@ public class NotificationFragment extends Fragment {
                     parent.setGravity(Gravity.CENTER_HORIZONTAL);
 
                     LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    layoutDetails.topMargin=20;
+                    layoutDetails.topMargin=15;
                     parent.setLayoutParams(layoutDetails);
                     parent.setOrientation(LinearLayout.HORIZONTAL);
 
                     final ImageButton floatingActionButton = new ImageButton(getContext());
-                    final String mobNo = allNotifications.get(i).substring(0,10);
+                    /*final String mobNo = allNotifications.get(i).substring(0,10);
                     floatingActionButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Toast.makeText(getContext(),mobNo,Toast.LENGTH_SHORT).show();
                         }
-                    });
+                    });*/
                     floatingActionButton.setBackgroundResource(R.drawable.snaskar_9620332800);
                     layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     layoutDetails.width=leftButtonWidth;
@@ -155,9 +156,18 @@ public class NotificationFragment extends Fragment {
                     LinearLayout linearLayout = new LinearLayout(getContext());
                     linearLayout.setOrientation(LinearLayout.VERTICAL);
                     TextView allN = new TextView(getContext());
+                    SeekBar seekBar = new SeekBar(getContext());
                     allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
                     allN.setGravity(Gravity.TOP);
-                    allN.setBackgroundColor(Color.YELLOW);
+                    boolean isCurrentUser = allNotifications.get(i).split(" ")[0].equals("You");
+                    if(isCurrentUser) {
+                        allN.setBackgroundColor(Color.CYAN);
+                        seekBar.setBackgroundColor(Color.CYAN);
+                    }
+                    else {
+                        allN.setBackgroundColor(Color.YELLOW);
+                        seekBar.setBackgroundColor(Color.YELLOW);
+                    }
                     allN.setPadding(22,0,10,0);
                     allN.setTypeface(Typeface.DEFAULT_BOLD);
                     layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -166,9 +176,8 @@ public class NotificationFragment extends Fragment {
                     layoutDetails.height=textViewHeight;
                     allN.setLayoutParams(layoutDetails);
                     allN.setTextColor(Color.BLACK);
-                    allN.setText(allNotifications.get(i).substring(10));
-                    SeekBar seekBar = new SeekBar(getContext());
-                    seekBar.setBackgroundColor(Color.YELLOW);
+                    String textToDisplay = allNotifications.get(i).substring(0,allNotifications.get(i).lastIndexOf(" "));
+                    allN.setText(textToDisplay);
                     linearLayout.addView(allN);
                     linearLayout.addView(seekBar);
                     parent.addView(linearLayout);
@@ -180,30 +189,43 @@ public class NotificationFragment extends Fragment {
                     floatingActionButton2.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Log.e("Not_Frag",v.getId()+"");
-                            if(mp!=null){
-                                for(int j=0;j<allNotifications.size();j++){
-                                        FloatingActionButton otherButon = (FloatingActionButton)view.findViewById(j);
-                                        otherButon.setImageResource(R.drawable.play);
-                                    }
-                                mp.reset();
+                            Log.e("Not_Frag", v.getId() + "");
+                            if (mp != null) {
+                                for (int j = 0; j < allNotifications.size(); j++) {
+                                    FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(j);
+                                    otherButon.setImageResource(R.drawable.play);
+                                }
                             }
 
-                            mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
-                            String url = serverSongURL+"romantic/"+songFileName;
-                            Log.e("Not_Frag_SongURL",url.toString());
-                            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                            try{
-                                //mp = MediaPlayer.create(this, Uri.parse(url));
-                                mp.setDataSource(url);
-                                mp.prepare();
-                                mp.start();
-                                floatingActionButton2.setImageResource(R.mipmap.pause);
+                            if (v.getId() != idOfTheLastPlayButtonClicked) {
+                                if(mp!=null)mp.reset();
+                                mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
+                                String url = serverSongURL + "romantic/" + songFileName;
+                                Log.e("Not_Frag_SongURL", url.toString());
+                                mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                                try {
+                                    //mp = MediaPlayer.create(this, Uri.parse(url));
+                                    mp.setDataSource(url);
+                                    mp.prepare();
+                                    mp.start();
+                                    floatingActionButton2.setImageResource(R.mipmap.pause);
+                                    idOfTheLastPlayButtonClicked = v.getId();
+                                    isPlaying = true;
+                                } catch (Exception ee) {
+                                    Log.e("Not_Frag_Err", "abc" + ee.getMessage());
+                                }
                             }
-                            catch (Exception ee){
-                                Log.e("Not_Frag_Err","abc"+ee.getMessage());
+                            else{
+                                if(isPlaying){
+                                    mp.pause();
+                                    isPlaying = false;
+                                }
+                                else{
+                                    mp.start();
+                                    floatingActionButton2.setImageResource(R.mipmap.pause);
+                                    isPlaying = true;
+                                }
                             }
-
                         }
                     });
                     floatingActionButton2.setImageResource(R.drawable.play);
@@ -264,6 +286,11 @@ public class NotificationFragment extends Fragment {
 
     @Override
     public void onDetach() {
+       if(mp!=null) {
+           mp.reset();
+           mp.release();
+           mp = null;
+       }
         super.onDetach();
         mListener = null;
     }

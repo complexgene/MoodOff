@@ -3,6 +3,7 @@
     android:id="@+id/allmoods"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clickable="true"
     android:background="@drawable/karaoke_bg7"
     tools:context="com.moodoff.Moods">
 

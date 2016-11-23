@@ -28,19 +28,20 @@ public class ParseNotificationData {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                String fromUser = jsonObject.optString("key").toString();
+                String timeStamp = jsonObject.optString("key").toString();
                 String fileWithType = jsonObject.optString("value").toString();
 
                 Log.e("jsonObj",jsonObject.toString());
 
-                for(String eachDedicate : fileWithType.split(" ")){
-                    String[] fileNameAndType = eachDedicate.split("#");
-                    if (fileNameAndType[1].equals("S")) {
-                        allNotifications.add(fromUser + "Type: Song " + fileNameAndType[0]);
-                    } else {
-                        allNotifications.add(fromUser + "Type: Karaoke " + fileNameAndType[0]);
-                    }
-                }
+                String[] allData = fileWithType.split("#");
+                String fromUser = allData[0];
+                String toUser = allData[1];
+                String songName = allData[2];
+                String type = allData[3];
+                String ts = allData[4];
+
+                allNotifications.add(fromUser+" "+toUser+" "+ts+" "+type+" "+songName);
+
             }
             Log.e("seeit",allNotifications.toString());
             return allNotifications;

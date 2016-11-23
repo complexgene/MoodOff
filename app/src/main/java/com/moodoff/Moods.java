@@ -3,6 +3,7 @@ package com.moodoff;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -74,6 +75,7 @@ public class Moods extends Fragment {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_moods, container,
                 false);
+        rootView.setBackgroundColor(Color.WHITE);
         btnRomantic = (Button)rootView.findViewById(R.id.btn_romantic);
         btnParty = (Button)rootView.findViewById(R.id.btn_party);
         btnOnTour = (Button)rootView.findViewById(R.id.btn_ontour);
@@ -106,8 +108,9 @@ public class Moods extends Fragment {
                 Fragment newFragment = GenericMood.newInstance("romantic","b");
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack if needed
+                //transaction.replace(R.id.allmoods, newFragment);
                 transaction.replace(R.id.allmoods, newFragment);
-                transaction.addToBackStack(null);
+                transaction.addToBackStack("genericmood_romantic");
                 transaction.commitAllowingStateLoss();
                 putAllButtonsOff();
             }

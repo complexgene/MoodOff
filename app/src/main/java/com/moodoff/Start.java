@@ -35,6 +35,7 @@ import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class Start extends AppCompatActivity {
     private String serverURL = HttpGetPostInterface.serverURL;
@@ -46,12 +47,12 @@ public class Start extends AppCompatActivity {
     SQLiteDatabase mydatabase;
     HashMap<String,String> allC = new HashMap<>();
 
-    private boolean isNetworkAvailable() {
+   /* private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +63,11 @@ public class Start extends AppCompatActivity {
                 new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_CONTACTS},
                 1);
 
-        if (!isNetworkAvailable()) {
+       /* if (!isNetworkAvailable()) {
             Toast.makeText(getApplicationContext(),"Sorry! You need Internet Connection",Toast.LENGTH_LONG).show();
             spinner.setVisibility(View.INVISIBLE);
 
-        } else {
+        } else {*/
 
             StoreRetrieveDataInterface rd = null;
 
@@ -112,7 +113,6 @@ public class Start extends AppCompatActivity {
                         allC = getOrStoreContactsTableData(0,allC);
                         contactReadFinished = false;
                     }
-                    while(contactReadFinished);
                     try {
                         final String userMobileNumber = UserDetails.getPhoneNumber();
                         final String serverURL = HttpGetPostInterface.serverURL;
@@ -123,8 +123,8 @@ public class Start extends AppCompatActivity {
                             @Override
                             public void run() {
                                 try {
-                                    URL url = new URL(serverURL + "/notifications/" + userMobileNumber);
-                                    Log.e("Start_Notf_Read", "Notitification");
+                                    URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
+                                    Log.e("Start_Notf_Read", url.toString());
                                     urlConnection = (HttpURLConnection) url.openConnection();
                                     InputStream is = urlConnection.getInputStream();
                                     isr = new InputStreamReader(is);
@@ -134,24 +134,42 @@ public class Start extends AppCompatActivity {
                                         response.append((char) data);
                                         data = isr.read();
                                     }
+                                    ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
                                     ArrayList<String> allYourNotification = new ArrayList<String>();
-                                    //Log.e("Start_allC",allC.toString());
-                                    for(String eachNotification : ParseNotificationData.getNotification(response.toString())){
-                                        String mobNo = eachNotification.substring(0,10);
-                                        if(allC.get(mobNo)!=null) {
-                                            allYourNotification.add(mobNo+" Dedicated By: "+allC.get(mobNo) + "\n"+eachNotification.substring(10));
+                                    while(contactReadFinished);
+                                    for(String eachNotification : allYourNotificationFromServer){
+                                        String[] allData = eachNotification.split(" ");
+                                        String fromUser = allData[0];
+                                        String toUser = allData[1];
+                                        String ts = allData[2];
+                                        String timeSplit[] = ts.split("_");
+                                        ts = "on "+timeSplit[0] + " at "+timeSplit[1].substring(0,5);
+                                        String type = allData[3];
+                                        String songName = allData[4];
+
+
+                                        if(fromUser.equals(UserDetails.getPhoneNumber())){
+                                            if (allC.get(toUser) != null) {
+                                                allYourNotification.add("You dedicated a song to " + allC.get(toUser) + "\n" + ts +" "+songName);
+                                            } else {
+                                                allYourNotification.add("You dedicated a song to " + toUser + "\n" + ts +" "+songName);
+                                            }
                                         }
-                                        else{
-                                            allYourNotification.add(mobNo+" Dedicated By: "+mobNo + "\n"+eachNotification.substring(10));
+                                        else {
+                                            if (allC.get(fromUser) != null) {
+                                                allYourNotification.add(allC.get(fromUser) + " dedicated you a song\n" + ts +" "+songName);
+                                            } else {
+                                                allYourNotification.add(fromUser + " dedicated you a song\n" + ts +" "+songName);
+                                            }
                                         }
-                                        Log.e("Start_allNot",allYourNotification.toString());
+                                        //Log.e("Start_allNot",allYourNotification.toString());
                                     }
                                     AllNotifications.allNotifications = allYourNotification;
                                     //  AllNotifications.totalNoOfNot = AllNotifications.allNotifications.size();
                                     doorClosed1 = false;
                                     Log.e("Start_Notif_Read", "Notification read complete..");
                                 } catch (Exception ee) {
-                                    Log.e("Start_notification_Read", ee.getMessage());
+                                    Log.e("Start_Notifi_ReadErr", ee.getMessage());
                                 } finally {
                                     try {
                                         isr.close();
@@ -230,7 +248,7 @@ public class Start extends AppCompatActivity {
                                         PlaylistSongs.allMoodPlayList.put(mood, songList);
                                         // Tracks if all the files have been read or not, once complete its reaches ZERO(0)
                                         readAllPlaylistComplete--;
-                                        Log.e("Start_PL_ReadStatus", mood + " read complete");
+                                        Log.e("Start_PL_ReadStatus", mood + " read complete :"+readAllPlaylistComplete);
                                     } catch (Exception ee) {
                                         Log.e("Start_Playlist_Read", songList.toString());
                                     } finally {
@@ -270,7 +288,7 @@ public class Start extends AppCompatActivity {
                 Log.e("Start_Error", e.getMessage());
             }
         }
-    }
+    //}
 
     public boolean checkIfATableExists(String tableName) {
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
@@ -292,17 +310,20 @@ public class Start extends AppCompatActivity {
         return false;
     }
 
-    public HashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
-        HashMap<String,String> allContactsPresent = new HashMap<>();
+    public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
+        LinkedHashMap<String,String> allContactsPresent = new LinkedHashMap<>();
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
             // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
             if(status == 0){
                 //READ and RETURN data
-                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
+                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts order by name", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
-                    allContactsPresent.put(resultSet.getString(0),resultSet.getString(1));
+                    String phone_no = resultSet.getString(0);
+                    String name = resultSet.getString(1);
+                    Log.e("Start_contactDet",phone_no+" "+name);
+                    allContactsPresent.put(phone_no,name);
                     resultSet.moveToNext();
                 }
             }

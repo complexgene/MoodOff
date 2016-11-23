@@ -1,10 +1,14 @@
 package com.moodoff;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -15,6 +19,7 @@ import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -110,7 +115,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     Context context;
     //Buttons
     Button playPauseBtn, stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
-    FloatingActionButton dedicateButton;
+    FloatingActionButton dedicateButton,changeMoodButton;
     ProgressBar spinner;
     SeekBar seekBar;
     TextView songName = null;
@@ -124,6 +129,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
+        view.setBackgroundColor(Color.WHITE);
 
         Toast.makeText(getContext(),"You selected mood: "+(char)(mParam1.charAt(0)-32)+mParam1.substring(1),Toast.LENGTH_LONG).show();
 
@@ -135,6 +141,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         repBtn = (Button) view.findViewById(R.id.repeatButton);
         shuffleBtn = (Button) view.findViewById(R.id.shuffleButton);
         dedicateButton = (FloatingActionButton) view.findViewById(R.id.btn_dedicate);
+        changeMoodButton = (FloatingActionButton) view.findViewById(R.id.btn_changemood);
         spinner = (ProgressBar) view.findViewById(R.id.progressBar);
         seekBar = (SeekBar) view.findViewById(R.id.seekBar);
         playPauseBtn.setOnClickListener(this);
@@ -172,10 +179,27 @@ public class GenericMood extends Moods implements View.OnClickListener{
         });
 
 
-        moodpageBG = (ImageView) view.findViewById(R.id.photoView);
+        //moodpageBG = (ImageView) view.findViewById(R.id.photoView);
         imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/"+currentMood+"/mogambo.jpg";
         bitmap = BitmapFactory.decodeFile(imageFilePath);
-        moodpageBG.setImageBitmap(bitmap);
+        //moodpageBG.setImageBitmap(bitmap);
+
+        changeMoodButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    Display display = getActivity().getWindowManager().getDefaultDisplay();
+                    Point size = new Point();
+                    display.getSize(size);
+                    int width = size.x/2;
+                    int height = size.y;
+                final Dialog fbDialogue = new Dialog(view.getContext(), android.R.style.Theme_Black);
+                fbDialogue.getWindow().setBackgroundDrawableResource(R.color.black);
+                fbDialogue.getWindow().setLayout(width,height);
+                fbDialogue.setContentView(R.layout.layout_playlist);
+                fbDialogue.setCancelable(true);
+                fbDialogue.show();
+            }
+        });
 
         FloatingActionButton cameraButton = (FloatingActionButton)view.findViewById(R.id.btn_camera);
         cameraButton.setOnClickListener(new View.OnClickListener() {

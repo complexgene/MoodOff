@@ -29,6 +29,7 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -198,14 +199,14 @@ public class ContactsFragment extends Fragment{
         mydatabase.close();
         return false;
     }
-    public HashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
-        HashMap<String,String> allContactsPresent = new HashMap<>();
+    public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
+        LinkedHashMap<String,String> allContactsPresent = new LinkedHashMap<>();
         mydatabase = getActivity().openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
             // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
             if(status == 0){
                 //READ and RETURN data
-                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
+                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts order by name", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
                     allContactsPresent.put(resultSet.getString(0),resultSet.getString(1));
