@@ -1,88 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_registration"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@drawable/karaoke_bg7"
     tools:context="com.moodoff.RegistrationActivity">
+    <EditText
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:digits="ABCDEFGHâ€Œâ€‹IJKLMNOPQRSTUVWXYZ "
+        android:inputType="textCapCharacters"
+        android:hint="Name"
+        android:maxLines="1"
+        android:textColor="@android:color/holo_blue_dark"
+        android:layout_marginTop = "30dp"
+        android:layout_marginBottom = "30dp"
+        android:textColorHint="@android:color/white"
+        />
 
     <EditText
-        android:layout_width="wrap_content"
+        android:id="@+id/phone_number"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:layout_marginTop="74dp"
-        android:id="@+id/uname"
-        android:textStyle="normal|bold|italic"
-        android:contentDescription="YourName"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:background="?attr/colorButtonNormal"
-        android:hint=" Your Name" />
+        android:layout_below="@+id/name"
+        android:digits="0123456789"
+        android:hint="10 Digit Mobile Number"
+        android:maxLines="1"
+        android:textColor="@android:color/holo_blue_dark"
+        android:layout_marginBottom = "40dp"
+        android:inputType="number"
+        android:maxLength="10"
+        android:textColorHint="@android:color/white" />
 
     <EditText
-        android:layout_width="wrap_content"
+        android:id="@+id/date_of_birth"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:hint=" Phone Number"
-        android:ems="10"
-        android:layout_below="@+id/uname"
-        android:layout_alignRight="@+id/uname"
-        android:layout_alignEnd="@+id/uname"
-        android:layout_marginTop="18dp"
-        android:id="@+id/phoneNumber"
-        android:background="?attr/colorButtonNormal"
-        android:textStyle="normal|bold|italic" />
+        android:layout_below="@+id/phone_number"
+        android:digits="0123456789/"
+        android:hint="Birthday (dd/mm/yyyy)"
+        android:maxLines="1"
+        android:textColor="@android:color/holo_blue_dark"
+        android:layout_marginBottom = "40dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:textColorHint="@android:color/white"
+        />
 
     <EditText
-        android:layout_width="wrap_content"
+        android:id="@+id/email_id"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:layout_marginTop="15dp"
-        android:id="@+id/email"
-        android:layout_below="@+id/phoneNumber"
-        android:layout_alignLeft="@+id/phoneNumber"
-        android:layout_alignStart="@+id/phoneNumber"
-        android:contentDescription="E-Mail"
-        android:background="?attr/colorButtonNormal"
-        android:textStyle="normal|bold|italic"
-        android:hint=" E-Mail" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:hint=" Date Of Birth"
-        android:layout_below="@+id/email"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:background="?attr/colorButtonNormal"
-        android:textStyle="normal|bold|italic"
-        android:id="@+id/editText" />
+        android:layout_below="@+id/date_of_birth"
+        android:digits="abcdefghâ€Œâ€‹ijklmnopqrstuvwxyz1234567890@_."
+        android:hint="E-mail"
+        android:maxLines="1"
+        android:textColor="@android:color/holo_blue_dark"
+        android:layout_marginBottom = "40dp"
+        android:inputType="textWebEmailAddress"
+        android:textColorHint="@android:color/white" />
 
     <Button
+        android:id="@+id/newregistration"
         android:text="Register"
-        android:layout_width="wrap_content"
+        android:textColor="#080808"
+        android:layout_below="@+id/email_id"
+        android:layout_alignParentRight="true"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/email"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="72dp"
-        android:id="@+id/register" />
+        android:layout_marginBottom = "40dp"
+        android:shadowColor="#A8A8A8"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="5"
+        android:onClick="register"
+        />
 
     <TextView
-        android:text=" Please Register Yourself "
-        android:layout_width="wrap_content"
+        android:id="@+id/error_message"
+        android:textColor="@android:color/holo_red_dark"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="22dp"
-        android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:textSize="24sp"
-        android:textStyle="normal|bold|italic"
-        android:background="?attr/colorControlHighlight" />
+        android:layout_below="@+id/newregistration"
+        android:maxLines="1"
+        android:visibility="gone"
+        />
 
-
+    <!--  <Button
+          android:id="@+id/oldregistration"
+          android:text="Already Registered"
+          android:textColor="#080808"
+          android:layout_below="@+id/password"
+          android:layout_alignParentLeft="true"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:background="@drawable/buttonregister"
+          android:shadowColor="#A8A8A8"
+          android:shadowDx="1"
+          android:shadowDy="1"
+          android:shadowRadius="5"
+          />
+      !-->
 </RelativeLayout>
