@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignTop="@id/storyAndPlayer"
-    android:layout_below="@id/storyTitle"
+    android:layout_below="@id/floatingButtons"
     android:orientation="vertical"
     >
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello hw r u"
-    />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/songPlaylist"
+        android:orientation="vertical"
+    >
+    </LinearLayout>
 
-</RelativeLayout>
+</ScrollView>

@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -125,7 +126,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     int currentIndex = 0, repParm = 0, playOrPauseParm = 0;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
@@ -160,9 +161,9 @@ public class GenericMood extends Moods implements View.OnClickListener{
         }
         if (currentplayList != null) {
             //onClickShuffleButton(view);
-            Log.e("SongCur",currentplayList.get(0));
+            Log.e("GenericMood_SongCur",currentplayList.get(0));
             currentSong = songNameFromList(currentplayList, currentIndex);
-            Log.e("SongCur",currentSong);
+            Log.e("GenericMood_SongCur",currentSong);
             displaySongName(songName, "Tap play button to listen song");
         }
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -187,17 +188,30 @@ public class GenericMood extends Moods implements View.OnClickListener{
         changeMoodButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    Display display = getActivity().getWindowManager().getDefaultDisplay();
-                    Point size = new Point();
-                    display.getSize(size);
-                    int width = size.x/2;
-                    int height = size.y;
+
+                Display display = getActivity().getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                int width = size.x/2;
+                int height = size.y;
+
                 final Dialog fbDialogue = new Dialog(view.getContext(), android.R.style.Theme_Black);
                 fbDialogue.getWindow().setBackgroundDrawableResource(R.color.black);
                 fbDialogue.getWindow().setLayout(width,height);
                 fbDialogue.setContentView(R.layout.layout_playlist);
                 fbDialogue.setCancelable(true);
                 fbDialogue.show();
+
+                //Populate the playlist layout file
+                View vv = inflater.inflate(R.layout.layout_playlist,container,false);
+                LinearLayout songPlaylist = (LinearLayout)vv.findViewById(R.id.songPlaylist);
+                Log.e("GenericMood_PlayListSz",currentplayList.size()+"");
+                for(String eachSong:currentplayList){
+                    TextView songNameInText = new TextView(getContext());
+                    songNameInText.setTextColor(Color.YELLOW);
+                    songNameInText.setText(eachSong);
+                    songPlaylist.addView(songNameInText);
+                }
             }
         });
 
@@ -288,7 +302,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
             startActivityForResult(it, 1);
         }
     }
-
     static String getPictureName(){
         return "mogambo.jpg";
     }
@@ -347,7 +360,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
             }
         }
     }
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -374,7 +386,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 break;
         }
     }
-
     /*On click method for previous button: play previous song*/
     public void onClickPrevButton(View v) {
         try{
@@ -387,7 +398,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
             releaseMediaPlayerObject();
         }
     }
-
     /*On click method for next button: play next song*/
     public void onClickNextButton(View v) {
         try{
@@ -400,7 +410,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
             releaseMediaPlayerObject();
         }
     }
-
     /*On click method for play/pause button*/
     public void onClickPlayButton(View v) {
         try{
@@ -581,9 +590,9 @@ public class GenericMood extends Moods implements View.OnClickListener{
     public void setSongSource(int index, String mood) {
         String currentSong = currentplayList.get(index);
         releaseMediaPlayerObject();
-        mp = new MediaPlayer();
+        mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
         String url = serverSongURL + mood + "/" + currentSong;
-        Log.e("GenericMood_SongPlayURL",url);
+        Log.e("GenericMood_SongPlayURL",url.toString());
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try{
             //mp = MediaPlayer.create(this, Uri.parse(url));
@@ -613,7 +622,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             }
             textToDisplaySong.setText(currentSong);
         } catch(Exception e){
-            Log.e("GenericMood_displaySon.",e.getMessage());
+            Log.e("GenericMood_displaySong",e.getMessage());
         }
     }
 
@@ -712,7 +721,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     /*Toast error message*/
     public void toastError(String error) {
         //Toast.makeText(view.getContext(), "Oops! Somehing went wrong\n"+error.toString(), Toast.LENGTH_LONG).show();
-        Log.e("MPissue",error);
+        Log.e("GenericMood_MPissue",error);
     }
 
     Runnable run = new Runnable() {

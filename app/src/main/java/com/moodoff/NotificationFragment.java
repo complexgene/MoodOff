@@ -1,18 +1,30 @@
 package com.moodoff;
 
+import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.Settings;
+import android.support.annotation.UiThread;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -44,6 +56,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -55,6 +68,7 @@ import java.util.ArrayList;
  * create an instance of this fragment.
  */
 public class NotificationFragment extends Fragment {
+    public static int totalNumberOfNotifications = 0;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -107,6 +121,7 @@ public class NotificationFragment extends Fragment {
     ArrayList<String> allNotifications = AllNotifications.allNotifications;
     int idOfTheLastPlayButtonClicked=-1;
     boolean isPlaying = false;
+    HashMap<String,String> allC = new HashMap<>();
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -116,25 +131,37 @@ public class NotificationFragment extends Fragment {
         setSizes();
 
         try {
-            mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
+            designNotPanel(0);
+        }
+        catch (Exception ei){
+            Log.e("NotificationFragment_Er",ei.getMessage());
+        }
 
-                ScrollView mainParent = new ScrollView(getContext());
-                mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-                LinearLayout ll = new LinearLayout(getContext());
-                ll.setOrientation(LinearLayout.VERTICAL);
+        checkNot();
+        return view;
+    }
 
-                for (i = 0; i < allNotifications.size(); i++) {
-                    LinearLayout parent = new LinearLayout(getContext());
-                    parent.setBackgroundColor(Color.GREEN);
-                    parent.setGravity(Gravity.CENTER_VERTICAL);
-                    parent.setGravity(Gravity.CENTER_HORIZONTAL);
+    public void designNotPanel(int k){
+        mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
 
-                    LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    layoutDetails.topMargin=15;
-                    parent.setLayoutParams(layoutDetails);
-                    parent.setOrientation(LinearLayout.HORIZONTAL);
 
-                    final ImageButton floatingActionButton = new ImageButton(getContext());
+        ScrollView mainParent = new ScrollView(getContext());
+        mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        LinearLayout ll = new LinearLayout(getContext());
+        ll.setOrientation(LinearLayout.VERTICAL);
+
+        for (i = 0; i < allNotifications.size(); i++) {
+            LinearLayout parent = new LinearLayout(getContext());
+            parent.setBackgroundColor(Color.GREEN);
+            parent.setGravity(Gravity.CENTER_VERTICAL);
+            parent.setGravity(Gravity.CENTER_HORIZONTAL);
+
+            LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            layoutDetails.topMargin=15;
+            parent.setLayoutParams(layoutDetails);
+            parent.setOrientation(LinearLayout.HORIZONTAL);
+
+            final ImageButton floatingActionButton = new ImageButton(getContext());
                     /*final String mobNo = allNotifications.get(i).substring(0,10);
                     floatingActionButton.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -142,113 +169,227 @@ public class NotificationFragment extends Fragment {
                             Toast.makeText(getContext(),mobNo,Toast.LENGTH_SHORT).show();
                         }
                     });*/
-                    floatingActionButton.setBackgroundResource(R.drawable.snaskar_9620332800);
-                    layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    layoutDetails.width=leftButtonWidth;
-                    layoutDetails.height=leftButtonHeight;
-                    layoutDetails.weight=1;
-                    layoutDetails.rightMargin=15;
-                    layoutDetails.topMargin = 25;
-                    layoutDetails.leftMargin=15;
-                    floatingActionButton.setLayoutParams(layoutDetails);
-                    parent.addView(floatingActionButton);
+            floatingActionButton.setBackgroundResource(R.drawable.snaskar_9620332800);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.width=leftButtonWidth;
+            layoutDetails.height=leftButtonHeight;
+            layoutDetails.weight=1;
+            layoutDetails.rightMargin=15;
+            layoutDetails.topMargin = 25;
+            layoutDetails.leftMargin=15;
+            floatingActionButton.setLayoutParams(layoutDetails);
+            parent.addView(floatingActionButton);
 
-                    LinearLayout linearLayout = new LinearLayout(getContext());
-                    linearLayout.setOrientation(LinearLayout.VERTICAL);
-                    TextView allN = new TextView(getContext());
-                    SeekBar seekBar = new SeekBar(getContext());
-                    allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
-                    allN.setGravity(Gravity.TOP);
-                    boolean isCurrentUser = allNotifications.get(i).split(" ")[0].equals("You");
-                    if(isCurrentUser) {
-                        allN.setBackgroundColor(Color.CYAN);
-                        seekBar.setBackgroundColor(Color.CYAN);
+            LinearLayout linearLayout = new LinearLayout(getContext());
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+            TextView allN = new TextView(getContext());
+            SeekBar seekBar = new SeekBar(getContext());
+            allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
+            allN.setGravity(Gravity.TOP);
+            boolean isCurrentUser = allNotifications.get(i).split(" ")[0].equals("You");
+            if(isCurrentUser) {
+                allN.setBackgroundColor(Color.CYAN);
+                seekBar.setBackgroundColor(Color.CYAN);
+            }
+            else {
+                allN.setBackgroundColor(Color.YELLOW);
+                seekBar.setBackgroundColor(Color.YELLOW);
+            }
+            allN.setPadding(22,0,10,0);
+            allN.setTypeface(Typeface.DEFAULT_BOLD);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.weight=1;
+            layoutDetails.width=textViewWidth;
+            layoutDetails.height=textViewHeight;
+            allN.setLayoutParams(layoutDetails);
+            allN.setTextColor(Color.BLACK);
+            String textToDisplay = allNotifications.get(i).substring(0,allNotifications.get(i).lastIndexOf(" "));
+            allN.setText(textToDisplay);
+            linearLayout.addView(allN);
+            linearLayout.addView(seekBar);
+            parent.addView(linearLayout);
+
+            final FloatingActionButton floatingActionButton2 = new FloatingActionButton(getContext());
+            floatingActionButton2.setId(i);
+            final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
+
+            floatingActionButton2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.e("Not_Frag", v.getId() + "");
+                    if (mp != null) {
+                        for (int j = 0; j < allNotifications.size(); j++) {
+                            FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(j);
+                            otherButon.setImageResource(R.drawable.play);
+                        }
                     }
-                    else {
-                        allN.setBackgroundColor(Color.YELLOW);
-                        seekBar.setBackgroundColor(Color.YELLOW);
+
+                    if (v.getId() != idOfTheLastPlayButtonClicked) {
+                        if(mp!=null)mp.reset();
+                        mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
+                        String url = serverSongURL + "romantic/" + songFileName;
+                        Log.e("Not_Frag_SongURL", url.toString());
+                        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        try {
+                            //mp = MediaPlayer.create(this, Uri.parse(url));
+                            mp.setDataSource(url);
+                            mp.prepare();
+                            mp.start();
+                            floatingActionButton2.setImageResource(R.mipmap.pause);
+                            idOfTheLastPlayButtonClicked = v.getId();
+                            isPlaying = true;
+                        } catch (Exception ee) {
+                            Log.e("Not_Frag_Err", "abc" + ee.getMessage());
+                        }
                     }
-                    allN.setPadding(22,0,10,0);
-                    allN.setTypeface(Typeface.DEFAULT_BOLD);
-                    layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    layoutDetails.weight=1;
-                    layoutDetails.width=textViewWidth;
-                    layoutDetails.height=textViewHeight;
-                    allN.setLayoutParams(layoutDetails);
-                    allN.setTextColor(Color.BLACK);
-                    String textToDisplay = allNotifications.get(i).substring(0,allNotifications.get(i).lastIndexOf(" "));
-                    allN.setText(textToDisplay);
-                    linearLayout.addView(allN);
-                    linearLayout.addView(seekBar);
-                    parent.addView(linearLayout);
+                    else{
+                        if(isPlaying){
+                            mp.pause();
+                            isPlaying = false;
+                        }
+                        else{
+                            mp.start();
+                            floatingActionButton2.setImageResource(R.mipmap.pause);
+                            isPlaying = true;
+                        }
+                    }
+                }
+            });
+            floatingActionButton2.setImageResource(R.drawable.play);
+            floatingActionButton2.setSize(FloatingActionButton.SIZE_MINI);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.weight=1;
+            layoutDetails.width=rightButtonWidth;
+            layoutDetails.height=rightButtonHeight;
+            layoutDetails.rightMargin=20;
+            layoutDetails.topMargin = 25;
+            layoutDetails.leftMargin=10;
+            floatingActionButton2.setLayoutParams(layoutDetails);
+            parent.addView(floatingActionButton2);
 
-                    final FloatingActionButton floatingActionButton2 = new FloatingActionButton(getContext());
-                    floatingActionButton2.setId(i);
-                    final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
+            ll.addView(parent);
+        }
+        mainParent.addView(ll);
+        mainParentLayout.addView(mainParent);
+        if(k==1)mainParentLayout.removeAllViews();
+    }
 
-                    floatingActionButton2.setOnClickListener(new View.OnClickListener() {
+
+    public void checkNot(){
+        new Handler().postDelayed(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    new Thread(new Runnable() {
                         @Override
-                        public void onClick(View v) {
-                            Log.e("Not_Frag", v.getId() + "");
-                            if (mp != null) {
-                                for (int j = 0; j < allNotifications.size(); j++) {
-                                    FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(j);
-                                    otherButon.setImageResource(R.drawable.play);
+                        public void run() {
+                            try{
+                                URL url = new URL(serverURL + "/notifications/" + UserDetails.getPhoneNumber());
+                                Log.e("NotFrag_Notf_Read", url.toString());
+                                urlConnection = (HttpURLConnection) url.openConnection();
+                                InputStream is = urlConnection.getInputStream();
+                                isr = new InputStreamReader(is);
+                                int data = isr.read();
+                                final StringBuilder response = new StringBuilder("");
+                                while (data != -1) {
+                                    response.append((char) data);
+                                    data = isr.read();
                                 }
-                            }
+                                Log.e("NotFrag_Response",response.toString());
+                                ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
+                                ArrayList<String> allYourNotification = new ArrayList<String>();
+                                int newSize = allYourNotificationFromServer.size();
+                                for(String eachNotification : allYourNotificationFromServer){
+                                    String[] allData = eachNotification.split(" ");
+                                    String fromUser = allData[0];
+                                    String toUser = allData[1];
+                                    String ts = allData[2];
+                                    String timeSplit[] = ts.split("_");
+                                    ts = "on "+timeSplit[0] + " at "+timeSplit[1].substring(0,5);
+                                    String type = allData[3];
+                                    String songName = allData[4];
 
-                            if (v.getId() != idOfTheLastPlayButtonClicked) {
-                                if(mp!=null)mp.reset();
-                                mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
-                                String url = serverSongURL + "romantic/" + songFileName;
-                                Log.e("Not_Frag_SongURL", url.toString());
-                                mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                                try {
-                                    //mp = MediaPlayer.create(this, Uri.parse(url));
-                                    mp.setDataSource(url);
-                                    mp.prepare();
-                                    mp.start();
-                                    floatingActionButton2.setImageResource(R.mipmap.pause);
-                                    idOfTheLastPlayButtonClicked = v.getId();
-                                    isPlaying = true;
-                                } catch (Exception ee) {
-                                    Log.e("Not_Frag_Err", "abc" + ee.getMessage());
+
+                                    if(fromUser.equals(UserDetails.getPhoneNumber())){
+                                        if (allC.get(toUser) != null) {
+                                            allYourNotification.add("You dedicated a song to " + allC.get(toUser) + "\n" + ts +" "+songName);
+                                        } else {
+                                            allYourNotification.add("You dedicated a song to " + toUser + "\n" + ts +" "+songName);
+                                        }
+                                    }
+                                    else {
+                                        if (allC.get(fromUser) != null) {
+                                            allYourNotification.add(allC.get(fromUser) + " dedicated you a song\n" + ts +" "+songName);
+                                        } else {
+                                            allYourNotification.add(fromUser + " dedicated you a song\n" + ts +" "+songName);
+                                        }
+                                    }
+                                }
+                                Log.e("NotFrag_AllParsedNot",allYourNotification.toString());
+                                AllNotifications.allNotifications = allYourNotification;
+                                Log.e("NotFrag_Size",totalNumberOfNotifications+" -- "+newSize);
+                                if(newSize>totalNumberOfNotifications) {
+                                    totalNumberOfNotifications = newSize;
+                                    Activity currActivity = getActivity();
+                                    NotificationCompat.Builder builder =
+                                            new NotificationCompat.Builder(view.getContext())
+                                                    .setSmallIcon(R.drawable.btn_dedicate)
+                                                    .setColor(001500)
+                                                    .setContentTitle("MoodOff")
+                                                    .setContentText(UserDetails.getUserName()+ "!! You got new notifications!!");
+
+                                    Intent notificationIntent;
+                                            if(getActivity()==null){
+                                                notificationIntent = new Intent(view.getContext(), Start.class);
+                                                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            }
+                                            else{
+                                                currActivity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        Toast.makeText(getContext(),"Hi New one",Toast.LENGTH_SHORT).show();
+                                                        designNotPanel(1);
+                                                    }
+                                                });
+                                                notificationIntent = new Intent(view.getContext(), NotificationFragment.class);
+                                                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            }
+                                    PendingIntent contentIntent = PendingIntent.getActivity(view.getContext(), 0, notificationIntent,
+                                            PendingIntent.FLAG_CANCEL_CURRENT);
+                                    builder.setContentIntent(contentIntent);
+                                    builder.setAutoCancel(true);
+
+                                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                                    Ringtone r = RingtoneManager.getRingtone(view.getContext(), notification);
+                                    r.play();
+
+                                    // Add as notification
+                                    NotificationManager manager = (NotificationManager) view.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                                    manager.notify(0, builder.build());
                                 }
                             }
-                            else{
-                                if(isPlaying){
-                                    mp.pause();
-                                    isPlaying = false;
+                            catch(Exception ee){
+                                Log.e("NotificationFrag_Err","Some issues.."+ee.getMessage());
+                            }
+                            finally {
+                                try {
+                                    isr.close();
+                                } catch (Exception ee) {
+                                    Log.e("NotificationFrag_Err", "InputStreamReader couldn't be closed");
                                 }
-                                else{
-                                    mp.start();
-                                    floatingActionButton2.setImageResource(R.mipmap.pause);
-                                    isPlaying = true;
-                                }
+                                urlConnection.disconnect();
+
                             }
                         }
-                    });
-                    floatingActionButton2.setImageResource(R.drawable.play);
-                    floatingActionButton2.setSize(FloatingActionButton.SIZE_MINI);
-                    layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    layoutDetails.weight=1;
-                    layoutDetails.width=rightButtonWidth;
-                    layoutDetails.height=rightButtonHeight;
-                    layoutDetails.rightMargin=20;
-                    layoutDetails.topMargin = 25;
-                    layoutDetails.leftMargin=10;
-                    floatingActionButton2.setLayoutParams(layoutDetails);
-                    parent.addView(floatingActionButton2);
-
-                    ll.addView(parent);
+                    }).start();
+                    checkNot();
+                } catch (Exception ee) {
+                    Log.e("NotificationFrag_Err","Some issues.."+ee.getMessage());
                 }
-            mainParent.addView(ll);
-            mainParentLayout.addView(mainParent);
-        }
-        catch (Exception ei){
-            Log.e("NotificationFragment_Er",ei.getMessage());
-        }
-        return view;
+            }
+        },5000);
     }
     public int leftButtonHeight,leftButtonWidth,rightButtonHeight,rightButtonWidth,textViewWidth,textViewHeight;
     public void setSizes(){

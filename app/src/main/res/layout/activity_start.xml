@@ -4,7 +4,7 @@
     android:id="@+id/activity_start"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/master_bg"
+    android:background="@drawable/aka"
     tools:context="com.moodoff.Start">
 
     <ProgressBar

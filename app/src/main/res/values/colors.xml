@@ -5,4 +5,6 @@
     <color name="colorAccent">#f7d5d4</color>
     <color name="FBtn_genericMood">#fff45e</color>
     <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="light_yellow">#fdfca2</color>
 </resources>

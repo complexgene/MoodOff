@@ -136,6 +136,7 @@ public class Start extends AppCompatActivity {
                                     }
                                     ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
                                     ArrayList<String> allYourNotification = new ArrayList<String>();
+                                    NotificationFragment.totalNumberOfNotifications = allYourNotificationFromServer.size();
                                     while(contactReadFinished);
                                     for(String eachNotification : allYourNotificationFromServer){
                                         String[] allData = eachNotification.split(" ");
@@ -242,7 +243,8 @@ public class Start extends AppCompatActivity {
                                         bufferedReader = new BufferedReader(isr);
                                         String line = "";
                                         while ((line = bufferedReader.readLine()) != null) {
-                                            songList.add(line);
+                                            if(!line.equals(""))
+                                                songList.add(line);
                                         }
                                         // Populate the variable in the PlayListSongs.java file which is to be accessed by MediaPlayer
                                         PlaylistSongs.allMoodPlayList.put(mood, songList);

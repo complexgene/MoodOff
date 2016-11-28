@@ -15,7 +15,7 @@
         android:background="#00FF00"
         android:layout_gravity="fill_horizontal"
         android:id="@+id/floatingButtons"
-        >
+    >
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -69,7 +69,8 @@
             app:fabSize="mini"
             />
     </RelativeLayout>
-<RelativeLayout
+
+    <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/storyTitle"
@@ -85,7 +86,8 @@
         android:fontFamily="cursive"
         android:layout_centerHorizontal="true"
         android:id="@+id/textView2" />
-</RelativeLayout>
+    </RelativeLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
