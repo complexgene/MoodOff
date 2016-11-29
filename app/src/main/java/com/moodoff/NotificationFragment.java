@@ -141,6 +141,23 @@ public class NotificationFragment extends Fragment {
         return view;
     }
 
+    SeekBar currentSeekBar;
+    Handler seekHandler = new Handler();
+
+    Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            seekUpdation();
+        }
+    };
+
+    public void seekUpdation() {
+        if (mp!=null) {
+            currentSeekBar.setProgress(mp.getCurrentPosition());
+            seekHandler.postDelayed(run, 10);
+        }
+    }
+
     public void designNotPanel(int k){
         mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
 
@@ -183,7 +200,7 @@ public class NotificationFragment extends Fragment {
             LinearLayout linearLayout = new LinearLayout(getContext());
             linearLayout.setOrientation(LinearLayout.VERTICAL);
             TextView allN = new TextView(getContext());
-            SeekBar seekBar = new SeekBar(getContext());
+            final SeekBar seekBar = new SeekBar(getContext());
             allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
             allN.setGravity(Gravity.TOP);
             boolean isCurrentUser = allNotifications.get(i).split(" ")[0].equals("You");
@@ -211,20 +228,43 @@ public class NotificationFragment extends Fragment {
 
             final FloatingActionButton floatingActionButton2 = new FloatingActionButton(getContext());
             floatingActionButton2.setId(i);
+            seekBar.setId((i+1)*1000000);
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    mp.seekTo(seekBar.getProgress());
+                }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                }
+            });
+
+
             final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
 
             floatingActionButton2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.e("Not_Frag", v.getId() + "");
-                    if (mp != null) {
-                        for (int j = 0; j < allNotifications.size(); j++) {
-                            FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(j);
-                            otherButon.setImageResource(R.drawable.play);
-                        }
-                    }
+//                    if (mp != null) {
+//                        for (int j = 0; j < allNotifications.size(); j++) {
+//                            FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(j);
+//                            otherButon.setImageResource(R.drawable.play);
+//                        }
+//                    }
+
+                    currentSeekBar = (SeekBar) view.findViewById((v.getId()+1)*1000000);
 
                     if (v.getId() != idOfTheLastPlayButtonClicked) {
+                        if (idOfTheLastPlayButtonClicked != -1) {
+                            FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(idOfTheLastPlayButtonClicked);
+                            otherButon.setImageResource(R.drawable.play);
+                            SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)*1000000);
+                            lastSeekBar.setProgress(0);
+                        }
                         if(mp!=null)mp.reset();
                         mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
                         String url = serverSongURL + "romantic/" + songFileName;
@@ -234,23 +274,26 @@ public class NotificationFragment extends Fragment {
                             //mp = MediaPlayer.create(this, Uri.parse(url));
                             mp.setDataSource(url);
                             mp.prepare();
+                            currentSeekBar.setMax(mp.getDuration());
+                            seekUpdation();
                             mp.start();
-                            floatingActionButton2.setImageResource(R.mipmap.pause);
+                            floatingActionButton2.setImageResource(R.mipmap.stop);
                             idOfTheLastPlayButtonClicked = v.getId();
                             isPlaying = true;
                         } catch (Exception ee) {
                             Log.e("Not_Frag_Err", "abc" + ee.getMessage());
                         }
-                    }
-                    else{
-                        if(isPlaying){
+                    } else {
+                        if(mp.isPlaying()){
                             mp.pause();
-                            isPlaying = false;
-                        }
-                        else{
+                            mp.seekTo(0);
+                            floatingActionButton2.setImageResource(R.mipmap.play);
+                            currentSeekBar.setProgress(0);
+                        } else {
+                            currentSeekBar.setMax(mp.getDuration());
+                            seekUpdation();
                             mp.start();
-                            floatingActionButton2.setImageResource(R.mipmap.pause);
-                            isPlaying = true;
+                            floatingActionButton2.setImageResource(R.mipmap.stop);
                         }
                     }
                 }
