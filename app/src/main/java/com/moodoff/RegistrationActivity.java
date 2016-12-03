@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.BoolRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,8 +15,10 @@ import android.util.Xml;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,8 +43,10 @@ public class RegistrationActivity extends AppCompatActivity {
     DatePicker datePicker;
     Calendar calendar;
     int year, month, day;
+    ProgressBar spinner;
     StoreRetrieveDataInterface rd=null;
     boolean status = false;
+    Button registerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +56,7 @@ public class RegistrationActivity extends AppCompatActivity {
         mobile_number = (EditText) findViewById(R.id.phone_number);
         birthday = (EditText) findViewById(R.id.date_of_birth);
         email = (EditText) findViewById(R.id.email_id);
+        spinner = (ProgressBar) findViewById(R.id.progressBarRegistration);
         error = (TextView) findViewById(R.id.error_message);
         calendar = Calendar.getInstance();
         year = calendar.get(Calendar.YEAR);
@@ -64,6 +70,7 @@ public class RegistrationActivity extends AppCompatActivity {
                 setDate();
             }
         });
+        registerButton = (Button) findViewById(R.id.newregistration);
     }
 
     public void setDate() {
@@ -113,6 +120,9 @@ public class RegistrationActivity extends AppCompatActivity {
 
     public void register(View view) {
         error.setVisibility(View.VISIBLE);
+        registerButton.setVisibility(View.GONE);
+        spinner.setVisibility(View.VISIBLE);
+
         if (validateRegistrationData() == true) {
 
             String nm = name.getText().toString().replaceAll(" ","_"),
@@ -132,10 +142,14 @@ public class RegistrationActivity extends AppCompatActivity {
             if (sendRegistrationInfo(userProfileString) == true) {
                 Log.e("RegistrationAct_Reg","Tried Registering...");
                 if (saveUserProfile() == true) {
+                    spinner.setVisibility(View.GONE);
                     error.setText("Registration Successful.");
-
+                    Intent ii = new Intent(RegistrationActivity.this, Start.class);
+                    startActivity(ii);
                 } else {
                     Log.e("Kutta","file not saved");
+                    spinner.setVisibility(View.GONE);
+                    registerButton.setVisibility(View.VISIBLE);
                     //error.setText("Registeration Unsuccessfull.");
                 }
             } else {
@@ -187,17 +201,18 @@ public class RegistrationActivity extends AppCompatActivity {
                 HttpURLConnection urlConnection=null;
                 try {
                     // Proide the URL fto which you would fire a post
-                    URL url = new URL("http://192.168.2.8:5679/controller/moodoff/users/"+user_string);
+                    URL url = new URL("http://hipilab.com/moodoff/users/"+user_string);
                     Log.e("RegistrationActivity",url.toString());
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setDoOutput(true);
                     int responseCode = urlConnection.getResponseCode();
+                    Log.e("RegActivity_resp",""+responseCode);
                     if(responseCode==200){
+                        status = true;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Toast.makeText(getApplicationContext(),"Successfully Registered",Toast.LENGTH_SHORT).show();
-                                status = true;
                             }
                         });
                     }

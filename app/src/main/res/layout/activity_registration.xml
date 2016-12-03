@@ -81,6 +81,17 @@
         android:onClick="register"
         />
 
+    <ProgressBar
+        android:id="@+id/progressBarRegistration"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="3dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/email_id"
+        android:visibility="gone"/>
+
     <TextView
         android:id="@+id/error_message"
         android:textColor="@android:color/holo_red_dark"
