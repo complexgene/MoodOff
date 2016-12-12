@@ -65,7 +65,7 @@
         android:inputType="textWebEmailAddress"
         android:textColorHint="@android:color/white" />
 
-    <Button
+     <Button
         android:id="@+id/newregistration"
         android:text="Register"
         android:textColor="#080808"
