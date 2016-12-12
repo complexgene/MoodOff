@@ -38,7 +38,7 @@ public class ContactList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.contact_list);
+        setContentView(R.layout.contact_list);
         Intent intent=getIntent();
         this.lstNames = (ListView) findViewById(R.id.contactlist);
 
@@ -78,13 +78,10 @@ public class ContactList extends AppCompatActivity {
                 int dividerId = d.getContext().getResources().getIdentifier("android:id/alertTitle", null, null);
                 View divider = d.findViewById(dividerId);
                 builder.setView(divider);
-
-
             }
         });
 
     }
-
 
     HashMap<String,String> allC = new HashMap<>();
     public void showContacts() {
@@ -95,9 +92,11 @@ public class ContactList extends AppCompatActivity {
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
             if(checkIfATableExists("allcontacts")) {
+                Log.e("ContactList","Tab exists");
                 allC = getOrStoreContactsTableData(0, allC);
             }
             else {
+                Log.e("ContactList","Tab doesn't exists");
                 allC = ContactList.getContactNames(getContentResolver());
                 getOrStoreContactsTableData(1,allC);
             }
@@ -105,6 +104,7 @@ public class ContactList extends AppCompatActivity {
             for(String eachContact:allC.keySet()){
                 contactsInList.add(allC.get(eachContact)+" "+eachContact);
             }
+            //contactsInList.add("Fu*k");
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contactsInList);
             lstNames.setAdapter(adapter);
         }
@@ -209,14 +209,13 @@ public class ContactList extends AppCompatActivity {
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
                     //Log.e("ContactsFragment_CntErr",eachContact);
-                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
+                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
                     //Log.e("ContactsFragment_CntErr",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }
                 return null;
             }
             mydatabase.close();
-
         }catch (Exception ee){
             Log.e("ContactsFragment_StrErr",ee.getMessage());
             ee.fillInStackTrace();

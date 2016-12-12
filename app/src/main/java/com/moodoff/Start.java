@@ -70,13 +70,10 @@ public class Start extends AppCompatActivity {
         } else {*/
 
             StoreRetrieveDataInterface rd = null;
-
             spinner = (ProgressBar) findViewById(R.id.spinner);
             //specialDate = (TextView) findViewById(R.id.specialDate);
             greet = (TextView) findViewById(R.id.greet);
-
             spinner.setVisibility(ProgressBar.VISIBLE);
-
             try {
                 rd = new StoreRetrieveDataImpl("UserData.txt");
                 if (rd.fileExists()) {
@@ -95,7 +92,6 @@ public class Start extends AppCompatActivity {
                     if (hour >= 18 && hour <= 23) greetStr = "- Good Evening -";
                     greet.setText(greetStr);
 
-
                     //Contacts Read and store in local DB
                     if (!checkIfATableExists("allcontacts")) {
                         Log.e("Start_cntcts", "Not present");
@@ -109,6 +105,7 @@ public class Start extends AppCompatActivity {
                             }
                         }).start();
                     } else {
+                        Log.e("Start_cntcts", "Present");
                         Toast.makeText(this, "You look awesome today!!", Toast.LENGTH_SHORT).show();
                         allC = getOrStoreContactsTableData(0,allC);
                         contactReadFinished = false;
@@ -138,33 +135,43 @@ public class Start extends AppCompatActivity {
                                     ArrayList<String> allYourNotification = new ArrayList<String>();
                                     NotificationFragment.totalNumberOfNotifications = allYourNotificationFromServer.size();
                                     while(contactReadFinished);
+                                    Log.e("Start_SIZE",allC.size()+"");
                                     for(String eachNotification : allYourNotificationFromServer){
                                         String[] allData = eachNotification.split(" ");
                                         String fromUser = allData[0];
                                         String toUser = allData[1];
                                         String ts = allData[2];
                                         String timeSplit[] = ts.split("_");
-                                        ts = "on "+timeSplit[0] + " at "+timeSplit[1].substring(0,5);
+                                        String date = timeSplit[0];
+                                        String time = timeSplit[1];
+                                        time = time.substring(0,time.lastIndexOf(":"));
                                         String type = allData[3];
                                         String songName = allData[4];
 
 
                                         if(fromUser.equals(UserDetails.getPhoneNumber())){
-                                            if (allC.get(toUser) != null) {
-                                                allYourNotification.add("You dedicated a song to " + allC.get(toUser) + "\n" + ts +" "+songName);
+                                            String nameOfTo = allC.get(toUser);
+                                            if(nameOfTo!=null && nameOfTo.length()>19)
+                                                nameOfTo = nameOfTo.substring(0,16)+"...";
+
+                                            if (nameOfTo != null) {
+                                                allYourNotification.add("[ "+date+" at "+time+" ]: \nYou -> " + nameOfTo + " " + songName);
                                             } else {
-                                                allYourNotification.add("You dedicated a song to " + toUser + "\n" + ts +" "+songName);
+                                                allYourNotification.add("[ "+date+" at "+time+" ]: \nYou -> " + toUser + " " + songName);
                                             }
                                         }
                                         else {
-                                            if (allC.get(fromUser) != null) {
-                                                allYourNotification.add(allC.get(fromUser) + " dedicated you a song\n" + ts +" "+songName);
+                                            String nameOfFrom = allC.get(fromUser);
+                                            if(nameOfFrom!=null && nameOfFrom.length()>19)
+                                                nameOfFrom = nameOfFrom.substring(0,16)+"...";
+                                            if (nameOfFrom != null) {
+                                                allYourNotification.add("[ "+date+" at "+time+" ]: \n" + nameOfFrom + " -> You " + songName);
                                             } else {
-                                                allYourNotification.add(fromUser + " dedicated you a song\n" + ts +" "+songName);
+                                                allYourNotification.add("[ "+date+" at "+time+"]: \n" + fromUser + " -> You " + songName);
                                             }
                                         }
-                                        //Log.e("Start_allNot",allYourNotification.toString());
                                     }
+                                    Log.e("Start_allNot",allYourNotification.toString());
                                     AllNotifications.allNotifications = allYourNotification;
                                     //  AllNotifications.totalNoOfNot = AllNotifications.allNotifications.size();
                                     doorClosed1 = false;
@@ -249,8 +256,10 @@ public class Start extends AppCompatActivity {
                                         // Populate the variable in the PlayListSongs.java file which is to be accessed by MediaPlayer
                                         PlaylistSongs.allMoodPlayList.put(mood, songList);
                                         // Tracks if all the files have been read or not, once complete its reaches ZERO(0)
-                                        readAllPlaylistComplete--;
-                                        Log.e("Start_PL_ReadStatus", mood + " read complete :"+readAllPlaylistComplete);
+                                        synchronized (Start.class) {
+                                            readAllPlaylistComplete--;
+                                            Log.e("Start_PL_ReadStatus", mood + " read complete :"+readAllPlaylistComplete);
+                                        }
                                     } catch (Exception ee) {
                                         Log.e("Start_Playlist_Read", songList.toString());
                                     } finally {
@@ -313,19 +322,20 @@ public class Start extends AppCompatActivity {
     }
 
     public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
+        Log.e("Start_allC_INITSZ",allContacts.size()+"");
         LinkedHashMap<String,String> allContactsPresent = new LinkedHashMap<>();
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
             // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
             if(status == 0){
                 //READ and RETURN data
-                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts order by name", null);
+                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
                 resultSet.moveToFirst();
+                Log.e("Start_TBLDetect",resultSet.getCount()+" no of rows..");
                 while (!resultSet.isAfterLast()) {
                     String phone_no = resultSet.getString(0);
                     String name = resultSet.getString(1);
-                    Log.e("Start_contactDet",phone_no+" "+name);
-                    allContactsPresent.put(phone_no,name);
+                    allContacts.put(phone_no,name);
                     resultSet.moveToNext();
                 }
             }
@@ -337,14 +347,14 @@ public class Start extends AppCompatActivity {
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
                     insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
-                    //Log.e("ContactsFragment_CntErr",insertQuery);
+                    Log.e("Start_InsertQuery",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }
                 mydatabase.close();
                 return null;
             }
         }catch (Exception ee){
-            Log.e("ContactsFragment_StrErr",ee.getMessage());
+            Log.e("StartFragment_TBLErr",ee.getMessage());
             ee.fillInStackTrace();
         }
         mydatabase.close();

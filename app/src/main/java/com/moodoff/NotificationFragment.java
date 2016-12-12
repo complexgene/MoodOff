@@ -86,15 +86,6 @@ public class NotificationFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment NotificationFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static NotificationFragment newInstance(String param1, String param2) {
         NotificationFragment fragment = new NotificationFragment();
         Bundle args = new Bundle();
@@ -136,8 +127,7 @@ public class NotificationFragment extends Fragment {
         catch (Exception ei){
             Log.e("NotificationFragment_Er",ei.getMessage());
         }
-
-        checkNot();
+        //checkNot();
         return view;
     }
 
@@ -178,7 +168,7 @@ public class NotificationFragment extends Fragment {
             parent.setLayoutParams(layoutDetails);
             parent.setOrientation(LinearLayout.HORIZONTAL);
 
-            final ImageButton floatingActionButton = new ImageButton(getContext());
+            final FloatingActionButton floatingActionButton = new FloatingActionButton(getContext());
                     /*final String mobNo = allNotifications.get(i).substring(0,10);
                     floatingActionButton.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -186,7 +176,7 @@ public class NotificationFragment extends Fragment {
                             Toast.makeText(getContext(),mobNo,Toast.LENGTH_SHORT).show();
                         }
                     });*/
-            floatingActionButton.setBackgroundResource(R.drawable.snaskar_9620332800);
+            floatingActionButton.setImageResource(R.drawable.love_ns);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.width=leftButtonWidth;
             layoutDetails.height=leftButtonHeight;
@@ -244,6 +234,8 @@ public class NotificationFragment extends Fragment {
 
 
             final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
+            Log.e("NotFrag_songFile",songFileName);
+
 
             floatingActionButton2.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -258,20 +250,20 @@ public class NotificationFragment extends Fragment {
 
                     currentSeekBar = (SeekBar) view.findViewById((v.getId()+1)*1000000);
 
-                    if (v.getId() != idOfTheLastPlayButtonClicked) {
+                    if(v.getId() != idOfTheLastPlayButtonClicked) {
                         if (idOfTheLastPlayButtonClicked != -1) {
                             FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(idOfTheLastPlayButtonClicked);
                             otherButon.setImageResource(R.drawable.play);
                             SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)*1000000);
                             lastSeekBar.setProgress(0);
                         }
+
                         if(mp!=null)mp.reset();
                         mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
                         String url = serverSongURL + "romantic/" + songFileName;
                         Log.e("Not_Frag_SongURL", url.toString());
                         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         try {
-                            //mp = MediaPlayer.create(this, Uri.parse(url));
                             mp.setDataSource(url);
                             mp.prepare();
                             currentSeekBar.setMax(mp.getDuration());
@@ -285,10 +277,10 @@ public class NotificationFragment extends Fragment {
                         }
                     } else {
                         if(mp.isPlaying()){
-                            mp.pause();
                             mp.seekTo(0);
-                            floatingActionButton2.setImageResource(R.mipmap.play);
                             currentSeekBar.setProgress(0);
+                            mp.pause();
+                            floatingActionButton2.setImageResource(R.mipmap.play);
                         } else {
                             currentSeekBar.setMax(mp.getDuration());
                             seekUpdation();

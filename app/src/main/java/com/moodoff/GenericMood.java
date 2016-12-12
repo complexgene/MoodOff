@@ -117,24 +117,18 @@ public class GenericMood extends Moods implements View.OnClickListener{
     //Buttons
     Button playPauseBtn, stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
     FloatingActionButton dedicateButton,changeMoodButton;
-    ProgressBar spinner;
+    ProgressBar spinner,storyLoadSpinner;
     SeekBar seekBar;
-    TextView songName = null;
+    TextView songName = null, storyTitleTV, storyBodyTV;
     Handler seekHandler = new Handler();
     ArrayList<String> currentplayList = null;
     String currentSong = "", currentMood = "", playListFilePath = "";
     int currentIndex = 0, repParm = 0, playOrPauseParm = 0;
 
-    @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
-        view.setBackgroundColor(Color.WHITE);
-
-        Toast.makeText(getContext(),"You selected mood: "+(char)(mParam1.charAt(0)-32)+mParam1.substring(1),Toast.LENGTH_LONG).show();
-
+    public void init(){
         songName = (TextView) view.findViewById(R.id.nameOfSong);
+        storyTitleTV = (TextView) view.findViewById(R.id.tv_storytitle);
+        storyBodyTV = (TextView) view.findViewById(R.id.tv_story);
         playPauseBtn = (Button) view.findViewById(R.id.playPauseBtn);
         stopBtn = (Button) view.findViewById(R.id.stopButton);
         nextBtn = (Button) view.findViewById(R.id.nextButton);
@@ -144,6 +138,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         dedicateButton = (FloatingActionButton) view.findViewById(R.id.btn_dedicate);
         changeMoodButton = (FloatingActionButton) view.findViewById(R.id.btn_changemood);
         spinner = (ProgressBar) view.findViewById(R.id.progressBar);
+        storyLoadSpinner = (ProgressBar) view.findViewById(R.id.load_story_spinner);
         seekBar = (SeekBar) view.findViewById(R.id.seekBar);
         playPauseBtn.setOnClickListener(this);
         stopBtn.setOnClickListener(this);
@@ -155,6 +150,68 @@ public class GenericMood extends Moods implements View.OnClickListener{
         seekBar.setOnClickListener(this);
         disableButton(prevBtn);
         currentMood = mParam1;
+    }
+
+    public String getStoryName(){
+        return "story1.txt";
+    }
+
+    @Override
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
+        view.setBackgroundColor(Color.WHITE);
+
+        init();
+        //Toast.makeText(getContext(),"You selected mood: "+(char)(mParam1.charAt(0)-32)+mParam1.substring(1),Toast.LENGTH_LONG).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    HttpURLConnection urlConnection = null;
+                    BufferedReader bufferedReader = null;
+                    @Override
+                    public void run() {
+                        try {
+                            URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/" + currentMood + "/" + getStoryName());
+                            Log.e("GenericMood_Story_url", url.toString());
+                            urlConnection = (HttpURLConnection) url.openConnection();
+                            InputStream is = urlConnection.getInputStream();
+                            InputStreamReader isr = new InputStreamReader(is);
+                            bufferedReader = new BufferedReader(isr);
+                            final StringBuilder storyBody = new StringBuilder("");
+                            String body="";
+                            final String title=bufferedReader.readLine();
+                            while ((body = bufferedReader.readLine()) != null) {
+                                storyBody.append(body);
+                            }
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    storyTitleTV.setText(title);
+                                    storyBodyTV.setText(storyBody.toString());
+                                    storyLoadSpinner.setVisibility(View.GONE);
+                                }
+                            });
+
+                        } catch (Exception ee) {
+                            Log.e("GenericM_StoryReadErr", ee.getMessage());
+                        } finally {
+                            try {
+                                bufferedReader.close();
+                            } catch (Exception ee) {
+                                Log.e("GenericM_Err", "BufferedReader couldn't be closed");
+                            }
+                            urlConnection.disconnect();
+
+                        }
+                    }
+                }).start();
+            }
+        },0);
+
+
         if (currentMood != "") {
             currentplayList = readList(currentMood);
             checkRepeatButtonStatus(currentIndex);
@@ -181,14 +238,13 @@ public class GenericMood extends Moods implements View.OnClickListener{
 
 
         //moodpageBG = (ImageView) view.findViewById(R.id.photoView);
-        imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/"+currentMood+"/mogambo.jpg";
-        bitmap = BitmapFactory.decodeFile(imageFilePath);
+        //imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/"+currentMood+"/mogambo.jpg";
+        //bitmap = BitmapFactory.decodeFile(imageFilePath);
         //moodpageBG.setImageBitmap(bitmap);
 
         changeMoodButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Display display = getActivity().getWindowManager().getDefaultDisplay();
                 Point size = new Point();
                 display.getSize(size);
@@ -298,6 +354,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             Toast.makeText(getActivity().getApplicationContext(),"You have to play a song to dedicate.",Toast.LENGTH_SHORT).show();
         }
         else {
+            Log.e("GenericMood","willstart");
             Intent it = new Intent(getContext(), ContactList.class);
             startActivityForResult(it, 1);
         }
@@ -688,9 +745,9 @@ public class GenericMood extends Moods implements View.OnClickListener{
             if (mp != null) {
                 if(mp.isPlaying()){mp.stop();}
                 mp.release();
-                mp = null;
+                //mp = null;
             }
-        } catch(Exception e){toastError(e.getMessage());}
+        } catch(Exception e){e.fillInStackTrace();e.printStackTrace();}
     }
 
     /*return the last index of the playlist*/

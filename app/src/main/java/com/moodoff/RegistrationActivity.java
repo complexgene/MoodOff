@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.BoolRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.util.Xml;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -42,11 +44,13 @@ public class RegistrationActivity extends AppCompatActivity {
     int year, month, day;
     StoreRetrieveDataInterface rd=null;
     boolean status = false;
+    Button register;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
+        register = (Button)findViewById(R.id.newregistration);
         name = (EditText) findViewById(R.id.name);
         mobile_number = (EditText) findViewById(R.id.phone_number);
         birthday = (EditText) findViewById(R.id.date_of_birth);
@@ -62,6 +66,12 @@ public class RegistrationActivity extends AppCompatActivity {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
                 imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                 setDate();
+            }
+        });
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                register(v);
             }
         });
     }
@@ -115,32 +125,55 @@ public class RegistrationActivity extends AppCompatActivity {
         error.setVisibility(View.VISIBLE);
         if (validateRegistrationData() == true) {
 
-            String nm = name.getText().toString().replaceAll(" ","_"),
+            final String nm = name.getText().toString().replaceAll(" ", "_"),
                     pn = mobile_number.getText().toString(),
                     dob = birthday.getText().toString(),
                     em = email.getText().toString(),
                     userProfileString;
 
-            userProfileString = nm+"/"+pn+"/"+em+"/"+dob;
+            userProfileString = nm + "/" + pn + "/" + em + "/" + dob;
 
-//            User user_object = new User();
-//            user_object.setName(name.getText().toString());
-//            user_object.setName(mobile_number.getText().toString());
-//            user_object.setName(birthday.getText().toString());
-//            user_object.setName(email.getText().toString());
-
-            if (sendRegistrationInfo(userProfileString) == true) {
-                Log.e("RegistrationAct_Reg","Tried Registering...");
-                if (saveUserProfile() == true) {
-                    error.setText("Registration Successful.");
-
-                } else {
-                    Log.e("Kutta","file not saved");
-                    //error.setText("Registeration Unsuccessfull.");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    HttpURLConnection urlConnection = null;
+                    try {
+                        // Proide the URL fto which you would fire a post
+                        URL url = new URL("http://hipilab.com/moodoff/users/" + userProfileString);
+                        Log.e("RegistrationActivity", url.toString());
+                        urlConnection = (HttpURLConnection) url.openConnection();
+                        urlConnection.setDoOutput(true);
+                        int responseCode = urlConnection.getResponseCode();
+                        Log.e("RegAct_RESCODE", "" + responseCode);
+                        if (responseCode == 200) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    saveUserProfile();
+                                    Toast.makeText(getApplicationContext(), "Successfully Registered", Toast.LENGTH_SHORT).show();
+                                    Intent mainIntent = new Intent(RegistrationActivity.this, Start.class);
+                                    startActivity(mainIntent);
+                                }
+                            });
+                        } else {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), "Registration Failed!! Try after sometime..", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch (Exception ee) {
+                        Log.e("RegistrationAct_Err", ee.getMessage());
+                        ee.printStackTrace();
+                    }
+                    // Close the Http Connection that you started in finally.
+                    finally {
+                        if (urlConnection != null)
+                            urlConnection.disconnect();
+                    }
                 }
-            } else {
-                Log.e("Kutta","NR");
-            }
+            }).start();
         }
     }
 
@@ -148,81 +181,16 @@ public class RegistrationActivity extends AppCompatActivity {
         try {
             rd = new StoreRetrieveDataImpl("UserData.txt");
             rd.beginWriteTransaction();
-            rd.createNewData("user", name.getText().toString().replaceAll(" ","_"));
+            rd.createNewData("user", name.getText().toString().replaceAll(" ", "_"));
             rd.createNewData("phoneNo", mobile_number.getText().toString());
             rd.createNewData("dob", birthday.getText().toString());
             rd.createNewData("email", email.getText().toString());
             rd.endWriteTransaction();
             return true;
         } catch (IOException e) {
-            error.setText("Could n't save the file.");
+            error.setText("Couldn't save the file.");
             return false;
         }
-
-
-//        Context context = getApplicationContext();
-//        File profileDir = new File(File.separator+"data"+File.separator+getPackageName()+File.separator+"profile");
-//        if (!profileDir.exists()){
-//            profileDir.mkdir();
-//        }
-//        File fileName = new File(profileDir.getAbsolutePath()+"myProfile.xml");
-//        error.setText(fileName.getAbsolutePath());
-//        try {
-//            fileName.createNewFile();
-//            return true;
-//        } catch (IOException e) {
-//            //error.setText("Could not save file !!!");
-//            return false;
-//        }
-    }
-
-//    public User getUserProfile() {
-//
-//    }
-
-    public boolean sendRegistrationInfo(final String user_string) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpURLConnection urlConnection=null;
-                try {
-                    // Proide the URL fto which you would fire a post
-                    URL url = new URL("http://192.168.2.8:5679/controller/moodoff/users/"+user_string);
-                    Log.e("RegistrationActivity",url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setDoOutput(true);
-                    int responseCode = urlConnection.getResponseCode();
-                    if(responseCode==200){
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getApplicationContext(),"Successfully Registered",Toast.LENGTH_SHORT).show();
-                                status = true;
-                            }
-                        });
-                    }
-                    else{
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getApplicationContext(),"Registration Failed!!",Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }
-                catch(Exception ee){
-                    Log.e("RegistrationActivity",ee.getMessage());
-                    ee.printStackTrace();
-                }
-                // Close the Http Connection that you started in finally.
-                finally {
-                    if(urlConnection!=null)
-                        urlConnection.disconnect();
-                }
-            }
-        }).start();
-        while(status==false);
-        return status;
     }
 
 }
