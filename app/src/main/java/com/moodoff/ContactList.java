@@ -128,8 +128,8 @@ public class ContactList extends AppCompatActivity {
      *
      * @return a list of names+mobile_number.
      */
-    public static HashMap<String,String> getContactNames(ContentResolver contentResolver) {
-        HashMap<String,String> contacts = new HashMap<>();
+    public static LinkedHashMap<String,String> getContactNames(ContentResolver contentResolver) {
+        LinkedHashMap<String,String> contacts = new LinkedHashMap<>();
         // Get the ContentResolver
         ContentResolver cr = contentResolver;
         // Get the Cursor of all the contacts

@@ -118,7 +118,6 @@ public class NotificationFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_notification, container, false);
-
         setSizes();
 
         try {
@@ -151,13 +150,20 @@ public class NotificationFragment extends Fragment {
     public void designNotPanel(int k){
         mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
 
-
         ScrollView mainParent = new ScrollView(getContext());
         mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         LinearLayout ll = new LinearLayout(getContext());
         ll.setOrientation(LinearLayout.VERTICAL);
 
         for (i = 0; i < allNotifications.size(); i++) {
+
+            String[] componentsInNotification = allNotifications.get(i).split(" ");
+            String date = componentsInNotification[1];
+            String time = componentsInNotification[3];
+            String fromUser = componentsInNotification[5];
+            String toUser = componentsInNotification[7];
+            String songName = componentsInNotification[8];
+
             LinearLayout parent = new LinearLayout(getContext());
             parent.setBackgroundColor(Color.GREEN);
             parent.setGravity(Gravity.CENTER_VERTICAL);
@@ -193,14 +199,15 @@ public class NotificationFragment extends Fragment {
             final SeekBar seekBar = new SeekBar(getContext());
             allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
             allN.setGravity(Gravity.TOP);
-            boolean isCurrentUser = allNotifications.get(i).split(" ")[0].equals("You");
+            boolean isCurrentUser = fromUser.trim().equals("You");
+            Log.e("Not_USR",isCurrentUser+" "+fromUser);
             if(isCurrentUser) {
-                allN.setBackgroundColor(Color.CYAN);
-                seekBar.setBackgroundColor(Color.CYAN);
-            }
-            else {
                 allN.setBackgroundColor(Color.YELLOW);
                 seekBar.setBackgroundColor(Color.YELLOW);
+            }
+            else {
+                allN.setBackgroundColor(Color.CYAN);
+                seekBar.setBackgroundColor(Color.CYAN);
             }
             allN.setPadding(22,0,10,0);
             allN.setTypeface(Typeface.DEFAULT_BOLD);
@@ -240,54 +247,9 @@ public class NotificationFragment extends Fragment {
             floatingActionButton2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.e("Not_Frag", v.getId() + "");
-//                    if (mp != null) {
-//                        for (int j = 0; j < allNotifications.size(); j++) {
-//                            FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(j);
-//                            otherButon.setImageResource(R.drawable.play);
-//                        }
-//                    }
-
                     currentSeekBar = (SeekBar) view.findViewById((v.getId()+1)*1000000);
+                    playSong(floatingActionButton2,v,currentSeekBar,songFileName);
 
-                    if(v.getId() != idOfTheLastPlayButtonClicked) {
-                        if (idOfTheLastPlayButtonClicked != -1) {
-                            FloatingActionButton otherButon = (FloatingActionButton) view.findViewById(idOfTheLastPlayButtonClicked);
-                            otherButon.setImageResource(R.drawable.play);
-                            SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)*1000000);
-                            lastSeekBar.setProgress(0);
-                        }
-
-                        if(mp!=null)mp.reset();
-                        mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
-                        String url = serverSongURL + "romantic/" + songFileName;
-                        Log.e("Not_Frag_SongURL", url.toString());
-                        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        try {
-                            mp.setDataSource(url);
-                            mp.prepare();
-                            currentSeekBar.setMax(mp.getDuration());
-                            seekUpdation();
-                            mp.start();
-                            floatingActionButton2.setImageResource(R.mipmap.stop);
-                            idOfTheLastPlayButtonClicked = v.getId();
-                            isPlaying = true;
-                        } catch (Exception ee) {
-                            Log.e("Not_Frag_Err", "abc" + ee.getMessage());
-                        }
-                    } else {
-                        if(mp.isPlaying()){
-                            mp.seekTo(0);
-                            currentSeekBar.setProgress(0);
-                            mp.pause();
-                            floatingActionButton2.setImageResource(R.mipmap.play);
-                        } else {
-                            currentSeekBar.setMax(mp.getDuration());
-                            seekUpdation();
-                            mp.start();
-                            floatingActionButton2.setImageResource(R.mipmap.stop);
-                        }
-                    }
                 }
             });
             floatingActionButton2.setImageResource(R.drawable.play);
@@ -309,6 +271,49 @@ public class NotificationFragment extends Fragment {
         if(k==1)mainParentLayout.removeAllViews();
     }
 
+    public void playSong(FloatingActionButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName){
+        Log.e("Not_Frag", currentClickedButton.getId() + "");
+        if(currentClickedButton.getId() != idOfTheLastPlayButtonClicked) {
+            if (idOfTheLastPlayButtonClicked != -1) {
+                FloatingActionButton lastPlayedButton = (FloatingActionButton) view.findViewById(idOfTheLastPlayButtonClicked);
+                lastPlayedButton.setImageResource(R.drawable.play);
+                SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)*1000000);
+                lastSeekBar.setProgress(0);
+            }
+            if(mp!=null)mp.reset();
+            playButton.setImageResource(R.drawable.stop);
+            idOfTheLastPlayButtonClicked = currentClickedButton.getId();
+            play(songFileName);
+        }
+        else {
+            if(mp.isPlaying()){
+                currentSeekBar.setProgress(0);
+                mp.reset();
+                playButton.setImageResource(R.drawable.play);
+            } else {
+                currentSeekBar.setMax(mp.getDuration());
+                seekUpdation();
+                play(songFileName);
+                //mp.start();
+                playButton.setImageResource(R.drawable.stop);
+            }
+        }
+    }
+    public void play(String songFileName){
+        mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
+        String url = serverSongURL + "romantic/" + songFileName;
+        Log.e("Not_Frag_SongURL", url.toString());
+        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            mp.setDataSource(url);
+            mp.prepare();
+            currentSeekBar.setMax(mp.getDuration());
+            seekUpdation();
+            mp.start();
+        } catch (Exception ee) {
+            Log.e("Not_Frag_Err", "abc" + ee.getMessage());
+        }
+    }
 
     public void checkNot(){
         new Handler().postDelayed(new Runnable() {

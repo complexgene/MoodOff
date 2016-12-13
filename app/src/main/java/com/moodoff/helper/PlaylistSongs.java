@@ -8,6 +8,13 @@ import java.util.HashMap;
  */
 
 public class PlaylistSongs {
-    public static ArrayList<String> romaticPlayList = new ArrayList<>();
     public static HashMap<String,ArrayList<String>> allMoodPlayList = new HashMap<>();
+
+    public static HashMap<String, ArrayList<String>> getAllMoodPlayList() {
+        return allMoodPlayList;
+    }
+
+    public static void setAllMoodPlayList(HashMap<String, ArrayList<String>> allMoodPlayList) {
+        PlaylistSongs.allMoodPlayList = allMoodPlayList;
+    }
 }
