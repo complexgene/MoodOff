@@ -647,7 +647,8 @@ public class GenericMood extends Moods implements View.OnClickListener{
     public void setSongSource(int index, String mood) {
         String currentSong = currentplayList.get(index);
         releaseMediaPlayerObject();
-        mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
+        mp = new MediaPlayer();
+        Log.e("GenericMood_MPInst",""+(mp==null));
         String url = serverSongURL + mood + "/" + currentSong;
         Log.e("GenericMood_SongPlayURL",url.toString());
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);

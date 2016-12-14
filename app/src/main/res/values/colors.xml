@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3f51b5</color>
+    <color name="colorPrimary">#7a88d5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#f7d5d4</color>
     <color name="FBtn_genericMood">#fff45e</color>
