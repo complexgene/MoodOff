@@ -96,10 +96,8 @@ public class RegistrationActivity extends AppCompatActivity {
     };
 
     private void updateLabel() {
-
         String myFormat = "dd-MM-yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-
         birthday.setText(sdf.format(calendar.getTime()));
     }
 

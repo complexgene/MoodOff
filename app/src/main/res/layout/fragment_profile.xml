@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/entireProfile"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5B7B1"
@@ -46,7 +47,7 @@
                 android:textStyle="normal|bold"
                 android:textSize="18sp"
                 android:textColor="@color/black"
-                android:id="@+id/name"
+                android:id="@+id/username"
                 android:fontFamily="serif" />
             <TextView
                 android:layout_width="wrap_content"
@@ -56,7 +57,7 @@
                 android:textStyle="normal|bold"
                 android:textSize="18sp"
                 android:textColor="@color/black"
-                android:id="@+id/phoneNumber"
+                android:id="@+id/userPhNo"
                 android:fontFamily="serif" />
             <TextView
                 android:layout_width="wrap_content"
@@ -66,7 +67,7 @@
                 android:textStyle="normal|bold"
                 android:textSize="18sp"
                 android:textColor="@color/black"
-                android:id="@+id/emailId"
+                android:id="@+id/useremailId"
                 android:fontFamily="serif" />
             <TextView
                 android:layout_width="wrap_content"
@@ -76,7 +77,7 @@
                 android:textStyle="normal|bold"
                 android:textSize="18sp"
                 android:textColor="@color/black"
-                android:id="@+id/dob"
+                android:id="@+id/userdob"
                 android:fontFamily="serif" />
         </TableLayout>
 
@@ -93,20 +94,12 @@
         android:background="@color/white"
         >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:background="@color/light_yellow"
-            >
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/light_yellow"
-                android:src="@drawable/edit"
-                android:background="@color/white"
-                android:text="Change"
-                />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/light_yellow"
+              >
             <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -116,7 +109,21 @@
             android:textStyle="bold"
             android:textSize="18sp"
                 android:fontFamily="serif" />
-        </LinearLayout>
+          </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        >
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:src="@drawable/edit"
+            android:background="@color/white"
+            android:text="Change"
+            />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -128,7 +135,7 @@
             android:textStyle="bold"
             android:text="Life is fantastic when its about watching you.."
             />
-
+    </LinearLayout>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -147,7 +154,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:paddingLeft="5dp"
-                android:text="273 people loved your text status"
+                android:text="273 people loved the text status"
                 android:textSize="16sp"
                 android:textStyle="normal|bold"
                 android:fontFamily="sans-serif-condensed"
@@ -172,14 +179,7 @@
             android:layout_marginBottom="5dp"
             android:background="@color/light_yellow"
             >
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/light_yellow"
-                android:src="@drawable/edit"
-                android:background="@color/white"
-                android:text="Change"
-                />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -195,6 +195,15 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/selectRingTone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/edit"
+                android:background="@color/white"
+                android:text="Change"
+                />
             <android.support.design.widget.FloatingActionButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -234,7 +243,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:paddingLeft="5dp"
-                android:text="27 people loved your audio status"
+                android:text="27 people loved the audio status"
                 android:textSize="16sp"
                 android:textStyle="normal|bold"
                 android:fontFamily="sans-serif-condensed"

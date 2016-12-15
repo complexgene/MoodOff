@@ -36,7 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class AllTabs extends AppCompatActivity implements Profile.OnFragmentInteractionListener,SingSong.OnFragmentInteractionListener,Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
+public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener,SingSong.OnFragmentInteractionListener,Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a

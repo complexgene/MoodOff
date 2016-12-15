@@ -64,6 +64,7 @@ public class Start extends AppCompatActivity {
                 UserDetails.setUserName(rd.getValueFor("user"));
                 UserDetails.setPhoneNumber(rd.getValueFor("phoneNo"));
                 UserDetails.setEmailId(rd.getValueFor("email"));
+                UserDetails.setDateOfBirth(rd.getValueFor("dob"));
                 rd.endReadTransaction();
             }
             else {
@@ -254,6 +255,7 @@ public class Start extends AppCompatActivity {
             spinner = (ProgressBar) findViewById(R.id.spinner);
             spinner.setVisibility(ProgressBar.VISIBLE);
 
+            fetchMoodsAndPlayListFiles();
             populateUserData();
             Log.e("Start_populateUSrData", "User data populated");
             greetUser();
@@ -261,7 +263,6 @@ public class Start extends AppCompatActivity {
             fetchContacts();
             while (fetchContactsNotComplete) ;
             fetchNotifications();
-            fetchMoodsAndPlayListFiles();
             try {
                 new Handler().postDelayed(new Runnable() {
                     @Override

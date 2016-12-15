@@ -8,6 +8,7 @@ public class UserDetails {
     private static String userName;
     private static String phoneNumber;
     private static String emailId;
+    private static String dateOfBirth;
 
     public static String getUserName() {
         return userName;
@@ -31,5 +32,13 @@ public class UserDetails {
 
     public static void setEmailId(String mailId) {
         emailId = mailId;
+    }
+
+    public static String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public static void setDateOfBirth(String dateOfBirth) {
+        UserDetails.dateOfBirth = dateOfBirth;
     }
 }
