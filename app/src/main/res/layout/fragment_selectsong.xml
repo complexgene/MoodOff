@@ -11,6 +11,7 @@
         android:background="@color/light_yellow"
         >
         <TextView
+            android:id="@+id/statusChangeTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
@@ -51,14 +52,13 @@
         <Button
             android:id="@+id/songselectok"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="OK"
-            android:elevation="17dp"
             style="@style/Widget.AppCompat.Button.Colored" />
         <Button
             android:id="@+id/songselectcancel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="Cancel"
             style="@style/Widget.AppCompat.Button.Colored" />
     </LinearLayout>

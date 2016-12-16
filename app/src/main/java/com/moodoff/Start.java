@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.helper.AllNotifications;
+import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.PlaylistSongs;
 import com.moodoff.helper.StoreRetrieveDataImpl;
@@ -65,6 +66,7 @@ public class Start extends AppCompatActivity {
                 UserDetails.setPhoneNumber(rd.getValueFor("phoneNo"));
                 UserDetails.setEmailId(rd.getValueFor("email"));
                 UserDetails.setDateOfBirth(rd.getValueFor("dob"));
+                UserDetails.setUserTextStatus(rd.getValueFor("textStatus"));
                 rd.endReadTransaction();
             }
             else {
@@ -246,6 +248,7 @@ public class Start extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+
         askForPermissions();
         if (!checkNetworkAvailability()) {
             Toast.makeText(getApplicationContext(),"Sorry! You need Internet Connection",Toast.LENGTH_LONG).show();
@@ -254,6 +257,10 @@ public class Start extends AppCompatActivity {
         } else {
             spinner = (ProgressBar) findViewById(R.id.spinner);
             spinner.setVisibility(ProgressBar.VISIBLE);
+
+
+            Log.e("Start_Bots","Bots started");
+            //startAutoBots();
 
             fetchMoodsAndPlayListFiles();
             populateUserData();
@@ -278,6 +285,17 @@ public class Start extends AppCompatActivity {
                 Log.e("Start_AllTabsLaunchErr","Error in Alltabs Launch");
             }
         }
+    }
+
+    DBHelper dbOpr = new DBHelper(this);
+    private void startAutoBots(){
+        Log.e("Start_Bots","Bots in work");
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dbOpr.toDoWorkExit();
+            }
+        },5000);
     }
 
     public boolean checkIfATableExists(String tableName) {

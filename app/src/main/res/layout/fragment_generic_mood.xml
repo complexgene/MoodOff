@@ -107,13 +107,13 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginRight="5dp"
             android:id="@+id/tv_story"
             android:textColor="@android:color/background_light"
             android:textStyle="normal|italic"
-            android:fontFamily="cursive"
-            android:textSize="18sp" />
+            android:fontFamily="serif"
+            android:textSize="15sp" />
         </ScrollView>
             <Button
                 android:layout_width="wrap_content"

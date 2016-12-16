@@ -2,16 +2,11 @@ package com.moodoff;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.BoolRes;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Xml;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -21,45 +16,39 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.DBHelper;
+import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class RegistrationActivity extends AppCompatActivity {
 
     EditText name,mobile_number,birthday,email;
     TextView error;
-    DatePicker datePicker;
     Calendar calendar;
     int year, month, day;
     StoreRetrieveDataInterface rd=null;
-    boolean status = false;
     Button register;
+    DBHelper dbOperations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
-        register = (Button)findViewById(R.id.newregistration);
-        name = (EditText) findViewById(R.id.name);
-        mobile_number = (EditText) findViewById(R.id.phone_number);
-        birthday = (EditText) findViewById(R.id.date_of_birth);
-        email = (EditText) findViewById(R.id.email_id);
-        error = (TextView) findViewById(R.id.error_message);
-        calendar = Calendar.getInstance();
-        year = calendar.get(Calendar.YEAR);
-        month = calendar.get(Calendar.MONTH);
-        day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        initComponents();
+
+        // Need to do this without any lag..
+        //createAllNecessaryTablesForAppOperation();
+
         birthday.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -74,6 +63,34 @@ public class RegistrationActivity extends AppCompatActivity {
                 register(v);
             }
         });
+    }
+
+    private void initComponents(){
+        dbOperations = new DBHelper(this);
+        register = (Button)findViewById(R.id.newregistration);
+        name = (EditText) findViewById(R.id.name);
+        mobile_number = (EditText) findViewById(R.id.phone_number);
+        birthday = (EditText) findViewById(R.id.date_of_birth);
+        email = (EditText) findViewById(R.id.email_id);
+        error = (TextView) findViewById(R.id.error_message);
+        calendar = Calendar.getInstance();
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH);
+        day = calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private void createAllNecessaryTablesForAppOperation(){
+        DBInternal dboperations = new DBInternal();
+        HashMap<String,String> contactsColumns = new HashMap<>();
+        contactsColumns.put("phone_no","VARCHAR");
+        contactsColumns.put("name","VARCHAR");
+        dboperations.createTable("allcontacts",contactsColumns);
+        Log.e("RegistrationAct_TBL","allcontacts table created.");
+        HashMap<String,String> worktodoColumns = new HashMap<>();
+        contactsColumns.put("id","INT PRIMARY KEY AUTOINCREMENT");
+        contactsColumns.put("api","VARCHAR");
+        dboperations.createTable("worktodo",worktodoColumns);
+        Log.e("RegistrationAct_TBL","worktodo table created.");
     }
 
     public void setDate() {
@@ -130,6 +147,8 @@ public class RegistrationActivity extends AppCompatActivity {
                     userProfileString;
 
             userProfileString = nm + "/" + pn + "/" + em + "/" + dob;
+            final String Url = "http://hipilab.com/moodoff/users/" + userProfileString;
+            dbOperations.todoWorkEntry(Url);
 
             new Thread(new Runnable() {
                 @Override
@@ -137,7 +156,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     HttpURLConnection urlConnection = null;
                     try {
                         // Proide the URL fto which you would fire a post
-                        URL url = new URL("http://hipilab.com/moodoff/users/" + userProfileString);
+                        URL url = new URL(Url);
                         Log.e("RegistrationActivity", url.toString());
                         urlConnection = (HttpURLConnection) url.openConnection();
                         urlConnection.setDoOutput(true);
@@ -183,6 +202,7 @@ public class RegistrationActivity extends AppCompatActivity {
             rd.createNewData("phoneNo", mobile_number.getText().toString());
             rd.createNewData("dob", birthday.getText().toString());
             rd.createNewData("email", email.getText().toString());
+            rd.createNewData("textStatus","Using MoodOff");
             rd.endWriteTransaction();
             return true;
         } catch (IOException e) {

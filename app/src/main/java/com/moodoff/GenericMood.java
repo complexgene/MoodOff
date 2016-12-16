@@ -31,6 +31,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.DBHelper;
+import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.ExpressionsImpl;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.PlaylistSongs;
@@ -124,8 +126,10 @@ public class GenericMood extends Moods implements View.OnClickListener{
     ArrayList<String> currentplayList = null;
     String currentSong = "", currentMood = "", playListFilePath = "";
     int currentIndex = 0, repParm = 0, playOrPauseParm = 0;
+    DBHelper dbOperations;
 
     public void init(){
+        dbOperations = new DBHelper(getContext());
         songName = (TextView) view.findViewById(R.id.nameOfSong);
         storyTitleTV = (TextView) view.findViewById(R.id.tv_storytitle);
         storyBodyTV = (TextView) view.findViewById(R.id.tv_story);
@@ -299,15 +303,26 @@ public class GenericMood extends Moods implements View.OnClickListener{
                     Toast.makeText(getActivity().getApplicationContext(),"Please play a song to like it.",Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    final String Url = "notifications/"+currentUser+"/"+currentSong+"/"+type;
-                    loveButton.setImageResource(R.drawable.love_s);
+                    final String Url = serverURL+"/notifications/"+currentUser+"/"+currentSong+"/"+type;
+
+                    if(dbOperations.todoWorkEntry(Url)){
+                        for(int i=0;i<10;i++){
+                            dbOperations.todoWorkEntry(Url);
+                        }
+                        loveButton.setImageResource(R.drawable.love_s);
+                        Toast.makeText(getActivity().getApplicationContext(),"You loved this song",Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        Toast.makeText(getActivity().getApplicationContext(),"Sorry!! Please try after sometime!!",Toast.LENGTH_SHORT).show();
+                    }
+
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
                             HttpURLConnection urlConnection=null;
                             try {
-                                // Proide the URL fto which you would fire a post
-                                URL url = new URL(serverURL+"/"+Url);
+                                // Proide the URL to which you would fire a post
+                                URL url = new URL(Url);
                                 Log.e("GenericMood_LOVEButton",url.toString());
                                 urlConnection = (HttpURLConnection) url.openConnection();
                                 urlConnection.setDoOutput(true);
@@ -370,6 +385,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 char type = 'S';
                 final String stredittext=data.getStringExtra("selectedContact");
                 final String Url = "notifications/"+currentUser+"/"+stredittext.split(" ")[1]+"/"+currentSong+"/"+type;
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -493,6 +509,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 currentSong = (String) songNameFromList(currentplayList, currentIndex);
                 displaySongName(songName, "Downloading the song...please wait");
                 setSongSource(currentIndex, currentMood);
+                mp.setLooping(false);
                 //after the song is prepared in asynchronous mode
                 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     public void onPrepared(MediaPlayer mediaPlayer) {
@@ -746,7 +763,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             if (mp != null) {
                 if(mp.isPlaying()){mp.stop();}
                 mp.release();
-                //mp = null;
+                mp = null;
             }
         } catch(Exception e){e.fillInStackTrace();e.printStackTrace();}
     }

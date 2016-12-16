@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
@@ -36,7 +37,7 @@ public class StoreRetrieveDataImpl implements StoreRetrieveDataInterface {
             this.fileName = fileName ;
         }
         catch(Exception e){
-            Toast.makeText(context, "abc:" + e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e("StoreRetrieveData_Err",e.getMessage());
             e.printStackTrace();
         }
     }

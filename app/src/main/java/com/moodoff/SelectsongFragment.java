@@ -121,8 +121,8 @@ public class SelectsongFragment extends Fragment {
                     }
                 });
 
-                eachSongPanel.addView(songName);
                 eachSongPanel.addView(playButton);
+                eachSongPanel.addView(songName);
                 allSongsContainer.addView(eachSongPanel);
             }
         }

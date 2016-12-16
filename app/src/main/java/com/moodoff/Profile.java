@@ -3,25 +3,33 @@ package com.moodoff;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.ListFragment;
-import android.text.Layout;
+import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.moodoff.helper.PlaylistSongs;
+import com.moodoff.helper.StoreRetrieveDataImpl;
+import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Profile extends Fragment {
     private static final String ARG_PARAM1 = "param1";
@@ -55,60 +63,180 @@ public class Profile extends Fragment {
         }
     }
 
-    View view,tempView;
-    TextView myName, myPhNo, myEmail, myDob;
-    ImageButton selectRingTone;
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_profile, container, false);
-        tempView = inflater.inflate(R.layout.fragment_selectsong, container, false);
+    private void init(){
+        view = mainInflater.inflate(R.layout.fragment_profile, mainContainer, false);
         myName = (TextView)view.findViewById(R.id.username);
         myPhNo = (TextView)view.findViewById(R.id.userPhNo);
         myEmail = (TextView)view.findViewById(R.id.useremailId);
         myDob = (TextView)view.findViewById(R.id.userdob);
+        myTextStatus = (TextView)view.findViewById(R.id.myTextStatus);
+        myAudioStatus = new String();
         selectRingTone = (ImageButton)view.findViewById(R.id.selectRingTone);
+        editTextStatus = (ImageButton)view.findViewById(R.id.editTextStatus);
+
+        //dialogView = mainInflater.inflate(R.layout.fragment_selectsong, mainContainer, false);
+        //dialogContainer = (LinearLayout)dialogView.findViewById(R.id.eachRingToneSong);
+
+    }
+
+    View view,dialogView;
+    TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle;
+    String myAudioStatus;
+    ImageButton selectRingTone, editTextStatus;
+    Button okButtonWidth,cancelButtonWidth,okButton,cancelButton;
+    int screenHeight, screenWidth;
+    ViewGroup mainContainer;
+    LayoutInflater mainInflater;
+    LinearLayout dialogContainer;
+    StoreRetrieveDataInterface fileOperations;
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        mainContainer = container;
+        mainInflater = inflater;
+
+        init();
+
         setUserProfileData();
-        //setUserTextStatus();
-        //setUserAudioStatus();
+
         selectRingTone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //chooseAndSetRingTone();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                Fragment newFragment = SelectsongFragment.newInstance("party","b");
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack if needed
-                transaction.replace(R.id.entireProfile, newFragment);
-                transaction.addToBackStack(null);
-                transaction.commitAllowingStateLoss();
-
+                editStatus(0);
             }
         });
-
+        editTextStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editStatus(1);
+            }
+        });
 
         return view;
     }
 
-    private void chooseAndSetRingTone(){
-        final Dialog fbDialogue = new Dialog(view.getContext(), android.R.style.Theme_Black);
-        fbDialogue.getWindow().setTitle("Select your audio status song");
+    private void editStatus(int textOrAudioStatus){
+        final Dialog fbDialogue = new Dialog(view.getContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         fbDialogue.getWindow().setBackgroundDrawable(new ColorDrawable(Color.argb(100, 0, 0, 0)));
-        fbDialogue.setContentView(R.layout.fragment_selectsong);
-        getSongsAndFillDialogue();
+
+        dialogView = mainInflater.inflate(R.layout.fragment_selectsong, mainContainer, false);
+        dialogContainer = (LinearLayout)dialogView.findViewById(R.id.eachRingToneSong);
+        statusChangeTitle = (TextView)dialogView.findViewById(R.id.statusChangeTitle);
+        okButton = (Button)dialogView.findViewById(R.id.songselectok);
+        cancelButton = (Button)dialogView.findViewById(R.id.songselectcancel);
+
+        if(textOrAudioStatus==0){
+            editUserAudioStatus(fbDialogue);
+        }
+        else{
+            editUserTextStatus(fbDialogue);
+        }
+        getAndSetScreenSizes();
+        setWidthOfButtonAcrossScreen();
+        fbDialogue.setContentView(dialogView);
         fbDialogue.setCancelable(true);
         fbDialogue.show();
     }
-    private void getSongsAndFillDialogue(){
-        LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        LinearLayout container = (LinearLayout) tempView.findViewById(R.id.eachRingToneSong);
-        TextView tv = new TextView(tempView.getContext());
-        tv.setText("Hi hello");
-        Button b = new Button(tempView.getContext());
-        b.setText("abcde");
-        container.addView(tv);
-        container.addView(b);
+
+    private void editUserTextStatus(final Dialog fbDialogue){
+        statusChangeTitle.setText("Edit your Text Status");
+        dialogContainer.removeAllViews();
+        final EditText tv = new EditText(dialogView.getContext());
+        tv.setText(myTextStatus.getText());
+        dialogContainer.addView(tv);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String oldStatus = myTextStatus.getText().toString();
+                String newStatus = tv.getText().toString();
+                if(oldStatus.equals(newStatus)){
+                    Toast.makeText(getContext(),"Same as previous status",Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    if(writeTheStatusChangeToFile(tv.getText().toString())){
+                        myTextStatus.setText(tv.getText());
+                    }
+                    else{
+                        Toast.makeText(getContext(),"Some error occured!! Please try later!!",Toast.LENGTH_SHORT).show();
+                    }
+                    fbDialogue.dismiss();
+                }
+            }
+        });
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fbDialogue.dismiss();
+            }
+        });
+
+    }
+
+    private boolean writeTheStatusChangeToFile(String newStatus){
+        try {
+            fileOperations = new StoreRetrieveDataImpl("UserData.txt");
+            fileOperations.beginWriteTransaction();
+            if(fileOperations.getValueFor("textStatus")==null){
+                fileOperations.createNewData("textStatus",newStatus);
+            }
+            else{
+                fileOperations.updateValueFor("textStatus",newStatus);
+            }
+            fileOperations.endWriteTransaction();
+            UserDetails.setUserTextStatus(newStatus);
+            return true;
+        } catch (IOException e) {
+            Log.e("Profile_writeToFile_Err","Couldn't save the file:"+e.getMessage());
+            return false;
+        }
+
+    }
+
+    private void editUserAudioStatus(final Dialog fbDialogue){
+        int playButtonId = 0;
+        statusChangeTitle.setText("Edit your Audio Status");
+        dialogContainer.removeAllViews();
+        HashMap<String,ArrayList<String>> allSongs = PlaylistSongs.getAllMoodPlayList();
+        for(final String eachMood : allSongs.keySet()){
+            TextView moodType = new TextView(dialogView.getContext());
+            moodType.setText(eachMood);
+            dialogContainer.addView(moodType);
+            for(final String eachSong : allSongs.get(eachMood)){
+                LinearLayout eachSongPanel = new LinearLayout(getContext());
+                eachSongPanel.setGravity(Gravity.CENTER_VERTICAL);
+                eachSongPanel.setOrientation(LinearLayout.HORIZONTAL);
+                TextView songName = new TextView(dialogView.getContext());
+                songName.setText(eachSong);
+                final FloatingActionButton playButton = new FloatingActionButton(getContext());
+                playButton.setImageResource(R.drawable.play);
+                playButton.setSize(FloatingActionButton.SIZE_MINI);
+                playButton.setId(++playButtonId);
+                playButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //playSong(eachSong);
+                        Toast.makeText(getContext(),eachSong,Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                eachSongPanel.addView(playButton);
+                eachSongPanel.addView(songName);
+                dialogContainer.addView(eachSongPanel);
+            }
+        }
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fbDialogue.dismiss();
+            }
+        });
 
     }
 
@@ -123,6 +251,24 @@ public class Profile extends Fragment {
         myPhNo.setText(phNo);
         myEmail.setText(email);
         myDob.setText(dob);
+        new UserDetails();
+        myTextStatus.setText(UserDetails.getUserTextStatus());
+        myTextStatus.setTextSize(20);
+        myAudioStatus=UserDetails.getUserAudioStatus();
+    }
+    private void getAndSetScreenSizes(){
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenWidth = size.x;
+        screenHeight = size.y;
+    }
+    public void setWidthOfButtonAcrossScreen(){
+        okButtonWidth = (Button)dialogView.findViewById(R.id.songselectok);
+        cancelButtonWidth = (Button)dialogView.findViewById(R.id.songselectcancel);
+        okButtonWidth.setWidth((int)Math.floor(0.5*screenWidth));
+        cancelButtonWidth.setWidth((int)Math.floor(0.5*screenWidth));
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

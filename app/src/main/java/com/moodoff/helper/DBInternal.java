@@ -1,22 +1,21 @@
 package com.moodoff.helper;
 
-import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-
-import com.moodoff.ContactList;
-import com.moodoff.R;
-
-import android.database.sqlite.*;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+import com.moodoff.R;
+
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
 
 /**
  * Created by snaskar on 10/15/2016.
@@ -35,15 +34,87 @@ public class DBInternal extends AppCompatActivity{
             tv = (TextView) findViewById(R.id.alldata);
             tableName = (EditText) findViewById(R.id.datatostore);
 
-            mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
-            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS notifications1(from_user_id VARCHAR,filename VARCHAR, type VARCHAR);");
-            mydatabase.close();
         }
         catch(Exception ee){
             Log.e("DBInternal",ee.getMessage());
         }
 
     }
+
+    public void createTable(String tableName,HashMap<String,String> columnNameAndDataType){
+        mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
+        String query = "CREATE TABLE IF NOT EXISTS"+tableName+"(";
+        for(String columns : columnNameAndDataType.keySet()) {
+            query+=columns+" "+columnNameAndDataType.get(columns)+",";
+        }
+        // To avoid the last COMMA
+        query=query.substring(0,query.length()-1)+");";
+        Log.e("DBInternal_CREATE_QUERY",query);
+        mydatabase.execSQL(query);
+        mydatabase.close();
+    }
+
+    public boolean todoWorkEntry(String API){
+        try {
+            mydatabase = getApplicationContext().openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
+            mydatabase.execSQL("insert into worktodo values('" + API + "');");
+            mydatabase.close();
+            return true;
+        }
+        catch(Exception ee){
+            Log.e("DBInternal_Err",ee.getMessage());
+            return false;
+        }
+    }
+
+    public void toDoWorkExit(){
+        mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
+        Cursor resultSet = mydatabase.rawQuery("Select * from worktodo", null);
+        resultSet.moveToFirst();
+        while (!resultSet.isAfterLast()) {
+            final int id = resultSet.getInt(0);
+            final String apiToFire = resultSet.getString(1);
+            new Handler().postDelayed(new Runnable() {
+                HttpURLConnection urlConnection = null;
+                InputStreamReader isr = null;
+                @Override
+                public void run() {
+                    try {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try{
+                                    URL url = new URL(apiToFire);
+                                    Log.e("DBInternal_API_TO_FIRE", url.toString());
+                                    urlConnection = (HttpURLConnection) url.openConnection();
+                                    if(urlConnection.getResponseCode()==200){
+                                        Log.e("DBInternal_API_SUCCESS","Successful");
+                                        mydatabase.execSQL("DELETE FROM worktodo WHERE ID="+id);
+                                    }
+                                }
+                                catch(Exception ee){
+                                    Log.e("DBInternal_Err","Some issues.."+ee.getMessage());
+                                }
+                                finally {
+                                    try {
+                                        isr.close();
+                                    } catch (Exception ee) {
+                                        Log.e("DBInternal_Err", "InputStreamReader couldn't be closed");
+                                    }
+                                    urlConnection.disconnect();
+                                }
+                            }
+                        }).start();
+                        toDoWorkExit();
+                    } catch (Exception ee) {
+                        Log.e("DBInternal_Err","Some issues.."+ee.getMessage());
+                    }
+                }
+            },5000);
+        }
+        mydatabase.close();
+    }
+
     public void runRawQuery(View v){
         String query = ((TextView)findViewById(R.id.rawquery)).getText().toString();
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
@@ -84,7 +155,7 @@ public class DBInternal extends AppCompatActivity{
         }
 
     }
-
+    // List all the tables in DB
     public void storeData(View v){
         try {
             mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
@@ -99,12 +170,10 @@ public class DBInternal extends AppCompatActivity{
             tv.setText("All Tables in DB:\n" + allTablesHere);
             mydatabase.close();
         }catch (Exception ee){
-            Log.e("DBInternal",ee.getMessage());
+            Log.e("DBInternal_Err",ee.getMessage());
         }
     }
-
-
-
+    // Show the data in the corresponding table that has been written in the textbox
     public void showData(View v){
         try {
             mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
@@ -126,10 +195,10 @@ public class DBInternal extends AppCompatActivity{
             tv.setText(parsingData);
             mydatabase.close();
         }catch (Exception ee){
-            Log.e("DBInternal",ee.getMessage());
+            Log.e("DBInternal_Err",ee.getMessage());
         }
     }
-
+    // Delete all the data in the corresponding table that has been written in the textbox
     public void clearData(View v){
         try {
             mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
@@ -137,10 +206,10 @@ public class DBInternal extends AppCompatActivity{
             mydatabase.close();
             tv.setText("Deleted all data from table "+tableName.getText());
         }catch (Exception ee){
-            Log.e("DBInternal",ee.getMessage());
+            Log.e("DBInternal_Err",ee.getMessage());
         }
     }
-
+    // Check if a tble is existing in the database
     public boolean checkIfATableExists(String tableName){
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
@@ -161,65 +230,5 @@ public class DBInternal extends AppCompatActivity{
         }
         mydatabase.close();
         return false;
-    }
-
-    public ArrayList<String> getOrStoreContactsTableData(int status, ArrayList<String> allContacts){
-        ArrayList<String> allContactsPresent = new ArrayList<String>();
-        try {
-            mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
-            // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
-                if(status == 0){
-                    //READ and RETURN data
-                    Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
-                    resultSet.moveToFirst();
-                    while (!resultSet.isAfterLast()) {
-                        allContactsPresent.add(resultSet.getString(0)+" "+resultSet.getString(1));
-                    }
-                }
-                // First time conatct table create or REFRESH done.
-                else{
-                    String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(user_id VARCHAR,phone_no VARCHAR);";
-                    mydatabase.execSQL(createQuery);
-                    String deleteQuery = "DELETE FROM allcontacts;";
-                    mydatabase.execSQL(deleteQuery);
-                    String insertQuery = "";
-                    for(String eachContact:allContacts){
-                        Log.e("DBInternal_Contact",eachContact);
-                        insertQuery = "INSERT INTO allcontacts values('"+eachContact.split(" ")[0]+"','"+eachContact.split(" ")[1]+"');";
-                        mydatabase.execSQL(createQuery);
-                    }
-                    return null;
-                }
-                mydatabase.close();
-
-        }catch (Exception ee){
-            Log.e("DBInternal_getStoreErr",ee.getMessage());
-            ee.fillInStackTrace();
-        }
-        return allContactsPresent;
-    }
-
-    public void checkAndPopulateNotificationsTable(ArrayList<String> allContacts){
-        try {
-            mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
-
-            String createQuery = "CREATE TABLE IF NOT EXISTS allnotifications(from_user_id VARCHAR,to_user_id VARCHAR,file_name VARCHAR,type CHAR,ts VARCHAR);";
-            String insertQuery = "";
-            mydatabase.execSQL(createQuery);
-            ContactList contactList = new ContactList();
-            tv.setText(allContacts.get(0));
-            for(String eachContact:allContacts){
-                Log.e("Connnn",eachContact);
-                insertQuery = "INSERT INTO allcontacts values('"+eachContact.split(" ")[0]+"','"+eachContact.split(" ")[1]+"');";
-                mydatabase.execSQL(createQuery);
-            }
-            mydatabase.close();
-            tv.setText("Created contacts table");
-
-
-        }catch (Exception ee){
-            Log.e("DBInternal1",ee.getMessage());
-            ee.fillInStackTrace();
-        }
     }
 }
