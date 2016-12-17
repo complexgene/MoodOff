@@ -116,22 +116,27 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
         >
-        <ImageButton
+
+        <android.support.design.widget.FloatingActionButton
             android:id="@+id/editTextStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="5dp"
+            app:fabSize="mini"
             android:src="@drawable/edit"
-            android:background="@color/white"
+            app:backgroundTint="@android:color/holo_green_light"
             android:text="Change"
             />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/myTextStatus"
             android:layout_marginTop="5dp"
             android:layout_marginLeft="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginBottom="2dp"
             android:textSize="20dp"
             android:textStyle="bold"
             android:text="Life is fantastic when its about watching you.."
@@ -196,16 +201,19 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <ImageButton
+            <android.support.design.widget.FloatingActionButton
                 android:id="@+id/selectRingTone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                app:fabSize="mini"
                 android:src="@drawable/edit"
-                android:background="@color/white"
+                app:backgroundTint="@android:color/holo_green_light"
                 android:text="Change"
                 />
             <android.support.design.widget.FloatingActionButton
+                android:id="@+id/playAudioStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"

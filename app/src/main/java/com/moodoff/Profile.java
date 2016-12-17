@@ -2,9 +2,12 @@ package com.moodoff;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -19,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,20 +74,18 @@ public class Profile extends Fragment {
         myEmail = (TextView)view.findViewById(R.id.useremailId);
         myDob = (TextView)view.findViewById(R.id.userdob);
         myTextStatus = (TextView)view.findViewById(R.id.myTextStatus);
-        myAudioStatus = new String();
+        playAudioStatusButton = (FloatingActionButton)view.findViewById(R.id.playAudioStatus);
+        myAudioStatusSong = new String();
         selectRingTone = (ImageButton)view.findViewById(R.id.selectRingTone);
         editTextStatus = (ImageButton)view.findViewById(R.id.editTextStatus);
-
-        //dialogView = mainInflater.inflate(R.layout.fragment_selectsong, mainContainer, false);
-        //dialogContainer = (LinearLayout)dialogView.findViewById(R.id.eachRingToneSong);
-
     }
 
     View view,dialogView;
     TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle;
-    String myAudioStatus;
+    String myAudioStatusSong;
     ImageButton selectRingTone, editTextStatus;
     Button okButtonWidth,cancelButtonWidth,okButton,cancelButton;
+    FloatingActionButton playAudioStatusButton;
     int screenHeight, screenWidth;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
@@ -112,8 +114,18 @@ public class Profile extends Fragment {
                 editStatus(1);
             }
         });
+        playAudioStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playSong(myAudioStatusSong);
+            }
+        });
 
         return view;
+    }
+
+    private void playSong(String songURL){
+        // Write the code to play the song and handle the seekbar too
     }
 
     private void editStatus(int textOrAudioStatus){
@@ -199,16 +211,37 @@ public class Profile extends Fragment {
         dialogContainer.removeAllViews();
         HashMap<String,ArrayList<String>> allSongs = PlaylistSongs.getAllMoodPlayList();
         for(final String eachMood : allSongs.keySet()){
+            /*LinearLayout moodTypeLayout = new LinearLayout(dialogView.getContext());
+            moodTypeLayout.setBackgroundColor(Color.CYAN);
             TextView moodType = new TextView(dialogView.getContext());
             moodType.setText(eachMood);
-            dialogContainer.addView(moodType);
-            for(final String eachSong : allSongs.get(eachMood)){
+            moodTypeLayout.addView(moodType);
+            dialogContainer.addView(moodTypeLayout);
+            */for(final String eachSong : allSongs.get(eachMood)){
                 LinearLayout eachSongPanel = new LinearLayout(getContext());
+                eachSongPanel.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutDetails.topMargin = 25;
+                eachSongPanel.setLayoutParams(layoutDetails);
+                eachSongPanel.setBackgroundColor(Color.RED);
                 eachSongPanel.setGravity(Gravity.CENTER_VERTICAL);
-                eachSongPanel.setOrientation(LinearLayout.HORIZONTAL);
                 TextView songName = new TextView(dialogView.getContext());
-                songName.setText(eachSong);
+                songName.setText(eachSong.replaceAll("_"," ").replaceAll("\\.mp3",""));
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutDetails.topMargin = 15;
+                songName.setGravity(Gravity.CENTER_HORIZONTAL);
+                songName.setTypeface(Typeface.DEFAULT_BOLD);
+                songName.setLayoutParams(layoutDetails);
+                eachSongPanel.addView(songName);
+
+                LinearLayout playButtonAndSeekBar = new LinearLayout(getContext());
+                playButtonAndSeekBar.setGravity(Gravity.CENTER_VERTICAL);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutDetails.leftMargin = 50;
+                layoutDetails.bottomMargin = 15;
+                playButtonAndSeekBar.setLayoutParams(layoutDetails);
                 final FloatingActionButton playButton = new FloatingActionButton(getContext());
+                playButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                 playButton.setImageResource(R.drawable.play);
                 playButton.setSize(FloatingActionButton.SIZE_MINI);
                 playButton.setId(++playButtonId);
@@ -219,9 +252,14 @@ public class Profile extends Fragment {
                         Toast.makeText(getContext(),eachSong,Toast.LENGTH_SHORT).show();
                     }
                 });
+                SeekBar seekBarForEachSong = new SeekBar(getContext());
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutDetails.rightMargin = 50;
+                seekBarForEachSong.setLayoutParams(layoutDetails);
+                playButtonAndSeekBar.addView(playButton);
+                playButtonAndSeekBar.addView(seekBarForEachSong);
 
-                eachSongPanel.addView(playButton);
-                eachSongPanel.addView(songName);
+                eachSongPanel.addView(playButtonAndSeekBar);
                 dialogContainer.addView(eachSongPanel);
             }
         }
@@ -254,7 +292,7 @@ public class Profile extends Fragment {
         new UserDetails();
         myTextStatus.setText(UserDetails.getUserTextStatus());
         myTextStatus.setTextSize(20);
-        myAudioStatus=UserDetails.getUserAudioStatus();
+        myAudioStatusSong=UserDetails.getUserAudioStatusSong();
     }
     private void getAndSetScreenSizes(){
         Display display = getActivity().getWindowManager().getDefaultDisplay();

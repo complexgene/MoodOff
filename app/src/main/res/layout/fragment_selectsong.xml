@@ -46,21 +46,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal"
+        android:gravity="bottom"
         android:background="@color/light_yellow"
         >
         <Button
             android:id="@+id/songselectok"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:background="@drawable/buttonborder"
             android:text="OK"
-            style="@style/Widget.AppCompat.Button.Colored" />
+            android:textColor="@color/black" />
+
         <Button
             android:id="@+id/songselectcancel"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="Cancel"
-            style="@style/Widget.AppCompat.Button.Colored" />
+            android:textColor="@color/black"
+            android:background="@drawable/buttonborder"
+            />
     </LinearLayout>
 
 </RelativeLayout>

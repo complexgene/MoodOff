@@ -315,7 +315,6 @@ public class NotificationFragment extends Fragment {
             Log.e("Not_Frag_Err", "abc" + ee.getMessage());
         }
     }
-
     public void checkNot(){
         new Handler().postDelayed(new Runnable() {
             HttpURLConnection urlConnection = null;
@@ -446,14 +445,12 @@ public class NotificationFragment extends Fragment {
         leftButtonHeight = rightButtonHeight = textViewHeight = (int)Math.ceil(.0625*height);
 
     }
-
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
     }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -464,7 +461,6 @@ public class NotificationFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
-
     @Override
     public void onDetach() {
        if(mp!=null) {
@@ -475,8 +471,7 @@ public class NotificationFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-public interface OnFragmentInteractionListener {
+    public interface OnFragmentInteractionListener {
     // TODO: Update argument type and name
     void onFragmentInteraction(Uri uri);
 }

@@ -12,10 +12,10 @@ public class UserDetails {
     private static String emailId;
     private static String dateOfBirth;
     private static String userTextStatus;
-    private static String userAudioStatus;
+    private static String userAudioStatusSong;
 
     public UserDetails(){
-        userAudioStatus = HttpGetPostInterface.serverSongURL+"romantic/HERO.mp3";
+        userAudioStatusSong = HttpGetPostInterface.serverSongURL+"romantic/HERO.mp3";
     }
 
     public static String getUserName() {
@@ -56,11 +56,11 @@ public class UserDetails {
         UserDetails.userTextStatus = userTextStatus;
     }
 
-    public static String getUserAudioStatus() {
-        return userAudioStatus;
+    public static String getUserAudioStatusSong() {
+        return userAudioStatusSong;
     }
 
-    public static void setUserAudioStatus(String userAudioStatus) {
-        UserDetails.userAudioStatus = userAudioStatus;
+    public static void setUserAudioStatusSong(String userAudioStatusSong) {
+        UserDetails.userAudioStatusSong = userAudioStatusSong;
     }
 }
