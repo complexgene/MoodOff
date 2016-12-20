@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -26,12 +25,17 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.PlaylistSongs;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -74,18 +78,23 @@ public class Profile extends Fragment {
         myEmail = (TextView)view.findViewById(R.id.useremailId);
         myDob = (TextView)view.findViewById(R.id.userdob);
         myTextStatus = (TextView)view.findViewById(R.id.myTextStatus);
+        textStatusLoveCount = (TextView)view.findViewById(R.id.textStatusLoveCount);
+        audioStatusLoveCount = (TextView)view.findViewById(R.id.audioStatusLoveCount);
         playAudioStatusButton = (FloatingActionButton)view.findViewById(R.id.playAudioStatus);
+        loveTextStatus = (FloatingActionButton)view.findViewById(R.id.loveTextStatus);
+        loveAudioStatus = (FloatingActionButton)view.findViewById(R.id.loveAudioStatus);
+        editBasicInfo = (FloatingActionButton)view.findViewById(R.id.editBasicInfo);
         myAudioStatusSong = new String();
         selectRingTone = (ImageButton)view.findViewById(R.id.selectRingTone);
         editTextStatus = (ImageButton)view.findViewById(R.id.editTextStatus);
     }
 
     View view,dialogView;
-    TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle;
+    TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount;
     String myAudioStatusSong;
     ImageButton selectRingTone, editTextStatus;
     Button okButtonWidth,cancelButtonWidth,okButton,cancelButton;
-    FloatingActionButton playAudioStatusButton;
+    FloatingActionButton playAudioStatusButton, loveTextStatus, loveAudioStatus, editBasicInfo;
     int screenHeight, screenWidth;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
@@ -100,7 +109,15 @@ public class Profile extends Fragment {
 
         init();
 
-        setUserProfileData();
+        String profileOfUser = mParam1;
+
+        Toast.makeText(getContext(),profileOfUser,Toast.LENGTH_SHORT).show();
+
+        setUserProfileData(profileOfUser);
+        // Check if its someone else's profile, then remove the edit button
+        if(!profileOfUser.equals(UserDetails.getPhoneNumber())){
+            selectRingTone.setVisibility(View.GONE);editTextStatus.setVisibility(View.GONE);editBasicInfo.setVisibility(View.INVISIBLE);
+        }
 
         selectRingTone.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,6 +135,12 @@ public class Profile extends Fragment {
             @Override
             public void onClick(View v) {
                 playSong(myAudioStatusSong);
+            }
+        });
+        loveTextStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               // loveTheTextStatus();
             }
         });
 
@@ -278,21 +301,63 @@ public class Profile extends Fragment {
 
     }
 
-    private void setUserProfileData(){
-        String name = UserDetails.getUserName();
+    boolean profileDetailsNotRetrievedYet = true;
+    HashMap<String,String> profileDataParsed = new HashMap<>();
+    private void setUserProfileData(final String userPhoneNumber){
+
+        final String serverURL = HttpGetPostInterface.serverURL;
+        new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(serverURL + "/users/" + userPhoneNumber);
+                    Log.e("Profile_ContactURL", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    InputStream is = urlConnection.getInputStream();
+                    isr = new InputStreamReader(is);
+                    int data = isr.read();
+                    final StringBuilder response = new StringBuilder("");
+                    while (data != -1) {
+                        response.append((char) data);
+                        data = isr.read();
+                    }
+                    Log.e("Profile_Data", response.toString());
+                    profileDataParsed = ParseNotificationData.parseAndGetProfileData(response.toString());
+                    Log.e("Profile_parsedHM",profileDataParsed.get("name"));
+                    profileDetailsNotRetrievedYet = false;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showProfileData();
+                        }
+                    });
+
+                } catch (Exception ee) {
+                    Log.e("Profile_Err", ee.getMessage());
+                }
+            }
+        }).start();
+        //showProfileData();
+    }
+    private void showProfileData(){
+        String name = profileDataParsed.get("name");
         if(name.length()>17){name=name.substring(0,17)+"...";}
-        String phNo = UserDetails.getPhoneNumber();
-        String email = UserDetails.getEmailId();
-        if(email.length()>17){email=email.substring(0,17)+"...";}
-        String dob = UserDetails.getDateOfBirth();
+        String phNo = profileDataParsed.get("phoneNumber");
+        String email = profileDataParsed.get("email");
+        if(email.length()>17){email=email.substring(0,15)+"...";}
+        String dob = profileDataParsed.get("dob");
         myName.setText(name);
         myPhNo.setText(phNo);
         myEmail.setText(email);
         myDob.setText(dob);
         new UserDetails();
-        myTextStatus.setText(UserDetails.getUserTextStatus());
+        myTextStatus.setText(profileDataParsed.get("textStatus"));
         myTextStatus.setTextSize(20);
-        myAudioStatusSong=UserDetails.getUserAudioStatusSong();
+        myAudioStatusSong=profileDataParsed.get("audioStatusURL");
+        textStatusLoveCount.setText(profileDataParsed.get("textStatusLoveCount")+" people loved the status");
+        audioStatusLoveCount.setText(profileDataParsed.get("audioStatusLoveCount")+" people loved the status");
     }
     private void getAndSetScreenSizes(){
         Display display = getActivity().getWindowManager().getDefaultDisplay();

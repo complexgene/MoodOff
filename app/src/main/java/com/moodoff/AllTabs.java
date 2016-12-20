@@ -148,8 +148,8 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
             // getItem is called to instantiate the fragment for the given page.
             if(position == 0)return Moods.newInstance("a","b");
             else if(position == 1)return NotificationFragment.newInstance("x","y");
-            else if(position == 2)return SingSong.newInstance("p","q");
-            else if(position == 3)return Profile.newInstance("p","q");
+            //else if(position == 2)return SingSong.newInstance("p","q");
+            else if(position == 2)return ContactsFragment.newInstance("p","q");
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
         }
@@ -157,7 +157,7 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 4;
+            return 3;
         }
 
         @Override
@@ -169,7 +169,7 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
                     return "Activity";
                 }
                 case 2: {
-                    return "Sing";
+                    return "Profiles";
                 }
                 case 3: {
                     return "Profiles";

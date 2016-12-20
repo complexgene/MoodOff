@@ -56,7 +56,7 @@ public class Start extends AppCompatActivity {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    private void populateUserData(){
+    private boolean populateUserData(){
         StoreRetrieveDataInterface rd = null;
         try {
             rd = new StoreRetrieveDataImpl("UserData.txt");
@@ -68,13 +68,16 @@ public class Start extends AppCompatActivity {
                 UserDetails.setDateOfBirth(rd.getValueFor("dob"));
                 UserDetails.setUserTextStatus(rd.getValueFor("textStatus"));
                 rd.endReadTransaction();
+                return true;
             }
             else {
                 Intent ii = new Intent(this, RegistrationActivity.class);
                 startActivity(ii);
+                return false;
             }
         }
         catch(Exception ee){Log.e("Start_popUsrData","Contacts not populated coz:"+ee.getMessage());}
+        return true;
     }
 
     private void greetUser() {
@@ -150,9 +153,9 @@ public class Start extends AppCompatActivity {
                                 nameOfTo = nameOfTo.substring(0,16)+"...";
 
                             if (nameOfTo != null) {
-                                allYourNotification.add("[ "+date+" at "+time+" ]: \nYou -> " + nameOfTo + " " + songName);
+                                allYourNotification.add(toUser+"[ "+date+" at "+time+" ]: \nYou > " + nameOfTo + " " + songName);
                             } else {
-                                allYourNotification.add("[ "+date+" at "+time+" ]: \nYou -> " + toUser + " " + songName);
+                                allYourNotification.add(toUser+"[ "+date+" at "+time+" ]: \nYou > " + toUser + " " + songName);
                             }
                         }
                         else {
@@ -160,9 +163,9 @@ public class Start extends AppCompatActivity {
                             if(nameOfFrom!=null && nameOfFrom.length()>19)
                                 nameOfFrom = nameOfFrom.substring(0,16)+"...";
                             if (nameOfFrom != null) {
-                                allYourNotification.add("[ "+date+" at "+time+" ]: \n" + nameOfFrom + " -> You " + songName);
+                                allYourNotification.add(fromUser+"[ "+date+" at "+time+" ]: \n" + nameOfFrom + " > You " + songName);
                             } else {
-                                allYourNotification.add("[ "+date+" at "+time+"]: \n" + fromUser + " -> You " + songName);
+                                allYourNotification.add(fromUser+"[ "+date+" at "+time+"]: \n" + fromUser + " > You " + songName);
                             }
                         }
                     }
@@ -251,38 +254,38 @@ public class Start extends AppCompatActivity {
 
         askForPermissions();
         if (!checkNetworkAvailability()) {
-            Toast.makeText(getApplicationContext(),"Sorry! You need Internet Connection",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Sorry! You need Internet Connection", Toast.LENGTH_LONG).show();
             spinner.setVisibility(View.INVISIBLE);
 
         } else {
-            spinner = (ProgressBar) findViewById(R.id.spinner);
-            spinner.setVisibility(ProgressBar.VISIBLE);
 
+            if (populateUserData()) {
+                spinner = (ProgressBar) findViewById(R.id.spinner);
+                spinner.setVisibility(ProgressBar.VISIBLE);
 
-            Log.e("Start_Bots","Bots started");
-            //startAutoBots();
-
-            fetchMoodsAndPlayListFiles();
-            populateUserData();
-            Log.e("Start_populateUSrData", "User data populated");
-            greetUser();
-            Log.e("Start_greetUSr", "Greet User done");
-            fetchContacts();
-            while (fetchContactsNotComplete) ;
-            fetchNotifications();
-            try {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        final Intent mainIntent = new Intent(Start.this, AllTabs.class);
-                        while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete) ;
-                        Log.e("Start_AllTabsLaunch", "AllTabs will be launched");
-                        Start.this.startActivity(mainIntent);
-                        Start.this.finish();
-                    }
-                }, 5000);
-            } catch (Exception ee) {
-                Log.e("Start_AllTabsLaunchErr","Error in Alltabs Launch");
+                Log.e("Start_Bots", "Bots started");
+                //startAutoBots();
+                fetchMoodsAndPlayListFiles();
+                Log.e("Start_populateUSrData", "User data populated");
+                greetUser();
+                Log.e("Start_greetUSr", "Greet User done");
+                fetchContacts();
+                while (fetchContactsNotComplete) ;
+                fetchNotifications();
+                try {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            final Intent mainIntent = new Intent(Start.this, AllTabs.class);
+                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete) ;
+                            Log.e("Start_AllTabsLaunch", "AllTabs will be launched");
+                            Start.this.startActivity(mainIntent);
+                            Start.this.finish();
+                        }
+                    }, 5000);
+                } catch (Exception ee) {
+                    Log.e("Start_AllTabsLaunchErr", "Error in Alltabs Launch");
+                }
             }
         }
     }

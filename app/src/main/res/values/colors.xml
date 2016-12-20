@@ -7,4 +7,7 @@
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
     <color name="light_yellow">#f2f2b8</color>
+    <color name="light_beguni">#efd1f3</color>
+    <color name="deep_orange">#ee0b16</color>
+    <color name="little_deep_orange">#FF5733</color>
 </resources>

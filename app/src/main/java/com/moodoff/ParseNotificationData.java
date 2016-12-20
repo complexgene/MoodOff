@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ParseNotificationData {
 
@@ -47,5 +48,35 @@ public class ParseNotificationData {
             return allNotifications;
         } catch (JSONException e) {e.printStackTrace();}
         return null;
+    }
+    static HashMap<String,String> parseAndGetProfileData(String raw_json){
+        HashMap<String,String> allProfileData = new HashMap<>();
+        Log.e("Profile_jsonObj",raw_json);
+        String strJson = raw_json;
+
+        try {
+            JSONObject jsonRootObject = new JSONObject(strJson);
+            String name = jsonRootObject.optString("name").toString();
+            String phoneNumber = jsonRootObject.optString("phoneNumber").toString();
+            String email = jsonRootObject.optString("email").toString();
+            String dob = jsonRootObject.optString("dob");
+            String textStatus = jsonRootObject.optString("textStatus").toString();
+            String audioStatusURL = jsonRootObject.optString("audioStatusURL").toString();
+            String textStatusLoveCount = jsonRootObject.optString("textStatusLoveCount").toString();
+            String audioStatusLoveCount =  jsonRootObject.optString("audioStatusLoveCount").toString();
+
+            allProfileData.put("name",name);
+            allProfileData.put("phoneNumber",phoneNumber);
+            allProfileData.put("email",email);
+            allProfileData.put("dob",dob);
+            allProfileData.put("textStatus",textStatus);
+            allProfileData.put("audioStatusURL",audioStatusURL);
+            allProfileData.put("textStatusLoveCount",textStatusLoveCount);
+            allProfileData.put("audioStatusLoveCount",audioStatusLoveCount);
+
+            return allProfileData;
+
+        } catch (JSONException e) {Log.e("ParseNotification_Err",e.getMessage());}
+        return allProfileData;
     }
 }

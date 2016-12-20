@@ -10,6 +10,7 @@ import android.util.Log;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 
 /**
  * Created by snaskar on 12/15/2016.
@@ -33,6 +34,19 @@ public class DBHelper extends SQLiteOpenHelper {
         // TODO Auto-generated method stub
         db.execSQL("DROP TABLE IF EXISTS contacts");
         onCreate(db);
+    }
+    public void createTable(String tableName,HashMap<String,String> columnNameAndDataType){
+        SQLiteDatabase mydatabase = getWritableDatabase();
+        String query = "CREATE TABLE IF NOT EXISTS "+tableName+"(";
+        for(String columns : columnNameAndDataType.keySet()) {
+            query=query+(columns+" "+columnNameAndDataType.get(columns)+",");
+        }
+        // To avoid the last COMMA
+        Log.e("RegistrationActi",query+" "+columnNameAndDataType.size());
+        query=query.substring(0,query.length()-1)+");";
+        Log.e("DBInternal_CREATE_QUERY",query);
+        mydatabase.execSQL(query);
+        mydatabase.close();
     }
 
     public boolean todoWorkEntry(String API){

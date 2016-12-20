@@ -1,15 +1,18 @@
 package com.moodoff;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -24,6 +27,7 @@ import android.provider.Settings;
 import android.support.annotation.UiThread;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.TypedValue;
@@ -105,17 +109,21 @@ public class NotificationFragment extends Fragment {
     }
 
     int i= 0;
-    View view;
+    View view,dialogView;
     MediaPlayer mp;
     TextView allNotificationsTextView;
     FrameLayout mainParentLayout;
     ArrayList<String> allNotifications = AllNotifications.allNotifications;
     int idOfTheLastPlayButtonClicked=-1;
     boolean isPlaying = false;
-    HashMap<String,String> allC = new HashMap<>();
+    static HashMap<String,String> allC = new HashMap<>();
+    LayoutInflater mainInflater;
+    ViewGroup mainContainer;
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mainInflater = inflater;
+        mainContainer = container;
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_notification, container, false);
         setSizes();
@@ -161,27 +169,30 @@ public class NotificationFragment extends Fragment {
             String date = componentsInNotification[1];
             String time = componentsInNotification[3];
             String fromUser = componentsInNotification[5];
-            String toUser = componentsInNotification[7];
+            final String toUserNumber = allNotifications.get(i).substring(0,10);
+            String toUserName = componentsInNotification[7];
             String songName = componentsInNotification[8];
 
             LinearLayout parent = new LinearLayout(getContext());
-            parent.setBackgroundColor(Color.GREEN);
+            parent.setBackgroundResource(R.drawable.buttonborder);
+            parent.setBackgroundColor(Color.rgb(166,213,133));
             parent.setGravity(Gravity.CENTER_VERTICAL);
             parent.setGravity(Gravity.CENTER_HORIZONTAL);
 
             LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            layoutDetails.topMargin=15;
+            layoutDetails.topMargin=25;
             parent.setLayoutParams(layoutDetails);
             parent.setOrientation(LinearLayout.HORIZONTAL);
 
             final FloatingActionButton floatingActionButton = new FloatingActionButton(getContext());
-                    /*final String mobNo = allNotifications.get(i).substring(0,10);
+                    //final String mobNo = allNotifications.get(i).substring(0,10);
                     floatingActionButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(getContext(),mobNo,Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(),toUserNumber,Toast.LENGTH_SHORT).show();
+                            loadProfile(toUserNumber);
                         }
-                    });*/
+                    });
             floatingActionButton.setImageResource(R.drawable.love_ns);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.width=leftButtonWidth;
@@ -202,29 +213,34 @@ public class NotificationFragment extends Fragment {
             boolean isCurrentUser = fromUser.trim().equals("You");
             Log.e("Not_USR",isCurrentUser+" "+fromUser);
             if(isCurrentUser) {
-                allN.setBackgroundColor(Color.YELLOW);
-                seekBar.setBackgroundColor(Color.YELLOW);
+                allN.setBackgroundColor(Color.rgb(166,213,133));
+                seekBar.setBackgroundColor(Color.rgb(166,213,133));
             }
             else {
+                //parent.setBackgroundResource(R.drawable.buttonborder);
+                //parent.setBackgroundColor(Color.CYAN);
                 allN.setBackgroundColor(Color.CYAN);
                 seekBar.setBackgroundColor(Color.CYAN);
             }
             allN.setPadding(22,0,10,0);
             allN.setTypeface(Typeface.DEFAULT_BOLD);
+            allN.setBackgroundResource(R.drawable.buttonborder);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.weight=1;
             layoutDetails.width=textViewWidth;
             layoutDetails.height=textViewHeight;
             allN.setLayoutParams(layoutDetails);
             allN.setTextColor(Color.BLACK);
+            allN.setTypeface(Typeface.SERIF);
             String textToDisplay = allNotifications.get(i).substring(0,allNotifications.get(i).lastIndexOf(" "));
             allN.setText(textToDisplay);
             linearLayout.addView(allN);
+            seekBar.setBackgroundResource(R.drawable.buttonborder);
             linearLayout.addView(seekBar);
             parent.addView(linearLayout);
 
-            final FloatingActionButton floatingActionButton2 = new FloatingActionButton(getContext());
-            floatingActionButton2.setId(i);
+            final FloatingActionButton playFloatingButton = new FloatingActionButton(getContext());
+            playFloatingButton.setId(i);
             seekBar.setId((i+1)*1000000);
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -245,16 +261,17 @@ public class NotificationFragment extends Fragment {
             Log.e("NotFrag_songFile",songFileName);
 
 
-            floatingActionButton2.setOnClickListener(new View.OnClickListener() {
+            playFloatingButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     currentSeekBar = (SeekBar) view.findViewById((v.getId()+1)*1000000);
-                    playSong(floatingActionButton2,v,currentSeekBar,songFileName);
+                    playSong(playFloatingButton,v,currentSeekBar,songFileName);
 
                 }
             });
-            floatingActionButton2.setImageResource(R.drawable.play);
-            floatingActionButton2.setSize(FloatingActionButton.SIZE_MINI);
+            playFloatingButton.setImageResource(R.drawable.play);
+            playFloatingButton.setSize(FloatingActionButton.SIZE_MINI);
+            //playFloatingButton.setBackgroundTintList(ColorStateList.valueOf());
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.weight=1;
             layoutDetails.width=rightButtonWidth;
@@ -262,8 +279,8 @@ public class NotificationFragment extends Fragment {
             layoutDetails.rightMargin=20;
             layoutDetails.topMargin = 25;
             layoutDetails.leftMargin=10;
-            floatingActionButton2.setLayoutParams(layoutDetails);
-            parent.addView(floatingActionButton2);
+            playFloatingButton.setLayoutParams(layoutDetails);
+            parent.addView(playFloatingButton);
 
             ll.addView(parent);
         }
@@ -271,7 +288,19 @@ public class NotificationFragment extends Fragment {
         mainParentLayout.addView(mainParent);
         if(k==1)mainParentLayout.removeAllViews();
     }
+    private void loadProfile(String contactNumber){
+        /*FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        Fragment newFragment = Profile.newInstance(contactNumber,"b");
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack if needed
+        transaction.replace(R.id.allContactDisplay, newFragment);
+        transaction.addToBackStack(null);
+        transaction.commitAllowingStateLoss();*/
+        final Dialog fbDialogue = new Dialog(view.getContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        fbDialogue.getWindow().setBackgroundDrawable(new ColorDrawable(Color.argb(100, 0, 0, 0)));
 
+        dialogView = mainInflater.inflate(R.layout.fragment_profile, mainContainer, false);
+    }
     public void playSong(FloatingActionButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName){
         Log.e("Not_Frag", currentClickedButton.getId() + "");
         if(currentClickedButton.getId() != idOfTheLastPlayButtonClicked) {

@@ -27,6 +27,7 @@
             android:background="@drawable/snaskar_9620332800"
             />
         <android.support.design.widget.FloatingActionButton
+            android:id="@+id/editBasicInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:backgroundTint="@android:color/holo_green_light"
@@ -48,7 +49,7 @@
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:id="@+id/username"
-                android:fontFamily="serif" />
+                android:fontFamily="serif-monospace" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -58,7 +59,7 @@
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:id="@+id/userPhNo"
-                android:fontFamily="serif" />
+                android:fontFamily="serif-monospace" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -68,7 +69,8 @@
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:id="@+id/useremailId"
-                android:fontFamily="serif" />
+                android:fontFamily="serif-monospace"
+                android:typeface="monospace" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -78,7 +80,8 @@
                 android:textSize="18sp"
                 android:textColor="@color/black"
                 android:id="@+id/userdob"
-                android:fontFamily="serif" />
+                android:fontFamily="serif-monospace"
+                android:typeface="monospace" />
         </TableLayout>
 
     </LinearLayout>
@@ -137,30 +140,35 @@
             android:layout_marginTop="5dp"
             android:layout_marginLeft="5dp"
             android:layout_marginBottom="2dp"
-            android:textSize="20dp"
+            android:paddingLeft="5dp"
+            android:textSize="14sp"
             android:textStyle="bold"
+            android:maxLength="200"
             android:text="Life is fantastic when its about watching you.."
-            android:fontFamily="cursive" />
+            android:fontFamily="serif-monospace"
+            android:typeface="normal" />
     </LinearLayout>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <android.support.design.widget.FloatingActionButton
+            android:id="@+id/loveTextStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginBottom="3dp"
-            android:src="@drawable/love_s"
+            android:src="@drawable/love_ns"
             app:backgroundTint="@android:color/holo_green_light"
             app:fabSize="mini" />
         />
             <TextView
+                android:id="@+id/textStatusLoveCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:paddingLeft="5dp"
-                android:text="273 people loved the text status"
+                android:text=" people loved the text status"
                 android:textSize="16sp"
                 android:textStyle="normal|bold"
                 android:fontFamily="sans-serif-condensed"
@@ -239,15 +247,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <android.support.design.widget.FloatingActionButton
+                android:id="@+id/loveAudioStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_marginBottom="3dp"
-                android:src="@drawable/love_s"
+                android:src="@drawable/love_ns"
                 app:backgroundTint="@android:color/holo_green_light"
                 app:fabSize="mini" />
             />
             <TextView
+                android:id="@+id/audioStatusLoveCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"

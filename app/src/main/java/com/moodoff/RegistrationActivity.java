@@ -47,7 +47,7 @@ public class RegistrationActivity extends AppCompatActivity {
         initComponents();
 
         // Need to do this without any lag..
-        //createAllNecessaryTablesForAppOperation();
+        createAllNecessaryTablesForAppOperation();
 
         birthday.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -79,18 +79,28 @@ public class RegistrationActivity extends AppCompatActivity {
         day = calendar.get(Calendar.DAY_OF_MONTH);
     }
 
+
     private void createAllNecessaryTablesForAppOperation(){
-        DBInternal dboperations = new DBInternal();
+        DBHelper dboperations = new DBHelper(getApplicationContext());
         HashMap<String,String> contactsColumns = new HashMap<>();
         contactsColumns.put("phone_no","VARCHAR");
         contactsColumns.put("name","VARCHAR");
         dboperations.createTable("allcontacts",contactsColumns);
         Log.e("RegistrationAct_TBL","allcontacts table created.");
         HashMap<String,String> worktodoColumns = new HashMap<>();
-        contactsColumns.put("id","INT PRIMARY KEY AUTOINCREMENT");
-        contactsColumns.put("api","VARCHAR");
+        worktodoColumns.put("id","INTEGER PRIMARY KEY AUTOINCREMENT");
+        worktodoColumns.put("api","VARCHAR");
         dboperations.createTable("worktodo",worktodoColumns);
         Log.e("RegistrationAct_TBL","worktodo table created.");
+        HashMap<String,String> profilesColumns = new HashMap<>();
+        profilesColumns.put("id","VARCHAR PRIMARY KEY");
+        profilesColumns.put("name","VARCHAR");
+        profilesColumns.put("mailid","VARCHAR");
+        profilesColumns.put("dob","VARCHAR");
+        profilesColumns.put("textstatus","VARCHAR");
+        profilesColumns.put("audiostatus","VARCHAR");
+        dboperations.createTable("profiles",profilesColumns);
+        Log.e("RegistrationAct_TBL","profiles table created.");
     }
 
     public void setDate() {

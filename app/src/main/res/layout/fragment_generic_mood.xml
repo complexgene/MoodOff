@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="fill_horizontal"
+        android:background="@color/deep_orange"
         android:id="@+id/floatingButtons"
     >
         <android.support.design.widget.FloatingActionButton
@@ -73,13 +74,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/storyTitle"
-    android:background="#000000"
+    android:background="#8eedd9"
     >
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
-        android:textColor="#FFFFFF"
+        android:textColor="#000000"
         android:textStyle="bold"
         android:textSize="22dp"
         android:layout_marginBottom="5dp"
@@ -92,7 +93,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/storyAndPlayer"
-        android:background="#000000"
+        android:background="#072c45"
         android:layout_below="@id/storyTitle"
         >
         <ScrollView
@@ -109,7 +110,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="5dp"
             android:id="@+id/tv_story"
-            android:textColor="@android:color/background_light"
+            android:textColor="#ffffff"
             android:textStyle="normal|italic"
             android:fontFamily="serif"
             android:textSize="15sp" />
@@ -117,35 +118,32 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:background="@color/white"
-            android:layout_above="@+id/nameOfSong">
+            android:background="@drawable/genericmoodbuttonborder"
+            android:layout_above="@+id/nameOfSong"
+            android:id="@+id/linearLayout">
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:background="@color/white"
+                android:background="@drawable/genericmoodbuttonborder"
                 android:textStyle="bold"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:paddingRight="5dp"
-                android:paddingLeft="5dp"
+                android:layout_weight="1"
                 android:layout_above="@+id/nameOfSong"
-                android:text="UPVOTE(0)"
+                android:text="LIKE(0)"
                 android:fontFamily="monospace" />
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="right"
-                android:paddingRight="5dp"
-                android:paddingLeft="5dp"
+                android:layout_weight="1"
                 android:textStyle="bold"
-                android:background="@color/white"
+                android:background="@drawable/genericmoodbuttonborder"
                 android:layout_above="@+id/duration"
                 android:layout_alignParentRight="true"
                 android:text="COMMENTS(0)"
                 android:fontFamily="monospace" />
         </LinearLayout>
-        <!--<ImageView
+        <!--<ImageView..
+
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingBottom="70dp"
@@ -166,9 +164,9 @@
             android:text="[ Click on Play to play Random Song ]"
             android:textColor="#FFFF00"
             android:background="#000000"
-            android:textSize="18sp"
+            android:textSize="12sp"
             android:textStyle="italic"
-            android:fontFamily="cursive" />
+            android:fontFamily="serif" />
         <TextView
             android:id="@+id/duration"
             android:layout_width="match_parent"
@@ -177,24 +175,25 @@
             android:layout_toRightOf="@id/nameOfSong"
             android:gravity="right"
             android:text="00:00"
-            android:layout_marginRight="5dp"
+            android:paddingRight="5dp"
             android:textColor="#FFFF00"
             android:background="#000000"
-            android:textSize="16sp"
+            android:textSize="12sp"
             android:textStyle="italic"
-            android:fontFamily="cursive" />
+            android:fontFamily="serif"
+            android:layout_below="@+id/linearLayout" />
         <SeekBar
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/buttons"
-            android:background="#CFFF00"
+            android:background="@color/little_deep_orange"
             style="@style/Widget.AppCompat.SeekBar" />
         <LinearLayout
             android:id="@+id/buttons"
             android:layout_alignParentBottom="true"
             android:orientation="horizontal"
-            android:background="#000000"
+            android:background="@color/deep_orange"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"

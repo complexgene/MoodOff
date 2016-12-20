@@ -1,19 +1,26 @@
 package com.moodoff;
 
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -23,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.helper.DBInternal;
+import com.moodoff.model.UserDetails;
 
 import org.w3c.dom.Text;
 
@@ -48,17 +56,13 @@ public class ContactsFragment extends Fragment{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
-
     public ContactsFragment() {
         // Required empty public constructor
     }
-
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -76,7 +80,6 @@ public class ContactsFragment extends Fragment{
         fragment.setArguments(args);
         return fragment;
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,55 +89,50 @@ public class ContactsFragment extends Fragment{
         }
     }
 
-    View v;Context ctx;
+    View mainView, profileDialogView;
+    ViewGroup mainContainer;
+    LayoutInflater mainInflater;
+    Context ctx;
     SQLiteDatabase mydatabase;
     EditText tableName;
     TextView tv = null;
     TextView contacts;
     ProgressBar spinner;
-    FloatingActionButton refreshContacts;
+    FloatingActionButton refreshContactButton;
     HashMap<String,String> allC = new HashMap<>();
     boolean contactReadingStatusNotComplete = true;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        mainContainer = container;
+        mainInflater = inflater;
+
         // Inflate the layout for this fragment
-        v = inflater.inflate(R.layout.fragment_contacts, container, false);
-        ctx = v.getContext();
+        mainView = inflater.inflate(R.layout.fragment_contacts, container, false);
+        ctx = mainView.getContext();
 
-        spinner = (ProgressBar)v.findViewById(R.id.refreshSpin);
+        addOwnProfileAndRefreshButton();
+
+        spinner = (ProgressBar)mainView.findViewById(R.id.refreshSpin);
         //DBInternal dbInternal = new DBInternal();
-        if(checkIfATableExists("allcontacts")){
-            Log.e("ContactsFragment_TBLEXT","table exists");
-            allC = getOrStoreContactsTableData(0,allC);
-            populatePageWithContacts();
-        }
-        else{
-            Log.e("ContactsFragment_cntcts","Not present");
-            Toast.makeText(getContext(),"Reading your Contacts. Wait.",Toast.LENGTH_LONG).show();
-            spinner.setVisibility(View.VISIBLE);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    allC = ContactList.getContactNames(ctx.getContentResolver());
-                    getOrStoreContactsTableData(1,allC);
+        allC = getOrStoreContactsTableData(0,allC);
+        populatePageWithContacts();
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getContext(),"Contacts Reading Finished..",Toast.LENGTH_SHORT).show();
-                            spinner.setVisibility(View.INVISIBLE);
-                            populatePageWithContacts();
-                        }
-                    });
-                }
-            }).start();
-        }
-
-//        mainLayout.addView(contactsScroll);
-        //contacts.setText(allC.get(0));
-        refreshContacts = (FloatingActionButton)v.findViewById(R.id.refreshContacts);
-        refreshContacts.setOnClickListener(new View.OnClickListener() {
+        return mainView;
+    }
+    private void addOwnProfileAndRefreshButton(){
+        LinearLayout refershAndProfile = (LinearLayout)mainView.findViewById(R.id.refreshAndUserProfile);
+        refershAndProfile.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams designDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        FloatingActionButton refreshContactButton = new FloatingActionButton(getContext());
+        refreshContactButton.setImageResource(R.drawable.refresh_contacts);
+        refreshContactButton.setBackgroundTintList(ColorStateList.valueOf(Color.YELLOW));
+        //refreshContactButton.setSize(FloatingActionButton.SIZE_MINI);
+        designDetails.leftMargin = 20;
+        designDetails.topMargin = 20;
+        designDetails.bottomMargin = 20;
+        refreshContactButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 spinner.setVisibility(View.VISIBLE);
@@ -157,27 +155,75 @@ public class ContactsFragment extends Fragment{
                 }).start();
             }
         });
+        refreshContactButton.setLayoutParams(designDetails);
+        Button myProfile = new Button(getContext());
+        myProfile.setText("My Profile");
+        myProfile.setBackgroundColor(Color.WHITE);
+        myProfile.setBackgroundResource(R.drawable.buttonborder);
+        designDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        designDetails.leftMargin = 20;
+        designDetails.topMargin = 20;
+        designDetails.rightMargin = 20;
+        designDetails.bottomMargin = 20;
+        myProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadProfile(UserDetails.getPhoneNumber());
+            }
+        });
+        myProfile.setLayoutParams(designDetails);
 
-        return v;
+        refershAndProfile.addView(refreshContactButton);
+        refershAndProfile.addView(myProfile);
     }
-
     public void populatePageWithContacts(){
-        RelativeLayout mainLayout = (RelativeLayout)v.findViewById(R.id.allContactDisplay);
-        ScrollView contactsScroll = (ScrollView)v.findViewById(R.id.contactsScroll);
+        RelativeLayout mainLayout = (RelativeLayout)mainView.findViewById(R.id.allContactDisplay);
+        ScrollView contactsScroll = (ScrollView)mainView.findViewById(R.id.contactsScroll);
         contactsScroll.removeAllViews();
         LinearLayout eachContact = new LinearLayout(ctx);
         eachContact.setOrientation(LinearLayout.VERTICAL);
-        eachContact.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        eachContact.setLayoutParams(layoutDetails);
         int noOfContacts = allC.size();
-        for(String eachCntct:allC.keySet()){
-            TextView tv = new TextView(ctx);
-            tv.setTextSize(16.0f);
-            tv.setText(allC.get(eachCntct)+" "+eachCntct);
-            eachContact.addView(tv);
+        for(final String eachCntct:allC.keySet()){
+            LinearLayout eachContactLayout = new LinearLayout(getContext());
+            eachContactLayout.setBackgroundColor(Color.rgb(107,236,124));
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.topMargin = 20;
+            eachContactLayout.setLayoutParams(layoutDetails);
+            Button contactNameAndNumber = new Button(ctx);
+            contactNameAndNumber.setText(allC.get(eachCntct)+"\n"+eachCntct);
+            contactNameAndNumber.setTextSize(16.0f);
+            contactNameAndNumber.setBackgroundColor(Color.WHITE);
+            contactNameAndNumber.setBackgroundResource(R.drawable.buttonborder);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.topMargin = 40;
+            layoutDetails.bottomMargin = 40;
+            layoutDetails.leftMargin = 25;
+            layoutDetails.rightMargin = 25;
+            contactNameAndNumber.setLayoutParams(layoutDetails);
+            contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    loadProfile(eachCntct);
+                }
+            });
+
+
+            eachContactLayout.addView(contactNameAndNumber);
+            eachContact.addView(eachContactLayout);
         }
         contactsScroll.addView(eachContact);
     }
-
+    private void loadProfile(String contactNumber){
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        Fragment newFragment = Profile.newInstance(contactNumber,"b");
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack if needed
+        transaction.replace(R.id.allContactDisplay, newFragment);
+        transaction.addToBackStack(null);
+        transaction.commitAllowingStateLoss();
+    }
     public boolean checkIfATableExists(String tableName){
         mydatabase = ctx.openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
@@ -238,14 +284,12 @@ public class ContactsFragment extends Fragment{
         //allContactsPresent.add("santanu");
         return allContactsPresent;
     }
-
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
     }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -256,13 +300,11 @@ public class ContactsFragment extends Fragment{
                     + " must implement OnFragmentInteractionListener");
         }
     }
-
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
-
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
