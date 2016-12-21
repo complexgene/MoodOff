@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 public class ParseNotificationData {
 
-    static ArrayList<String> getNotification(String raw_json)
+    public static ArrayList<String> getNotification(String raw_json)
     {
         String strJson = raw_json;
         ArrayList<String> allNotifications = new ArrayList<>();
@@ -44,7 +44,7 @@ public class ParseNotificationData {
                 allNotifications.add(fromUser+" "+toUser+" "+ts+" "+type+" "+songName);
 
             }
-            Log.e("seeit",allNotifications.toString());
+            Log.e("ParseNotification",allNotifications.toString());
             return allNotifications;
         } catch (JSONException e) {e.printStackTrace();}
         return null;

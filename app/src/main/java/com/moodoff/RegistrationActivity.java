@@ -101,6 +101,24 @@ public class RegistrationActivity extends AppCompatActivity {
         profilesColumns.put("audiostatus","VARCHAR");
         dboperations.createTable("profiles",profilesColumns);
         Log.e("RegistrationAct_TBL","profiles table created.");
+        HashMap<String,String> rnotificationsColumns = new HashMap<>();
+        rnotificationsColumns.put("from_user_id","VARCHAR");
+        rnotificationsColumns.put("to_user_id","VARCHAR");
+        rnotificationsColumns.put("file_name","VARCHAR");
+        rnotificationsColumns.put("type","VARCHAR");
+        rnotificationsColumns.put("send_done","INTEGER");
+        rnotificationsColumns.put("create_ts","VARCHAR");
+        dboperations.createTable("rnotifications",rnotificationsColumns);
+        Log.e("RegistrationAct_TBL","Read Notifications table created");
+        HashMap<String,String> wnotificationsColumns = new HashMap<>();
+        wnotificationsColumns.put("from_user_id","VARCHAR");
+        wnotificationsColumns.put("to_user_id","VARCHAR");
+        wnotificationsColumns.put("file_name","VARCHAR");
+        wnotificationsColumns.put("type","VARCHAR");
+        wnotificationsColumns.put("send_done","TINYINT(1)");
+        wnotificationsColumns.put("create_ts","TIMESTAMP");
+        dboperations.createTable("rnotifications",wnotificationsColumns);
+        Log.e("RegistrationAct_TBL","Write Notifications table created");
     }
 
     public void setDate() {

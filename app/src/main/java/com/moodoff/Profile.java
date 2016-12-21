@@ -25,8 +25,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.AppData;
 import com.moodoff.helper.HttpGetPostInterface;
-import com.moodoff.helper.PlaylistSongs;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
@@ -232,7 +232,7 @@ public class Profile extends Fragment {
         int playButtonId = 0;
         statusChangeTitle.setText("Edit your Audio Status");
         dialogContainer.removeAllViews();
-        HashMap<String,ArrayList<String>> allSongs = PlaylistSongs.getAllMoodPlayList();
+        HashMap<String,ArrayList<String>> allSongs = AppData.allMoodPlayList;
         for(final String eachMood : allSongs.keySet()){
             /*LinearLayout moodTypeLayout = new LinearLayout(dialogView.getContext());
             moodTypeLayout.setBackgroundColor(Color.CYAN);

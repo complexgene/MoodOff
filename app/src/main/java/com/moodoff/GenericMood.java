@@ -3,12 +3,10 @@ package com.moodoff;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -31,15 +29,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBHelper;
-import com.moodoff.helper.DBInternal;
-import com.moodoff.helper.ExpressionsImpl;
 import com.moodoff.helper.HttpGetPostInterface;
-import com.moodoff.helper.PlaylistSongs;
 import com.moodoff.model.UserDetails;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +43,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -653,7 +647,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             final String serverURL = HttpGetPostInterface.serverURL;
 
             // Access the collection of songs that has already been read in Start.java and stored in variable of file PlaylistSongs.java
-            listOfSong = PlaylistSongs.allMoodPlayList.get(mood);
+            listOfSong = AppData.allMoodPlayList.get(mood);
 
             Collections.shuffle(listOfSong);
             return(listOfSong);

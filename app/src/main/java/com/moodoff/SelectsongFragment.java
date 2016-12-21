@@ -2,13 +2,10 @@ package com.moodoff;
 
 import android.content.Context;
 import android.graphics.Point;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,12 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.moodoff.helper.PlaylistSongs;
+import com.moodoff.helper.AppData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,7 +93,7 @@ public class SelectsongFragment extends Fragment {
     static int playButtonId = 0;
     private void retrieveAndShowSongs(){
         LinearLayout allSongsContainer = (LinearLayout)view.findViewById(R.id.eachRingToneSong);
-        HashMap<String,ArrayList<String>> allSongs = PlaylistSongs.getAllMoodPlayList();
+        HashMap<String,ArrayList<String>> allSongs = AppData.allMoodPlayList;
         for(final String eachMood : allSongs.keySet()){
             TextView moodType = new TextView(getContext());
             moodType.setText(eachMood);

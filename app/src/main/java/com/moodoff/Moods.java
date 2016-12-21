@@ -1,8 +1,5 @@
 package com.moodoff;
 
-import android.app.FragmentManager;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,16 +7,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
-import com.moodoff.helper.AllNotifications;
 import com.moodoff.helper.DBInternal;
 
 
@@ -115,7 +109,7 @@ public class Moods extends Fragment {
                 transaction.replace(R.id.allmoods, newFragment);
                 transaction.addToBackStack("genericmood_romantic");
                 transaction.commitAllowingStateLoss();
-                putAllButtonsOff();
+                //putAllButtonsOff();
             }
         });
         btnParty.setOnClickListener(new View.OnClickListener() {

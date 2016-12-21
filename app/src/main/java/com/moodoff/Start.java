@@ -17,27 +17,24 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.moodoff.helper.AllNotifications;
+import com.moodoff.helper.AppData;
+import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.HttpGetPostInterface;
-import com.moodoff.helper.PlaylistSongs;
+import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class Start extends AppCompatActivity {
     private String serverURL = HttpGetPostInterface.serverURL;
-    private boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true;
+    public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true;
     ProgressBar spinner;
     TextView greet;
     SQLiteDatabase mydatabase;
@@ -81,7 +78,7 @@ public class Start extends AppCompatActivity {
     }
 
     private void greetUser() {
-        Toast.makeText(this, "You look just awesome today!!", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "You look just awesome today!!", Toast.LENGTH_SHORT).show();
         greet = (TextView) findViewById(R.id.greet);
         Calendar c = Calendar.getInstance();
         //specialDate.setText("Today is: " + c.get(Calendar.DATE) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.YEAR));
@@ -108,44 +105,31 @@ public class Start extends AppCompatActivity {
             allReadContacts = getOrStoreContactsTableData(0,allReadContacts);
             fetchContactsNotComplete = false;
         }
+        ContactsManager.allReadContacts = allReadContacts;
+        //NotificationFragment.allReadContacts = allReadContacts;
     }
 
     private void fetchNotifications() {
-        final String userMobileNumber = UserDetails.getPhoneNumber();
-        final String serverURL = HttpGetPostInterface.serverURL;
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
-            @Override
-            public void run() {
                 try {
-                    URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
-                    Log.e("Start_Notf_ReadURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    InputStream is = urlConnection.getInputStream();
-                    isr = new InputStreamReader(is);
-                    int data = isr.read();
-                    final StringBuilder response = new StringBuilder("");
-                    while (data != -1) {
-                        response.append((char) data);
-                        data = isr.read();
-                    }
-                    ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
+                    Log.e("Start_Notifications","Start loading notifications from DB");
+                    ArrayList<String> allNotificationsFromDB = readNotificationsFromInternalDB();
+                    AppData.totalNoOfNot = allNotificationsFromDB.size();
+                    Log.e("Start","SM doing work");
+                    ServerManager serverManager = new ServerManager(this);
+                    serverManager.readNotificationsFromServerAndWriteToInternalDB();
                     ArrayList<String> allYourNotification = new ArrayList<String>();
-                    NotificationFragment.totalNumberOfNotifications = allYourNotificationFromServer.size();
+                    NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
+                    Log.e("Start_NotB4",allNotificationsFromDB.toString());
                     Log.e("Start_SIZE",allReadContacts.size()+"");
-                    for(String eachNotification : allYourNotificationFromServer){
+                    for(String eachNotification : allNotificationsFromDB){
                         String[] allData = eachNotification.split(" ");
                         String fromUser = allData[0];
                         String toUser = allData[1];
-                        String ts = allData[2];
-                        String timeSplit[] = ts.split("_");
-                        String date = timeSplit[0];
-                        String time = timeSplit[1];
+                        String date = allData[2];
+                        String time = allData[3];
                         time = time.substring(0,time.lastIndexOf(":"));
-                        String type = allData[3];
-                        String songName = allData[4];
-
+                        String type = allData[4];
+                        String songName = allData[5];
 
                         if(fromUser.equals(UserDetails.getPhoneNumber())){
                             String nameOfTo = allReadContacts.get(toUser);
@@ -170,80 +154,24 @@ public class Start extends AppCompatActivity {
                         }
                     }
                     Log.e("Start_allNot",allYourNotification.toString());
-                    AllNotifications.allNotifications = allYourNotification;
+                    //NotificationFragment.
+                    AppData.allNotifications = allYourNotification;
                     notificationFetchNotComplete = false;
                     Log.e("Start_Notif_Read", "Notification read complete..");
                 } catch (Exception ee) {
-                    Log.e("Start_Notifi_ReadErr", ee.getMessage());
-                } finally {
-                    try {
-                        isr.close();
-                    } catch (Exception ee) {
-                        Log.e("Start_Err", "InputStreamReader couldn't be closed");
-                    }
-                    urlConnection.disconnect();
-
+                    Log.e("Start_Notif_ReadErr", ee.getMessage());
+                    ee.printStackTrace();
                 }
-            }
-        }).start();
+    }
+
+    private ArrayList<String> readNotificationsFromInternalDB(){
+        DBHelper dbOperations = new DBHelper(this);
+        return dbOperations.readNotificationsFromInternalDB();
     }
 
     private void fetchMoodsAndPlayListFiles() {
-        final ArrayList<String> allMoods = new ArrayList<String>();
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            BufferedReader bufferedReader = null;
-
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL(HttpGetPostInterface.serverSongURL + "allsongdata.txt");
-                    Log.e("Start_allsongsURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    InputStream is = urlConnection.getInputStream();
-                    InputStreamReader isr = new InputStreamReader(is);
-                    bufferedReader = new BufferedReader(isr);
-
-                    int noOfMoods = Integer.parseInt(bufferedReader.readLine());
-                    ArrayList<String> typeOfMoods = new ArrayList<String>(noOfMoods);
-                    for(int i=0;i<noOfMoods;i++) {
-                        typeOfMoods.add(bufferedReader.readLine());
-                    }
-
-                    Log.e("Start_typeOfMoods",typeOfMoods.toString());
-
-                    bufferedReader.readLine(); //SEPARATOR
-
-                    String song = "";
-                    ArrayList<String> allSongInAMood = new ArrayList<String>();
-                    for(int i=0;i<noOfMoods;i++) {
-                        while ((song = bufferedReader.readLine()) != null) {
-                            if(!song.equals("")) {
-                                allSongInAMood.add(song);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                        PlaylistSongs.getAllMoodPlayList().put(typeOfMoods.get(i),allSongInAMood);
-                        Log.e("Start_disMood",typeOfMoods.get(i)+" "+allSongInAMood.toString());
-                        allSongInAMood = new ArrayList<String>();
-                    }
-                    moodsAndSongsFetchNotComplete = false;
-                    Log.e("Start_allmoods_Read", "AllMoods read complete..");
-                } catch (Exception ee) {
-                    Log.e("Start_notification_Read", ee.getMessage());
-                } finally {
-                    try {
-                        bufferedReader.close();
-                    } catch (Exception ee) {
-                        Log.e("Start_allmoodsReadErr", "BufferedReader couldn't be closed");
-                    }
-                    urlConnection.disconnect();
-
-                }
-            }
-        }).start();
+        ServerManager reads = new ServerManager();
+        reads.readPlayListFromServer();
     }
 
     @Override
@@ -282,7 +210,7 @@ public class Start extends AppCompatActivity {
                             Start.this.startActivity(mainIntent);
                             Start.this.finish();
                         }
-                    }, 5000);
+                    }, 2500);
                 } catch (Exception ee) {
                     Log.e("Start_AllTabsLaunchErr", "Error in Alltabs Launch");
                 }

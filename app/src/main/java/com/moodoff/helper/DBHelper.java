@@ -10,6 +10,7 @@ import android.util.Log;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -48,7 +49,6 @@ public class DBHelper extends SQLiteOpenHelper {
         mydatabase.execSQL(query);
         mydatabase.close();
     }
-
     public boolean todoWorkEntry(String API){
         try {
             mydatabaseReadable = this.getWritableDatabase();
@@ -109,5 +109,47 @@ public class DBHelper extends SQLiteOpenHelper {
             resultSet.moveToNext();
         }
         mydatabaseReadable.close();
+    }
+    public ArrayList<String> readNotificationsFromInternalDB() {
+        ArrayList<String> allNotifications = new ArrayList<>();
+        mydatabaseReadable = getReadableDatabase();
+        Cursor resultSet = mydatabaseReadable.rawQuery("Select * from notifications", null);
+        resultSet.moveToFirst();
+        while (!resultSet.isAfterLast()) {
+            final String from_user = resultSet.getString(0);
+            final String to_user = resultSet.getString(1);
+            final String fileName = resultSet.getString(2);
+            final String type = resultSet.getString(3);
+            final int send_done = resultSet.getInt(4);
+            final String timestamp = resultSet.getString(5);
+            String data = from_user+" "+to_user+" "+timestamp+" "+type+" "+fileName;
+            allNotifications.add(data);
+            Log.e("DBHelper_RDNot",data);
+            resultSet.moveToNext();
+        }
+        return allNotifications;
+    }
+    public void writeNewNotificationsToInternalDB(ArrayList<String> newNotifications){
+        myDatabaseWritable = getWritableDatabase();
+        for(String eachNotification : newNotifications){
+            String[] allData = eachNotification.split(" ");
+            String fromUser = allData[0];
+            String toUser = allData[1];
+            String ts = allData[2];
+            String timeSplit[] = ts.split("_");
+            String date = timeSplit[0];
+            String time = timeSplit[1];
+            //time = time.substring(0,time.lastIndexOf(":"));
+            String type = allData[3];
+            String fileName = allData[4];
+
+            String queryToFire = "insert into notifications values('"+fromUser+"','"+toUser+"','"+fileName+"','"+type+"',0,'"+(date+" "+time)+"');";
+            myDatabaseWritable.execSQL(queryToFire);
+
+        }
+    }
+    public void deleteAllDataFromNotificationTableFromInternalDB(){
+        myDatabaseWritable = getWritableDatabase();
+        myDatabaseWritable.execSQL("delete from notifications");
     }
 }

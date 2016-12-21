@@ -6,28 +6,19 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.ContactsContract;
-import android.provider.Settings;
-import android.support.annotation.UiThread;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.TypedValue;
@@ -36,29 +27,22 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.moodoff.helper.AllNotifications;
-import com.moodoff.helper.HttpGetPostImpl;
+import com.moodoff.helper.AppData;
+import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
-import com.moodoff.helper.StoreRetrieveDataImpl;
-import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -113,10 +97,10 @@ public class NotificationFragment extends Fragment {
     MediaPlayer mp;
     TextView allNotificationsTextView;
     FrameLayout mainParentLayout;
-    ArrayList<String> allNotifications = AllNotifications.allNotifications;
+    ArrayList<String> allNotifications;
     int idOfTheLastPlayButtonClicked=-1;
     boolean isPlaying = false;
-    static HashMap<String,String> allC = new HashMap<>();
+    static HashMap<String,String> allReadContacts = ContactsManager.allReadContacts;
     LayoutInflater mainInflater;
     ViewGroup mainContainer;
     @Override
@@ -129,12 +113,15 @@ public class NotificationFragment extends Fragment {
         setSizes();
 
         try {
+            while(Start.fetchContactsNotComplete);
+            allNotifications = AppData.allNotifications;
+            Log.e("NotificationFrag_SIZE",allNotifications.size()+"");
             designNotPanel(0);
         }
         catch (Exception ei){
-            Log.e("NotificationFragment_Er",ei.getMessage());
+            Log.e("NotificationFrag_Er2",ei.getMessage());
         }
-        //checkNot();
+
         return view;
     }
 
@@ -165,17 +152,18 @@ public class NotificationFragment extends Fragment {
 
         for (i = 0; i < allNotifications.size(); i++) {
 
+            Log.e("NotificationFrag_Each",allNotifications.get(i));
+
             String[] componentsInNotification = allNotifications.get(i).split(" ");
-            String date = componentsInNotification[1];
+            String date = componentsInNotification[2];
             String time = componentsInNotification[3];
-            String fromUser = componentsInNotification[5];
-            final String toUserNumber = allNotifications.get(i).substring(0,10);
-            String toUserName = componentsInNotification[7];
-            String songName = componentsInNotification[8];
+            String fromUser = componentsInNotification[0];
+            final String toUser = componentsInNotification[1];
+            //String toUserName = componentsInNotification[7];
+            String songName = componentsInNotification[5];
 
             LinearLayout parent = new LinearLayout(getContext());
             parent.setBackgroundResource(R.drawable.buttonborder);
-            parent.setBackgroundColor(Color.rgb(166,213,133));
             parent.setGravity(Gravity.CENTER_VERTICAL);
             parent.setGravity(Gravity.CENTER_HORIZONTAL);
 
@@ -189,8 +177,8 @@ public class NotificationFragment extends Fragment {
                     floatingActionButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(getContext(),toUserNumber,Toast.LENGTH_SHORT).show();
-                            loadProfile(toUserNumber);
+                            Toast.makeText(getContext(),toUser,Toast.LENGTH_SHORT).show();
+                            //loadProfile(toUserNumber);
                         }
                     });
             floatingActionButton.setImageResource(R.drawable.love_ns);
@@ -213,18 +201,18 @@ public class NotificationFragment extends Fragment {
             boolean isCurrentUser = fromUser.trim().equals("You");
             Log.e("Not_USR",isCurrentUser+" "+fromUser);
             if(isCurrentUser) {
-                allN.setBackgroundColor(Color.rgb(166,213,133));
-                seekBar.setBackgroundColor(Color.rgb(166,213,133));
+                parent.setBackgroundColor(Color.rgb(205,99,223));
+                allN.setBackgroundColor(Color.rgb(205,99,223));
+                seekBar.setBackgroundColor(Color.rgb(205,99,223));
             }
             else {
-                //parent.setBackgroundResource(R.drawable.buttonborder);
-                //parent.setBackgroundColor(Color.CYAN);
-                allN.setBackgroundColor(Color.CYAN);
-                seekBar.setBackgroundColor(Color.CYAN);
+                parent.setBackgroundColor(Color.rgb(61,206,175));
+                allN.setBackgroundColor(Color.rgb(61,206,175));
+                seekBar.setBackgroundColor(Color.rgb(61,206,175));
             }
             allN.setPadding(22,0,10,0);
             allN.setTypeface(Typeface.DEFAULT_BOLD);
-            allN.setBackgroundResource(R.drawable.buttonborder);
+            allN.setBackgroundResource(R.drawable.buttonborder_others_notification);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.weight=1;
             layoutDetails.width=textViewWidth;
@@ -232,10 +220,10 @@ public class NotificationFragment extends Fragment {
             allN.setLayoutParams(layoutDetails);
             allN.setTextColor(Color.BLACK);
             allN.setTypeface(Typeface.SERIF);
-            String textToDisplay = allNotifications.get(i).substring(0,allNotifications.get(i).lastIndexOf(" "));
+            String textToDisplay = allNotifications.get(i).substring(10,allNotifications.get(i).lastIndexOf(" "));
             allN.setText(textToDisplay);
             linearLayout.addView(allN);
-            seekBar.setBackgroundResource(R.drawable.buttonborder);
+            //seekBar.setBackgroundResource(R.drawable.buttonborder);
             linearLayout.addView(seekBar);
             parent.addView(linearLayout);
 
@@ -343,122 +331,6 @@ public class NotificationFragment extends Fragment {
         } catch (Exception ee) {
             Log.e("Not_Frag_Err", "abc" + ee.getMessage());
         }
-    }
-    public void checkNot(){
-        new Handler().postDelayed(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
-            @Override
-            public void run() {
-                try {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try{
-                                URL url = new URL(serverURL + "/notifications/" + UserDetails.getPhoneNumber());
-                                Log.e("NotFrag_Notf_Read", url.toString());
-                                urlConnection = (HttpURLConnection) url.openConnection();
-                                InputStream is = urlConnection.getInputStream();
-                                isr = new InputStreamReader(is);
-                                int data = isr.read();
-                                final StringBuilder response = new StringBuilder("");
-                                while (data != -1) {
-                                    response.append((char) data);
-                                    data = isr.read();
-                                }
-                                Log.e("NotFrag_Response",response.toString());
-                                ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
-                                ArrayList<String> allYourNotification = new ArrayList<String>();
-                                int newSize = allYourNotificationFromServer.size();
-                                for(String eachNotification : allYourNotificationFromServer){
-                                    String[] allData = eachNotification.split(" ");
-                                    String fromUser = allData[0];
-                                    String toUser = allData[1];
-                                    String ts = allData[2];
-                                    String timeSplit[] = ts.split("_");
-                                    ts = "on "+timeSplit[0] + " at "+timeSplit[1].substring(0,5);
-                                    String type = allData[3];
-                                    String songName = allData[4];
-
-
-                                    if(fromUser.equals(UserDetails.getPhoneNumber())){
-                                        if (allC.get(toUser) != null) {
-                                            allYourNotification.add("You dedicated a song to " + allC.get(toUser) + "\n" + ts +" "+songName);
-                                        } else {
-                                            allYourNotification.add("You dedicated a song to " + toUser + "\n" + ts +" "+songName);
-                                        }
-                                    }
-                                    else {
-                                        if (allC.get(fromUser) != null) {
-                                            allYourNotification.add(allC.get(fromUser) + " dedicated you a song\n" + ts +" "+songName);
-                                        } else {
-                                            allYourNotification.add(fromUser + " dedicated you a song\n" + ts +" "+songName);
-                                        }
-                                    }
-                                }
-                                Log.e("NotFrag_AllParsedNot",allYourNotification.toString());
-                                AllNotifications.allNotifications = allYourNotification;
-                                Log.e("NotFrag_Size",totalNumberOfNotifications+" -- "+newSize);
-                                if(newSize>totalNumberOfNotifications) {
-                                    totalNumberOfNotifications = newSize;
-                                    Activity currActivity = getActivity();
-                                    NotificationCompat.Builder builder =
-                                            new NotificationCompat.Builder(view.getContext())
-                                                    .setSmallIcon(R.drawable.btn_dedicate)
-                                                    .setColor(001500)
-                                                    .setContentTitle("MoodOff")
-                                                    .setContentText(UserDetails.getUserName()+ "!! You got new notifications!!");
-
-                                    Intent notificationIntent;
-                                            if(getActivity()==null){
-                                                notificationIntent = new Intent(view.getContext(), Start.class);
-                                                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                            }
-                                            else{
-                                                currActivity.runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        Toast.makeText(getContext(),"Hi New one",Toast.LENGTH_SHORT).show();
-                                                        designNotPanel(1);
-                                                    }
-                                                });
-                                                notificationIntent = new Intent(view.getContext(), NotificationFragment.class);
-                                                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                            }
-                                    PendingIntent contentIntent = PendingIntent.getActivity(view.getContext(), 0, notificationIntent,
-                                            PendingIntent.FLAG_CANCEL_CURRENT);
-                                    builder.setContentIntent(contentIntent);
-                                    builder.setAutoCancel(true);
-
-                                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                                    Ringtone r = RingtoneManager.getRingtone(view.getContext(), notification);
-                                    r.play();
-
-                                    // Add as notification
-                                    NotificationManager manager = (NotificationManager) view.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-                                    manager.notify(0, builder.build());
-                                }
-                            }
-                            catch(Exception ee){
-                                Log.e("NotificationFrag_Err","Some issues.."+ee.getMessage());
-                            }
-                            finally {
-                                try {
-                                    isr.close();
-                                } catch (Exception ee) {
-                                    Log.e("NotificationFrag_Err", "InputStreamReader couldn't be closed");
-                                }
-                                urlConnection.disconnect();
-
-                            }
-                        }
-                    }).start();
-                    checkNot();
-                } catch (Exception ee) {
-                    Log.e("NotificationFrag_Err","Some issues.."+ee.getMessage());
-                }
-            }
-        },5000);
     }
     public int leftButtonHeight,leftButtonWidth,rightButtonHeight,rightButtonWidth,textViewWidth,textViewHeight;
     public void setSizes(){

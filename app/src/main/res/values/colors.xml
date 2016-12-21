@@ -10,4 +10,6 @@
     <color name="light_beguni">#efd1f3</color>
     <color name="deep_orange">#ee0b16</color>
     <color name="little_deep_orange">#FF5733</color>
+    <color name="notification_you">#cd63df</color>
+    <color name="notification_me">#3dceaf</color>
 </resources>
