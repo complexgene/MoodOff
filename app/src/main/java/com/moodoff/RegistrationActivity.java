@@ -35,7 +35,7 @@ import static com.moodoff.helper.HttpGetPostInterface.serverURL;
 
 public class RegistrationActivity extends AppCompatActivity {
 
-    EditText name,mobile_number,birthday,email;
+    EditText name,mobile_number,birthday,email, status_text;
     ProgressBar progressRegistration;
     TextView error;
     Calendar calendar;
@@ -93,6 +93,7 @@ public class RegistrationActivity extends AppCompatActivity {
         mobile_number = (EditText) findViewById(R.id.phone_number);
         birthday = (EditText) findViewById(R.id.date_of_birth);
         email = (EditText) findViewById(R.id.email_id);
+        status_text = (EditText) findViewById(R.id.status_text);
         error = (TextView) findViewById(R.id.error_message);
         calendar = Calendar.getInstance();
         year = calendar.get(Calendar.YEAR);
@@ -249,10 +250,12 @@ public class RegistrationActivity extends AppCompatActivity {
                     pn = mobile_number.getText().toString(),
                     dob = birthday.getText().toString(),
                     em = email.getText().toString(),
+                    textStatus = status_text.getText().toString().replaceAll(" ","_"),
                     userProfileString;
 
-            userProfileString = nm + "/" + pn + "/" + em + "/" + dob;
-            final String Url = "http://hipilab.com/moodoff/users/" + userProfileString;
+            userProfileString = nm + "/" + pn + "/" + em + "/" + dob + "/" + textStatus;
+            //final String Url = serverURL+"/users/" + userProfileString;
+            final String Url = "http://192.168.2.5:5679/controller/users/" + userProfileString;
             dbOperations.todoWorkEntry(Url);
 
             new Thread(new Runnable() {
