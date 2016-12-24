@@ -828,6 +828,15 @@ public class GenericMood extends Moods implements View.OnClickListener{
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        //mp.release();
+        Log.e("GenericMood","In onDetach");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.e("GenericMood","In onDestroy");
+        releaseMediaPlayerObject();
     }
 
     /**
@@ -844,4 +853,5 @@ public class GenericMood extends Moods implements View.OnClickListener{
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
 }

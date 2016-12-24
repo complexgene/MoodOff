@@ -32,7 +32,7 @@ public class ParseNotificationData {
                 String timeStamp = jsonObject.optString("key").toString();
                 String fileWithType = jsonObject.optString("value").toString();
 
-                Log.e("jsonObj",jsonObject.toString());
+                //Log.e("jsonObj",jsonObject.toString());
 
                 String[] allData = fileWithType.split("#");
                 String fromUser = allData[0];
@@ -76,7 +76,7 @@ public class ParseNotificationData {
 
             return allProfileData;
 
-        } catch (JSONException e) {Log.e("ParseNotification_Err",e.getMessage());}
+        } catch (JSONException e) {Log.e("ParseNotification_Err",e.getMessage());e.fillInStackTrace();}
         return allProfileData;
     }
 }

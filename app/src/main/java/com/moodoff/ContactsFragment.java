@@ -8,6 +8,7 @@ import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -187,15 +188,16 @@ public class ContactsFragment extends Fragment{
         int noOfContacts = allC.size();
         for(final String eachCntct:allC.keySet()){
             LinearLayout eachContactLayout = new LinearLayout(getContext());
-            eachContactLayout.setBackgroundColor(Color.rgb(107,236,124));
+            eachContactLayout.setBackgroundColor(Color.WHITE);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.topMargin = 20;
             eachContactLayout.setLayoutParams(layoutDetails);
             Button contactNameAndNumber = new Button(ctx);
             contactNameAndNumber.setText(allC.get(eachCntct)+"\n"+eachCntct);
             contactNameAndNumber.setTextSize(16.0f);
-            contactNameAndNumber.setBackgroundColor(Color.WHITE);
-            contactNameAndNumber.setBackgroundResource(R.drawable.buttonborder);
+            contactNameAndNumber.setTypeface(Typeface.SERIF);
+            contactNameAndNumber.setBackgroundColor(Color.rgb(61,206,175));
+            //contactNameAndNumber.setBackgroundResource(R.drawable.buttonborder);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.topMargin = 40;
             layoutDetails.bottomMargin = 40;

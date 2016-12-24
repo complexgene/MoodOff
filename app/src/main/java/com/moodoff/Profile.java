@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.helper.AppData;
+import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
@@ -111,7 +112,7 @@ public class Profile extends Fragment {
 
         String profileOfUser = mParam1;
 
-        Toast.makeText(getContext(),profileOfUser,Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(),"Loading profile of: "+ ContactsManager.allReadContacts.get(profileOfUser),Toast.LENGTH_SHORT).show();
 
         setUserProfileData(profileOfUser);
         // Check if its someone else's profile, then remove the edit button

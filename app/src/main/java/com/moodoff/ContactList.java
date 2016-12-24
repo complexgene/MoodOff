@@ -104,8 +104,7 @@ public class ContactList extends AppCompatActivity {
             for(String eachContact:allC.keySet()){
                 contactsInList.add(allC.get(eachContact)+" "+eachContact);
             }
-            //contactsInList.add("Fu*k");
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contactsInList);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.displaycontactsfordedicate, contactsInList);
             lstNames.setAdapter(adapter);
         }
     }

@@ -7,11 +7,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
 import android.util.Log;
 
-import java.io.InputStreamReader;
+import com.moodoff.ContactList;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+import static com.moodoff.Start.fetchContactsNotComplete;
+import static com.moodoff.helper.ContactsManager.allReadContacts;
 
 /**
  * Created by snaskar on 12/15/2016.
@@ -20,9 +24,11 @@ import java.util.HashMap;
 public class DBHelper extends SQLiteOpenHelper {
 
     SQLiteDatabase mydatabaseReadable, myDatabaseWritable;
+    Context context;
 
     public DBHelper(Context context) {
         super(context, "moodoff" , null, 1);
+        this.context = context;
     }
 
     @Override
@@ -36,24 +42,44 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS contacts");
         onCreate(db);
     }
-    public void createTable(String tableName,HashMap<String,String> columnNameAndDataType){
+    public void dropAllTables(){
+        myDatabaseWritable = getWritableDatabase();
+        myDatabaseWritable.execSQL("drop table if exists allcontacts");
+        myDatabaseWritable.execSQL("drop table if exists worktodo");
+        myDatabaseWritable.execSQL("drop table if exists profiles");
+        myDatabaseWritable.execSQL("drop table if exists allcontacts");
+        myDatabaseWritable.execSQL("drop table if exists rnotifications");
+        Log.e("DBHelper_DELTab","Deleted all tables");
+
+    }
+    public void createTable(String tableName,LinkedHashMap<String,String> columnNameAndDataType){
         SQLiteDatabase mydatabase = getWritableDatabase();
         String query = "CREATE TABLE IF NOT EXISTS "+tableName+"(";
         for(String columns : columnNameAndDataType.keySet()) {
             query=query+(columns+" "+columnNameAndDataType.get(columns)+",");
         }
         // To avoid the last COMMA
-        Log.e("RegistrationActi",query+" "+columnNameAndDataType.size());
         query=query.substring(0,query.length()-1)+");";
-        Log.e("DBInternal_CREATE_QUERY",query);
+        Log.e("DBHelper_createQuery",query+" "+columnNameAndDataType.size());
         mydatabase.execSQL(query);
-        mydatabase.close();
+        if(tableName.equals("allcontacts")){
+            SQLiteDatabase dbW = getWritableDatabase();
+            dbW.execSQL("drop table if exists allcontacts;");
+            Log.e("DBHelper_allcntct_TBL","For allcontacts table we need to populate data here..");
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    allReadContacts = ContactList.getContactNames(context.getContentResolver());
+                    getOrStoreContactsTableData(1, allReadContacts);
+                }
+            }).start();
+        }
     }
     public boolean todoWorkEntry(String API){
         try {
-            mydatabaseReadable = this.getWritableDatabase();
-            mydatabaseReadable.execSQL("insert into worktodo(api) values('" + API + "');");
-            mydatabaseReadable.close();
+            SQLiteDatabase mydatabaseW = getWritableDatabase();
+            mydatabaseW.execSQL("insert into worktodo(api) values('" + API + "');");
             return true;
         }
         catch(Exception ee){
@@ -63,7 +89,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
     public void toDoWorkExit(){
         Log.e("DBHelper","Here i am");
-        mydatabaseReadable = getReadableDatabase();
+        SQLiteDatabase mydatabaseReadable = getReadableDatabase();
         Cursor resultSet = mydatabaseReadable.rawQuery("Select * from worktodo", null);
         resultSet.moveToFirst();
         while (!resultSet.isAfterLast()) {
@@ -108,12 +134,11 @@ public class DBHelper extends SQLiteOpenHelper {
             },5000);
             resultSet.moveToNext();
         }
-        mydatabaseReadable.close();
     }
     public ArrayList<String> readNotificationsFromInternalDB() {
         ArrayList<String> allNotifications = new ArrayList<>();
         mydatabaseReadable = getReadableDatabase();
-        Cursor resultSet = mydatabaseReadable.rawQuery("Select * from notifications", null);
+        Cursor resultSet = mydatabaseReadable.rawQuery("Select * from rnotifications", null);
         resultSet.moveToFirst();
         while (!resultSet.isAfterLast()) {
             final String from_user = resultSet.getString(0);
@@ -143,13 +168,49 @@ public class DBHelper extends SQLiteOpenHelper {
             String type = allData[3];
             String fileName = allData[4];
 
-            String queryToFire = "insert into notifications values('"+fromUser+"','"+toUser+"','"+fileName+"','"+type+"',0,'"+(date+" "+time)+"');";
+            String queryToFire = "insert into rnotifications values('"+fromUser+"','"+toUser+"','"+fileName+"','"+type+"',0,'"+(date+" "+time)+"');";
             myDatabaseWritable.execSQL(queryToFire);
 
         }
     }
     public void deleteAllDataFromNotificationTableFromInternalDB(){
         myDatabaseWritable = getWritableDatabase();
-        myDatabaseWritable.execSQL("delete from notifications");
+        myDatabaseWritable.execSQL("delete from rnotifications");
+    }
+    public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, LinkedHashMap<String,String> allContacts){
+        SQLiteDatabase mydatabaseR = getReadableDatabase(),mydatabaseW = getWritableDatabase();
+        try {
+            // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
+            if(status == 0){
+                //READ and RETURN data
+                Cursor resultSet = mydatabaseR.rawQuery("Select * from allcontacts order by name", null);
+                resultSet.moveToFirst();
+                Log.e("Start_TBLDetect",resultSet.getCount()+" no of rows..");
+                while (!resultSet.isAfterLast()) {
+                    String phone_no = resultSet.getString(0);
+                    String name = resultSet.getString(1);
+                    allContacts.put(phone_no,name);
+                    resultSet.moveToNext();
+                }
+            }
+            // First time contact table create or REFRESH done.
+            else{
+                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(phone_no VARCHAR,name VARCHAR);";
+                mydatabaseW.execSQL(createQuery);
+                Log.e("Start_TBLCRT","allcontacts table created..");
+                String insertQuery = "";
+                for(String eachContact:allContacts.keySet()){
+                    mydatabaseW = getWritableDatabase();
+                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
+                    Log.e("Start_InsertQuery",insertQuery);
+                    mydatabaseW.execSQL(insertQuery);
+                }
+
+            }
+        }catch (Exception ee){
+            Log.e("DBHelper_Err",ee.getMessage());
+            ee.fillInStackTrace();
+        }
+        return allContacts;
     }
 }

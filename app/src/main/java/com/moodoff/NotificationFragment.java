@@ -113,7 +113,7 @@ public class NotificationFragment extends Fragment {
         setSizes();
 
         try {
-            while(Start.fetchContactsNotComplete);
+            while(Start.notificationFetchNotComplete);
             allNotifications = AppData.allNotifications;
             Log.e("NotificationFrag_SIZE",allNotifications.size()+"");
             designNotPanel(0);
@@ -376,4 +376,5 @@ public class NotificationFragment extends Fragment {
     // TODO: Update argument type and name
     void onFragmentInteraction(Uri uri);
 }
+
 }

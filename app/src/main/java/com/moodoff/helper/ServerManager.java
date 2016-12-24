@@ -9,10 +9,20 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.PagerTitleStrip;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.View;
+import android.widget.TabHost;
 import android.widget.Toast;
 
+import com.moodoff.AllTabs;
 import com.moodoff.NotificationFragment;
 import com.moodoff.ParseNotificationData;
 import com.moodoff.R;
@@ -53,6 +63,7 @@ public class ServerManager{
                     URL url = new URL(HttpGetPostInterface.serverSongURL + "allsongdata.txt");
                     Log.e("Start_allsongsURL", url.toString());
                     urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setConnectTimeout(3000);
                     InputStream is = urlConnection.getInputStream();
                     InputStreamReader isr = new InputStreamReader(is);
                     bufferedReader = new BufferedReader(isr);
@@ -79,13 +90,20 @@ public class ServerManager{
                             }
                         }
                         AppData.allMoodPlayList.put(typeOfMoods.get(i),allSongInAMood);
-                        Log.e("Start_disMood",typeOfMoods.get(i)+" "+allSongInAMood.toString());
+                        Log.e("Start_MoodAndSongs",typeOfMoods.get(i)+" "+allSongInAMood.toString());
                         allSongInAMood = new ArrayList<String>();
                     }
                     Start.moodsAndSongsFetchNotComplete = false;
                     Log.e("Start_allmoods_Read", "AllMoods read complete..");
                 } catch (Exception ee) {
-                    Log.e("Start_notification_Read", ee.getMessage());
+                    Log.e("Start_notRd_Err", "Server not reachable i think:"+ee.getMessage());
+                    /*Activity act = (Activity)context;
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context,"Sorry!! Server not reachable..",Toast.LENGTH_LONG).show();
+                        }
+                    });*/
                 } finally {
                     try {
                         bufferedReader.close();
@@ -152,7 +170,7 @@ public class ServerManager{
         },7000);
     }
     private void displayAlertNotificationOnTopBarOfPhone(final Context context){
-        Activity currActivity = (Activity)context;
+        final Activity currActivity = (Activity)context;
         NotificationCompat.Builder builder =
             new NotificationCompat.Builder(currActivity)
                     .setSmallIcon(R.drawable.btn_dedicate)
@@ -169,8 +187,12 @@ public class ServerManager{
             currActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    //Toast.makeText(context,"Hi New one",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context,"Hey!! New notification. Sorry!! You have to close and restart the app to see the new notifications!!",Toast.LENGTH_LONG).show();
                     //designNotPanel(1);
+                    ViewPager viewPager = (ViewPager) AllTabs.mViewPager.findViewById(R.id.container);
+                    int currentTab = viewPager.getCurrentItem();
+                    //viewPager.setCurrentItem(1);
+                    //viewPager.getAdapter().notifyDataSetChanged();
                 }
             });
             notificationIntent = new Intent(currActivity, NotificationFragment.class);

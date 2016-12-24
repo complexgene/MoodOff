@@ -64,11 +64,15 @@ public class Start extends AppCompatActivity {
                 UserDetails.setEmailId(rd.getValueFor("email"));
                 UserDetails.setDateOfBirth(rd.getValueFor("dob"));
                 UserDetails.setUserTextStatus(rd.getValueFor("textStatus"));
+                UserDetails.setUserAudioStatusSong(rd.getValueFor("audioStatus"));
                 rd.endReadTransaction();
                 return true;
             }
             else {
                 Intent ii = new Intent(this, RegistrationActivity.class);
+                ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
+                finish(); // destroy current activity..
                 startActivity(ii);
                 return false;
             }
@@ -114,7 +118,7 @@ public class Start extends AppCompatActivity {
                     Log.e("Start_Notifications","Start loading notifications from DB");
                     ArrayList<String> allNotificationsFromDB = readNotificationsFromInternalDB();
                     AppData.totalNoOfNot = allNotificationsFromDB.size();
-                    Log.e("Start","SM doing work");
+                    Log.e("Start_Notifictions","Fetched "+AppData.totalNoOfNot+" notifications..");
                     ServerManager serverManager = new ServerManager(this);
                     serverManager.readNotificationsFromServerAndWriteToInternalDB();
                     ArrayList<String> allYourNotification = new ArrayList<String>();
@@ -172,7 +176,9 @@ public class Start extends AppCompatActivity {
     private void fetchMoodsAndPlayListFiles() {
         ServerManager reads = new ServerManager();
         reads.readPlayListFromServer();
+        //moodsAndSongsFetchNotComplete = false;
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,6 +187,7 @@ public class Start extends AppCompatActivity {
 
 
         askForPermissions();
+
         if (!checkNetworkAvailability()) {
             Toast.makeText(getApplicationContext(), "Sorry! You need Internet Connection", Toast.LENGTH_LONG).show();
             spinner.setVisibility(View.INVISIBLE);
@@ -190,11 +197,12 @@ public class Start extends AppCompatActivity {
             if (populateUserData()) {
                 spinner = (ProgressBar) findViewById(R.id.spinner);
                 spinner.setVisibility(ProgressBar.VISIBLE);
+                Log.e("Start_populateUSrData", "User data populated");
 
-                Log.e("Start_Bots", "Bots started");
+                //Log.e("Start_Bots", "Bots started");
                 //startAutoBots();
                 fetchMoodsAndPlayListFiles();
-                Log.e("Start_populateUSrData", "User data populated");
+                Log.e("Start_moodPlaylist", "Playlist file fetched");
                 greetUser();
                 Log.e("Start_greetUSr", "Greet User done");
                 fetchContacts();

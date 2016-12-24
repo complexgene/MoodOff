@@ -66,13 +66,15 @@ public class Moods extends Fragment {
     Button btnRomantic,btnParty,btnOnTour,btnInLove,btnDance,btnMissU;
     ExpandableListView moodlist;
     RelativeLayout layout;
+    ViewGroup mainContainer;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mainContainer = container;
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_moods, container,
                 false);
-        rootView.setBackgroundColor(Color.WHITE);
+        //rootView.setBackgroundColor(Color.WHITE);
         btnRomantic = (Button)rootView.findViewById(R.id.btn_romantic);
         btnParty = (Button)rootView.findViewById(R.id.btn_party);
         btnOnTour = (Button)rootView.findViewById(R.id.btn_ontour);
@@ -109,7 +111,7 @@ public class Moods extends Fragment {
                 transaction.replace(R.id.allmoods, newFragment);
                 transaction.addToBackStack("genericmood_romantic");
                 transaction.commitAllowingStateLoss();
-                //putAllButtonsOff();
+                putAllButtonsOff();
             }
         });
         btnParty.setOnClickListener(new View.OnClickListener() {

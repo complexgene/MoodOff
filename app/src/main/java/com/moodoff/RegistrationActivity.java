@@ -13,31 +13,37 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.helper.DBHelper;
-import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+
+import static com.moodoff.helper.HttpGetPostInterface.serverURL;
 
 public class RegistrationActivity extends AppCompatActivity {
 
     EditText name,mobile_number,birthday,email;
+    ProgressBar progressRegistration;
     TextView error;
     Calendar calendar;
     int year, month, day;
     StoreRetrieveDataInterface rd=null;
     Button register;
     DBHelper dbOperations;
+    boolean userExists = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,25 +55,40 @@ public class RegistrationActivity extends AppCompatActivity {
         // Need to do this without any lag..
         createAllNecessaryTablesForAppOperation();
 
+        name.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
+        mobile_number.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
+        email.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
+
         birthday.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
+                error.setText("");
                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
                 imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                 setDate();
+
             }
         });
         register.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                register(v);
+            public void onClick(final View v) {
+                if (validateRegistrationData()){
+                    Toast.makeText(getApplicationContext(),"Registering...Wait!!",Toast.LENGTH_LONG).show();
+                    progressRegistration.setVisibility(View.VISIBLE);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            checkIfUserExists(v,mobile_number.getText().toString());
+                        }
+                    }).start();
+                }
             }
         });
     }
 
     private void initComponents(){
         dbOperations = new DBHelper(this);
-        register = (Button)findViewById(R.id.newregistration);
+        register = (Button)findViewById(R.id.btn_register);
         name = (EditText) findViewById(R.id.name);
         mobile_number = (EditText) findViewById(R.id.phone_number);
         birthday = (EditText) findViewById(R.id.date_of_birth);
@@ -77,22 +98,79 @@ public class RegistrationActivity extends AppCompatActivity {
         year = calendar.get(Calendar.YEAR);
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
+        progressRegistration = (ProgressBar)findViewById(R.id.progressBarRegistration);
+        progressRegistration.setVisibility(View.INVISIBLE);
     }
 
+    private void checkIfUserExists(final View v,String mobNo) {
+        final String Url = serverURL + "/users/check/" + mobNo;
+        new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    Log.e("RegAct_Not", "Start checking if user exists");
+                    URL url = new URL(Url);
+                    Log.e("RegistrAct_checkUserURL", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    InputStream is = urlConnection.getInputStream();
+                    isr = new InputStreamReader(is);
+                    Log.e("RegAct_data","here");
+                    int data = isr.read();
+                    final StringBuilder response = new StringBuilder("");
+                    while (data != -1) {
+                        response.append((char) data);
+                        data = isr.read();
+                    }
+                    Log.e("RegAct_usrChkStatus",response.toString());
+                    if(response.toString().equals("true")){
+                        userExists = true;
+                    }
+                    //doNotContinue = false;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(userExists){
+                                error.setText("!! This phone number is already registered !!");
+                                progressRegistration.setVisibility(View.INVISIBLE);
+                            }
+                            else{
+                                register(v);
+                            }
+                        }
+                    });
+
+                } catch (Exception ee) {
+                    Log.e("RegAct_chkUsrErr", ee.getMessage());
+                }
+                finally {
+                    try{
+                        isr.close();
+                    }
+                    catch(Exception ee){
+                        Log.e("RegAct_Usrchk_Err", "ISR couldn't be closed");
+                    }
+                    urlConnection.disconnect();
+                }
+            }
+        }).start();
+    }
 
     private void createAllNecessaryTablesForAppOperation(){
         DBHelper dboperations = new DBHelper(getApplicationContext());
-        HashMap<String,String> contactsColumns = new HashMap<>();
+        dbOperations.dropAllTables();
+        LinkedHashMap<String,String> contactsColumns = new LinkedHashMap<>();
         contactsColumns.put("phone_no","VARCHAR");
         contactsColumns.put("name","VARCHAR");
         dboperations.createTable("allcontacts",contactsColumns);
         Log.e("RegistrationAct_TBL","allcontacts table created.");
-        HashMap<String,String> worktodoColumns = new HashMap<>();
+        LinkedHashMap<String,String> worktodoColumns = new LinkedHashMap<>();
         worktodoColumns.put("id","INTEGER PRIMARY KEY AUTOINCREMENT");
         worktodoColumns.put("api","VARCHAR");
         dboperations.createTable("worktodo",worktodoColumns);
         Log.e("RegistrationAct_TBL","worktodo table created.");
-        HashMap<String,String> profilesColumns = new HashMap<>();
+        LinkedHashMap<String,String> profilesColumns = new LinkedHashMap<>();
         profilesColumns.put("id","VARCHAR PRIMARY KEY");
         profilesColumns.put("name","VARCHAR");
         profilesColumns.put("mailid","VARCHAR");
@@ -101,7 +179,7 @@ public class RegistrationActivity extends AppCompatActivity {
         profilesColumns.put("audiostatus","VARCHAR");
         dboperations.createTable("profiles",profilesColumns);
         Log.e("RegistrationAct_TBL","profiles table created.");
-        HashMap<String,String> rnotificationsColumns = new HashMap<>();
+        LinkedHashMap<String,String> rnotificationsColumns = new LinkedHashMap<>();
         rnotificationsColumns.put("from_user_id","VARCHAR");
         rnotificationsColumns.put("to_user_id","VARCHAR");
         rnotificationsColumns.put("file_name","VARCHAR");
@@ -109,8 +187,8 @@ public class RegistrationActivity extends AppCompatActivity {
         rnotificationsColumns.put("send_done","INTEGER");
         rnotificationsColumns.put("create_ts","VARCHAR");
         dboperations.createTable("rnotifications",rnotificationsColumns);
-        Log.e("RegistrationAct_TBL","Read Notifications table created");
-        HashMap<String,String> wnotificationsColumns = new HashMap<>();
+        Log.e("RegistrationAct_TBL","rnotifications table created");
+        /*HashMap<String,String> wnotificationsColumns = new HashMap<>();
         wnotificationsColumns.put("from_user_id","VARCHAR");
         wnotificationsColumns.put("to_user_id","VARCHAR");
         wnotificationsColumns.put("file_name","VARCHAR");
@@ -118,7 +196,7 @@ public class RegistrationActivity extends AppCompatActivity {
         wnotificationsColumns.put("send_done","TINYINT(1)");
         wnotificationsColumns.put("create_ts","TIMESTAMP");
         dboperations.createTable("rnotifications",wnotificationsColumns);
-        Log.e("RegistrationAct_TBL","Write Notifications table created");
+        Log.e("RegistrationAct_TBL","Write Notifications table created");*/
     }
 
     public void setDate() {
@@ -154,11 +232,11 @@ public class RegistrationActivity extends AppCompatActivity {
         if (name.getText().toString().isEmpty()) {
             error.setText("Error: Name is mandatory.");return false;
         } else if (mobile_number.getText().toString().isEmpty()) {
-            error.setText("Error: phone number is mandatory.");return false;
+            error.setText("Error: Phone number is mandatory.");return false;
         } else if (birthday.getText().toString().isEmpty()) {
-            error.setText("Error: birthday is mandatory.");return false;
+            error.setText("Error: Birthday is mandatory.");return false;
         } else if (isValidEmail(email.getText()) == false) {
-            error.setText("Invalid Email.");return false;
+            error.setText("Error: Invalid Email Format.");return false;
         } else {
             return true;
         }
@@ -166,7 +244,6 @@ public class RegistrationActivity extends AppCompatActivity {
 
     public void register(View view) {
         error.setVisibility(View.VISIBLE);
-        if (validateRegistrationData() == true) {
 
             final String nm = name.getText().toString().replaceAll(" ", "_"),
                     pn = mobile_number.getText().toString(),
@@ -183,7 +260,13 @@ public class RegistrationActivity extends AppCompatActivity {
                 public void run() {
                     HttpURLConnection urlConnection = null;
                     try {
-                        // Proide the URL fto which you would fire a post
+                        runOnUiThread(new Runnable() {
+                                          @Override
+                                          public void run() {
+                                              Toast.makeText(getApplicationContext(), "Setting up things..!!", Toast.LENGTH_SHORT).show();
+                                          }
+                                      });
+                                // Proide the URL fto which you would fire a post
                         URL url = new URL(Url);
                         Log.e("RegistrationActivity", url.toString());
                         urlConnection = (HttpURLConnection) url.openConnection();
@@ -196,7 +279,11 @@ public class RegistrationActivity extends AppCompatActivity {
                                 public void run() {
                                     saveUserProfile();
                                     Toast.makeText(getApplicationContext(), "Successfully Registered", Toast.LENGTH_SHORT).show();
+
                                     Intent mainIntent = new Intent(RegistrationActivity.this, Start.class);
+                                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
+                                    finish(); // destroy current activity..
                                     startActivity(mainIntent);
                                 }
                             });
@@ -219,7 +306,6 @@ public class RegistrationActivity extends AppCompatActivity {
                     }
                 }
             }).start();
-        }
     }
 
     public boolean saveUserProfile() {
@@ -231,6 +317,7 @@ public class RegistrationActivity extends AppCompatActivity {
             rd.createNewData("dob", birthday.getText().toString());
             rd.createNewData("email", email.getText().toString());
             rd.createNewData("textStatus","Using MoodOff");
+            rd.createNewData("audioStatus","Using MoodOff");
             rd.endWriteTransaction();
             return true;
         } catch (IOException e) {
@@ -239,4 +326,9 @@ public class RegistrationActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }
