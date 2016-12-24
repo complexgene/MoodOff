@@ -254,8 +254,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     userProfileString;
 
             userProfileString = nm + "/" + pn + "/" + em + "/" + dob + "/" + textStatus;
-            //final String Url = serverURL+"/users/" + userProfileString;
-            final String Url = "http://192.168.2.5:5679/controller/users/" + userProfileString;
+            final String Url = serverURL+"/users/" + userProfileString;
             dbOperations.todoWorkEntry(Url);
 
             new Thread(new Runnable() {
