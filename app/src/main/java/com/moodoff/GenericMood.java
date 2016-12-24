@@ -378,9 +378,9 @@ public class GenericMood extends Moods implements View.OnClickListener{
             }
         });
 
-        songName.setSelected(true);
-        songName.setEllipsize(TextUtils.TruncateAt.MARQUEE);
-        songName.setSingleLine(true);
+//        songName.setSelected(true);
+//        songName.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+//        songName.setSingleLine(true);
 
         return view;
     }

@@ -159,10 +159,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/seekBar"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:gravity="left"
             android:paddingLeft="10dp"
@@ -172,6 +168,10 @@
             android:textSize="12sp"
             android:textStyle="italic"
             android:fontFamily="serif" />
+        <!--android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"-->
         <TextView
             android:id="@+id/duration"
             android:layout_width="match_parent"
