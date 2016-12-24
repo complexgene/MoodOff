@@ -15,7 +15,7 @@
         android:layout_gravity="fill_horizontal"
         android:background="@color/deep_orange"
         android:id="@+id/floatingButtons"
-    >
+        >
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -71,22 +71,22 @@
     </RelativeLayout>
 
     <RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/storyTitle"
-    android:background="#8eedd9"
-    >
-    <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:textColor="#000000"
-        android:textStyle="bold"
-        android:textSize="22dp"
-        android:layout_marginBottom="5dp"
-        android:fontFamily="cursive"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/tv_storytitle" />
+        android:id="@+id/storyTitle"
+        android:background="#8eedd9"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:textSize="22dp"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="cursive"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/tv_storytitle" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -100,20 +100,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/scrollView3">
-        <TextView
-            android:text=""
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="5dp"
-            android:id="@+id/tv_story"
-            android:textColor="#ffffff"
-            android:textStyle="normal|italic"
-            android:fontFamily="serif"
-            android:textSize="15sp" />
+            <TextView
+                android:text=""
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp"
+                android:id="@+id/tv_story"
+                android:textColor="#ffffff"
+                android:textStyle="normal|italic"
+                android:fontFamily="serif"
+                android:textSize="15sp" />
         </ScrollView>
         <LinearLayout
             android:layout_width="match_parent"
@@ -159,6 +159,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/seekBar"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
             android:gravity="left"
             android:paddingLeft="10dp"
             android:text="[ Click on Play to play Random Song ]"
@@ -236,8 +241,8 @@
                 style="?android:attr/progressBarStyleLarge"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="3dp"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_centerHorizontal="true"
                 android:visibility="gone"/>
             <Button

@@ -16,6 +16,9 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -115,11 +118,11 @@ public class GenericMood extends Moods implements View.OnClickListener{
     FloatingActionButton dedicateButton,changeMoodButton;
     ProgressBar spinner,storyLoadSpinner;
     SeekBar seekBar;
-    TextView songName = null, storyTitleTV, storyBodyTV;
+    TextView songName = null, storyTitleTV, storyBodyTV, duration;
     Handler seekHandler = new Handler();
     ArrayList<String> currentplayList = null;
     String currentSong = "", currentMood = "", playListFilePath = "";
-    int currentIndex = 0, repParm = 0, playOrPauseParm = 0;
+    int currentIndex = 0, repParm = 0, playOrPauseParm = 0, timeElapsedOrTimeLeft = 0;
     DBHelper dbOperations;
 
     public void init(){
@@ -138,6 +141,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         spinner = (ProgressBar) view.findViewById(R.id.progressBar);
         storyLoadSpinner = (ProgressBar) view.findViewById(R.id.load_story_spinner);
         seekBar = (SeekBar) view.findViewById(R.id.seekBar);
+        duration = (TextView) view.findViewById(R.id.duration);
         playPauseBtn.setOnClickListener(this);
         stopBtn.setOnClickListener(this);
         nextBtn.setOnClickListener(this);
@@ -146,6 +150,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         shuffleBtn.setOnClickListener(this);
         dedicateButton.setOnClickListener(this);
         seekBar.setOnClickListener(this);
+        duration.setOnClickListener(this);
         disableButton(prevBtn);
         currentMood = mParam1;
     }
@@ -353,6 +358,30 @@ public class GenericMood extends Moods implements View.OnClickListener{
             }
         });
 
+        duration.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // TODO Auto-generated method stub
+                String Value = duration.getText().toString().split(":")[0];
+                if (Integer.valueOf(Value) > 100) {
+                    duration.setText("00:00");
+                }
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count,
+                                          int after) {
+                // TODO Auto-generated method stub
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+                // TODO Auto-generated method stub
+            }
+        });
+
+        songName.setSelected(true);
+        songName.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        songName.setSingleLine(true);
+
         return view;
     }
 
@@ -451,8 +480,72 @@ public class GenericMood extends Moods implements View.OnClickListener{
             case R.id.btn_dedicate:
                 navigateContacts(view);
                 break;
+            case R.id.duration:
+                onClickDuration(view);
         }
     }
+
+    public void onClickDuration(View v) {
+        timeElapsedOrTimeLeft = (timeElapsedOrTimeLeft > 0) ? 0 : 1;
+    }
+
+    Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            seekUpdation();
+        }
+    };
+
+    public void seekUpdation() {
+        if (mp!=null) {
+            seekBar.setProgress(mp.getCurrentPosition());
+            if(seekBar.getMax()!=0) {
+                duration.setText(getCurrentSongElapsedOrLeftDuration(mp, timeElapsedOrTimeLeft));
+                seekHandler.postDelayed(run, 10);
+            }
+        }
+    }
+
+    /*Return current playing song's duration in mm:ss format*/
+    public String getCurrentSongElapsedOrLeftDuration(MediaPlayer mediaPlayer, int timeElapsedOrTimeLeft) {
+        try {
+            int duration = 0, elapsedOrLeftTimeInMiliSeconds = 0;
+            if (mediaPlayer != null) {
+                if(timeElapsedOrTimeLeft == 0) {
+                    elapsedOrLeftTimeInMiliSeconds = mediaPlayer.getDuration()-mediaPlayer.getCurrentPosition();
+                } else {
+                    elapsedOrLeftTimeInMiliSeconds = mediaPlayer.getCurrentPosition();
+                }
+                if (elapsedOrLeftTimeInMiliSeconds != 0) {
+                    try{
+                        duration = ((elapsedOrLeftTimeInMiliSeconds) / 1000);
+                    }
+                    catch(ArithmeticException e){
+                        duration = 0;
+                    }
+                }
+            }
+            return ((duration/60) + ":" + ((duration%60 > 9) ? (duration % 60) : ("0"+(duration%60)) ));
+        } catch (Exception e) {
+            toastError(e.getMessage());
+            return "00:00";
+        }
+    }
+
+    /*Return current playing song's duration in mm:ss format*/
+    public String getCurrentSongDuration(MediaPlayer mediaPlayer) {
+        try {
+            int duration = 0;
+            if (mediaPlayer != null) {
+                duration = (mediaPlayer.getDuration()/1000);
+            }
+            return ((duration/60) + ":" + ((duration%60 > 9) ? (duration % 60) : ("0"+(duration%60)) ));
+        } catch (Exception e) {
+            toastError(e.getMessage());
+            return "00:00";
+        }
+    }
+
     /*On click method for previous button: play previous song*/
     public void onClickPrevButton(View v) {
         try{
@@ -508,9 +601,11 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     public void onPrepared(MediaPlayer mediaPlayer) {
                         showPlayPauseButton("pause");
-                        displaySongName(songName, currentIndex + " " + currentSong + " " + getCurrentSongDuration(mediaPlayer));
-                        seekBar.setMax(mediaPlayer.getDuration());
-                        seekUpdation();
+                        displaySongName(songName, currentSong + " " + getCurrentSongDuration(mediaPlayer));
+                        if(mediaPlayer!=null) {
+                            seekBar.setMax(mediaPlayer.getDuration());
+                            seekUpdation();
+                        }
                         mediaPlayer.start();
                     }
                 });
@@ -528,9 +623,11 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 if(!mp.isPlaying()) {
                     showPlayPauseButton("pause");
                     currentSong = (String)songNameFromList(currentplayList,currentIndex);
-                    displaySongName(songName, currentIndex + " " + currentSong + " " + getCurrentSongDuration(mp));
-                    seekBar.setMax(mp.getDuration());
-                    seekUpdation();
+                    displaySongName(songName, currentSong + " " + getCurrentSongDuration(mp));
+                    if(mp!=null) {
+                        seekBar.setMax(mp.getDuration());
+                        seekUpdation();
+                    }
                     mp.start();
                 }
             }
@@ -548,24 +645,10 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 mp.pause();
             }
             showPlayPauseButton("play");
-        Log.e("GenericMood_MPPause","MediaPlayer Paused Done");
+            Log.e("GenericMood_MPPause","MediaPlayer Paused Done");
         } catch (Exception e){
             toastError(e.getMessage());
             releaseMediaPlayerObject();
-        }
-    }
-
-    /*Return current playing song's duration in mm:ss format*/
-    public String getCurrentSongDuration(MediaPlayer mediaPlayer) {
-        try {
-            int duration = 0;
-            if (mediaPlayer != null) {
-                duration = (mediaPlayer.getDuration()/1000);
-            }
-            return ((duration/60) + "." + ((duration%60 > 9) ? (duration % 60) : ("0"+(duration%60)) ));
-        } catch (Exception e) {
-            toastError(e.getMessage());
-            return "00:00";
         }
     }
 
@@ -793,19 +876,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
         Log.e("GenericMood_MPissue",error);
     }
 
-    Runnable run = new Runnable() {
-        @Override
-        public void run() {
-            seekUpdation();
-        }
-    };
-    public void seekUpdation() {
-        if (mp!=null) {
-                seekBar.setProgress(mp.getCurrentPosition());
-                seekHandler.postDelayed(run, 10);
-        }
-    }
-
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -828,15 +898,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        //mp.release();
-        Log.e("GenericMood","In onDetach");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.e("GenericMood","In onDestroy");
-        releaseMediaPlayerObject();
     }
 
     /**
@@ -853,5 +914,4 @@ public class GenericMood extends Moods implements View.OnClickListener{
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
-
 }
