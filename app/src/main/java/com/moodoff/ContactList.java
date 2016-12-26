@@ -86,10 +86,10 @@ public class ContactList extends AppCompatActivity {
     HashMap<String,String> allC = new HashMap<>();
     public void showContacts() {
         // Check the SDK version and whether the permission is already granted or not.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+                //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+            } else {
             // Android version is lesser than 6.0 or the permission is already granted.
             if(checkIfATableExists("allcontacts")) {
                 Log.e("ContactList","Tab exists");

@@ -6,8 +6,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
@@ -115,14 +119,45 @@ public class NotificationFragment extends Fragment {
         try {
             while(Start.notificationFetchNotComplete);
             allNotifications = AppData.allNotifications;
+            oldCountOfNotifications = allNotifications.size();
             Log.e("NotificationFrag_SIZE",allNotifications.size()+"");
             designNotPanel(0);
+            showNotPanel();
+
         }
         catch (Exception ei){
             Log.e("NotificationFrag_Er2",ei.getMessage());
         }
 
         return view;
+    }
+
+    Activity act;
+    int currentPlayButtonId = -1;
+    FloatingActionButton currentPlayingButton;
+    public static boolean changeDetected = false;
+    private void showNotPanel(){
+        act = (Activity)view.getContext();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        act.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(changeDetected) {
+                                    designNotPanel(0);
+                                }
+                            }
+                        });
+                    }
+                }).start();
+                showNotPanel();
+            }
+        },2000);
+
     }
 
     SeekBar currentSeekBar;
@@ -142,53 +177,81 @@ public class NotificationFragment extends Fragment {
         }
     }
 
-    public void designNotPanel(int k){
-        mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
+    public static int oldCountOfNotifications = 0;
 
+    public void designNotPanel(int k){
+        Log.e("Not_Design","called..:"+currentPlayButtonId);
+        changeDetected = false;
+        mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
+        mainParentLayout.removeAllViews();
+        mainParentLayout.setBackgroundResource(R.drawable.moodon_bg_notpanel);
         ScrollView mainParent = new ScrollView(getContext());
         mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         LinearLayout ll = new LinearLayout(getContext());
         ll.setOrientation(LinearLayout.VERTICAL);
-
+        allNotifications = AppData.allNotifications;
+        int difference = allNotifications.size() - oldCountOfNotifications;
+        Log.e("NotFrag","Updating notification view:"+difference);
         for (i = 0; i < allNotifications.size(); i++) {
 
-            Log.e("NotificationFrag_Each",allNotifications.get(i));
+        //    Log.e("NotificationFrag_Each",allNotifications.get(i));
 
             String[] componentsInNotification = allNotifications.get(i).split(" ");
+            String fromUserNumber = componentsInNotification[0];
+            String fromUserName = allReadContacts.get(fromUserNumber);
+            if(fromUserName == null){
+               if(fromUserNumber.equals(UserDetails.getPhoneNumber())){
+                   fromUserName = "You";
+               }
+               else{
+                fromUserName = fromUserNumber;
+               }
+            }
             String date = componentsInNotification[2];
             String time = componentsInNotification[3];
-            String fromUser = componentsInNotification[0];
-            final String toUser = componentsInNotification[1];
-            //String toUserName = componentsInNotification[7];
+            final String toUserNumber = componentsInNotification[1];
+            String toUserName = allReadContacts.get(toUserNumber);
+            if(toUserName == null){
+                if(toUserNumber.equals(UserDetails.getPhoneNumber())){
+                    toUserName = "You";
+                }
+                else{
+                    toUserName = toUserNumber;
+                }
+            }
             String songName = componentsInNotification[5];
 
             LinearLayout parent = new LinearLayout(getContext());
-            parent.setBackgroundResource(R.drawable.buttonborder);
+            parent.setBackgroundResource(R.color.deep_orange);
             parent.setGravity(Gravity.CENTER_VERTICAL);
             parent.setGravity(Gravity.CENTER_HORIZONTAL);
 
             LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
             layoutDetails.topMargin=25;
+            layoutDetails.leftMargin = 15;
+            layoutDetails.rightMargin = 15;
             parent.setLayoutParams(layoutDetails);
             parent.setOrientation(LinearLayout.HORIZONTAL);
 
             final FloatingActionButton floatingActionButton = new FloatingActionButton(getContext());
-                    //final String mobNo = allNotifications.get(i).substring(0,10);
                     floatingActionButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(getContext(),toUser,Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(),toUserNumber,Toast.LENGTH_SHORT).show();
                             //loadProfile(toUserNumber);
                         }
                     });
             floatingActionButton.setImageResource(R.drawable.love_ns);
+            floatingActionButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(21,214,191)));
+            floatingActionButton.setSize(FloatingActionButton.SIZE_MINI);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.width=leftButtonWidth;
-            layoutDetails.height=leftButtonHeight;
+            //layoutDetails.width=leftButtonWidth;
+            //layoutDetails.height=leftButtonHeight;
             layoutDetails.weight=1;
-            layoutDetails.rightMargin=15;
-            layoutDetails.topMargin = 25;
-            layoutDetails.leftMargin=15;
+            layoutDetails.gravity=Gravity.CENTER_VERTICAL;
+            //layoutDetails.rightMargin=15;
+            //layoutDetails.topMargin = 25;
+            layoutDetails.leftMargin=20;
             floatingActionButton.setLayoutParams(layoutDetails);
             parent.addView(floatingActionButton);
 
@@ -196,31 +259,39 @@ public class NotificationFragment extends Fragment {
             linearLayout.setOrientation(LinearLayout.VERTICAL);
             TextView allN = new TextView(getContext());
             final SeekBar seekBar = new SeekBar(getContext());
+            seekBar.setEnabled(false);
             allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
             allN.setGravity(Gravity.TOP);
-            boolean isCurrentUser = fromUser.trim().equals("You");
-            Log.e("Not_USR",isCurrentUser+" "+fromUser);
+            boolean isCurrentUser = fromUserName.trim().equals("You");
+          //  Log.e("Not_USR",isCurrentUser+" "+fromUserName);
             if(isCurrentUser) {
-                parent.setBackgroundColor(Color.rgb(205,99,223));
-                allN.setBackgroundColor(Color.rgb(205,99,223));
-                seekBar.setBackgroundColor(Color.rgb(205,99,223));
+                parent.setBackgroundResource(R.drawable.eachnotificationfile);
+                //parent.setBackgroundColor(Color.rgb(241,219,127));
+                //allN.setBackgroundColor(Color.rgb(241,219,127));
+                //seekBar.setBackgroundColor(Color.rgb(241,219,127));
             }
             else {
-                parent.setBackgroundColor(Color.rgb(61,206,175));
-                allN.setBackgroundColor(Color.rgb(61,206,175));
-                seekBar.setBackgroundColor(Color.rgb(61,206,175));
+                parent.setBackgroundResource(R.drawable.registrationdatabox);
+                //parent.setBackgroundColor(Color.rgb(61,206,175));
+                //allN.setBackgroundColor(Color.rgb(61,206,175));
+                //seekBar.setBackgroundColor(Color.rgb(61,206,175));
             }
             allN.setPadding(22,0,10,0);
             allN.setTypeface(Typeface.DEFAULT_BOLD);
-            allN.setBackgroundResource(R.drawable.buttonborder_others_notification);
+            //allN.setBackgroundResource(R.color.light_yellow);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.weight=1;
             layoutDetails.width=textViewWidth;
             layoutDetails.height=textViewHeight;
+            layoutDetails.topMargin = 15;
+            layoutDetails.rightMargin = 15;
+            layoutDetails.leftMargin = 15;
             allN.setLayoutParams(layoutDetails);
             allN.setTextColor(Color.BLACK);
+            //allN.setTypeface(Typeface.createFromAsset(getContext().getApplicationContext().getAssets(),"fonts/BLKCHCRY.ttf"));
             allN.setTypeface(Typeface.SERIF);
-            String textToDisplay = allNotifications.get(i).substring(10,allNotifications.get(i).lastIndexOf(" "));
+            String textToDisplay = "[ "+date+" at "+time.substring(0,time.lastIndexOf(":"))+"]\n"+fromUserName+" > "+toUserName;
+           // Log.e("NotFrag",textToDisplay);
             allN.setText(textToDisplay);
             linearLayout.addView(allN);
             //seekBar.setBackgroundResource(R.drawable.buttonborder);
@@ -246,27 +317,31 @@ public class NotificationFragment extends Fragment {
 
 
             final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
-            Log.e("NotFrag_songFile",songFileName);
+            //Log.e("NotFrag_songFile",songFileName);
 
 
             playFloatingButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    currentSeekBar = (SeekBar) view.findViewById((v.getId()+1)*1000000);
+                    currentPlayButtonId = v.getId();
+                    currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId)+1)*1000000);
+                    currentSeekBar.setEnabled(true);
+                    //currentSeekBar.getProgressDrawable().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_IN));
                     playSong(playFloatingButton,v,currentSeekBar,songFileName);
 
                 }
             });
             playFloatingButton.setImageResource(R.drawable.play);
             playFloatingButton.setSize(FloatingActionButton.SIZE_MINI);
-            //playFloatingButton.setBackgroundTintList(ColorStateList.valueOf());
+            playFloatingButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.weight=1;
-            layoutDetails.width=rightButtonWidth;
-            layoutDetails.height=rightButtonHeight;
+            layoutDetails.gravity = Gravity.CENTER_VERTICAL;
+            //layoutDetails.width=rightButtonWidth;
+            //layoutDetails.height=rightButtonHeight;
             layoutDetails.rightMargin=20;
-            layoutDetails.topMargin = 25;
-            layoutDetails.leftMargin=10;
+            //layoutDetails.topMargin = 25;
+            //layoutDetails.leftMargin=10;
             playFloatingButton.setLayoutParams(layoutDetails);
             parent.addView(playFloatingButton);
 
@@ -274,7 +349,16 @@ public class NotificationFragment extends Fragment {
         }
         mainParent.addView(ll);
         mainParentLayout.addView(mainParent);
-        if(k==1)mainParentLayout.removeAllViews();
+        if(mp!=null && mp.isPlaying()){
+            Log.e("Not_Frag","HERE "+currentSeekBar.getId()+" "+mp.getCurrentPosition()+" "+mp.getDuration()+" "+currentPlayButtonId+difference);
+            currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId+difference)+1)*1000000);
+            currentSeekBar.setMax(mp.getDuration());
+            currentSeekBar.setEnabled(true);
+            seekUpdation();
+            currentPlayingButton = (FloatingActionButton)view.findViewById(currentPlayButtonId+difference);
+            currentPlayingButton.setImageResource(R.drawable.stop);
+            idOfTheLastPlayButtonClicked = currentPlayButtonId+difference;
+        }
     }
     private void loadProfile(String contactNumber){
         /*FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -297,6 +381,7 @@ public class NotificationFragment extends Fragment {
                 lastPlayedButton.setImageResource(R.drawable.play);
                 SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)*1000000);
                 lastSeekBar.setProgress(0);
+                lastSeekBar.setEnabled(false);
             }
             if(mp!=null)mp.reset();
             playButton.setImageResource(R.drawable.stop);
@@ -306,10 +391,12 @@ public class NotificationFragment extends Fragment {
         else {
             if(mp.isPlaying()){
                 currentSeekBar.setProgress(0);
+                currentSeekBar.setEnabled(false);
                 mp.reset();
                 playButton.setImageResource(R.drawable.play);
             } else {
                 currentSeekBar.setMax(mp.getDuration());
+                currentSeekBar.setEnabled(true);
                 seekUpdation();
                 play(songFileName);
                 //mp.start();
@@ -320,7 +407,7 @@ public class NotificationFragment extends Fragment {
     public void play(String songFileName){
         mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
         String url = serverSongURL + "romantic/" + songFileName;
-        Log.e("Not_Frag_SongURL", url.toString());
+        Log.e("Not_Frag_SongURL", url.toString()+" sB id:"+currentSeekBar.getId());
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
             mp.setDataSource(url);

@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,10 +69,12 @@ public class Moods extends Fragment {
     ExpandableListView moodlist;
     RelativeLayout layout;
     ViewGroup mainContainer;
+    LayoutInflater mainInflater;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mainContainer = container;
+        mainInflater = inflater;
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_moods, container,
                 false);
@@ -135,6 +139,9 @@ public class Moods extends Fragment {
             }
         });
 
+        ViewPager viewPager = (ViewPager) AllTabs.mViewPager.findViewById(R.id.container);
+
+
         return rootView;
     }
     public void putAllButtonsOff(){
@@ -160,6 +167,13 @@ public class Moods extends Fragment {
         Button b = (Button)rootView.findViewById(R.id.btn_romantic);
         b.setVisibility(View.GONE);
     }*/
+
+    @Override
+    public void onResume() {
+        if(rootView != null)
+            showAllButtons();
+        super.onResume();
+    }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

@@ -3,13 +3,16 @@ package com.moodoff;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -28,23 +31,21 @@ import com.moodoff.model.UserDetails;
 
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 
 public class Start extends AppCompatActivity {
+    public static int switchToTab = 0;
+    private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 100;
     private String serverURL = HttpGetPostInterface.serverURL;
     public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true;
     ProgressBar spinner;
     TextView greet;
     SQLiteDatabase mydatabase;
+    DBHelper dbOpr = new DBHelper(this);
     LinkedHashMap<String,String> allReadContacts = new LinkedHashMap<>();
-
-    private void askForPermissions(){
-        ActivityCompat.requestPermissions(Start.this,
-                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_CONTACTS},
-                1);
-    }
 
     private boolean checkNetworkAvailability(){
         ConnectivityManager connectivityManager
@@ -121,45 +122,11 @@ public class Start extends AppCompatActivity {
                     Log.e("Start_Notifictions","Fetched "+AppData.totalNoOfNot+" notifications..");
                     ServerManager serverManager = new ServerManager(this);
                     serverManager.readNotificationsFromServerAndWriteToInternalDB();
-                    ArrayList<String> allYourNotification = new ArrayList<String>();
+                    //ArrayList<String> allYourNotification = new ArrayList<String>();
                     NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
                     Log.e("Start_NotB4",allNotificationsFromDB.toString());
                     Log.e("Start_SIZE",allReadContacts.size()+"");
-                    for(String eachNotification : allNotificationsFromDB){
-                        String[] allData = eachNotification.split(" ");
-                        String fromUser = allData[0];
-                        String toUser = allData[1];
-                        String date = allData[2];
-                        String time = allData[3];
-                        time = time.substring(0,time.lastIndexOf(":"));
-                        String type = allData[4];
-                        String songName = allData[5];
-
-                        if(fromUser.equals(UserDetails.getPhoneNumber())){
-                            String nameOfTo = allReadContacts.get(toUser);
-                            if(nameOfTo!=null && nameOfTo.length()>19)
-                                nameOfTo = nameOfTo.substring(0,16)+"...";
-
-                            if (nameOfTo != null) {
-                                allYourNotification.add(toUser+"[ "+date+" at "+time+" ]: \nYou > " + nameOfTo + " " + songName);
-                            } else {
-                                allYourNotification.add(toUser+"[ "+date+" at "+time+" ]: \nYou > " + toUser + " " + songName);
-                            }
-                        }
-                        else {
-                            String nameOfFrom = allReadContacts.get(fromUser);
-                            if(nameOfFrom!=null && nameOfFrom.length()>19)
-                                nameOfFrom = nameOfFrom.substring(0,16)+"...";
-                            if (nameOfFrom != null) {
-                                allYourNotification.add(fromUser+"[ "+date+" at "+time+" ]: \n" + nameOfFrom + " > You " + songName);
-                            } else {
-                                allYourNotification.add(fromUser+"[ "+date+" at "+time+"]: \n" + fromUser + " > You " + songName);
-                            }
-                        }
-                    }
-                    Log.e("Start_allNot",allYourNotification.toString());
-                    //NotificationFragment.
-                    AppData.allNotifications = allYourNotification;
+                    AppData.allNotifications = allNotificationsFromDB;
                     notificationFetchNotComplete = false;
                     Log.e("Start_Notif_Read", "Notification read complete..");
                 } catch (Exception ee) {
@@ -176,7 +143,6 @@ public class Start extends AppCompatActivity {
     private void fetchMoodsAndPlayListFiles() {
         ServerManager reads = new ServerManager();
         reads.readPlayListFromServer();
-        //moodsAndSongsFetchNotComplete = false;
     }
 
 
@@ -185,8 +151,12 @@ public class Start extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+        /*ViewPager viewPager = (ViewPager) AllTabs.mViewPager.findViewById(R.id.container);
+        viewPager.setCurrentItem(switchToTab);*/
+        //if(switchToTab)
 
-        askForPermissions();
+        //askForPermissions();
+        //while(permissionNotDone);
 
         if (!checkNetworkAvailability()) {
             Toast.makeText(getApplicationContext(), "Sorry! You need Internet Connection", Toast.LENGTH_LONG).show();
@@ -218,7 +188,7 @@ public class Start extends AppCompatActivity {
                             Start.this.startActivity(mainIntent);
                             Start.this.finish();
                         }
-                    }, 2500);
+                    }, 0);
                 } catch (Exception ee) {
                     Log.e("Start_AllTabsLaunchErr", "Error in Alltabs Launch");
                 }
@@ -226,7 +196,6 @@ public class Start extends AppCompatActivity {
         }
     }
 
-    DBHelper dbOpr = new DBHelper(this);
     private void startAutoBots(){
         Log.e("Start_Bots","Bots in work");
         new Handler().postDelayed(new Runnable() {
@@ -293,5 +262,6 @@ public class Start extends AppCompatActivity {
         mydatabase.close();
         return allContacts;
     }
+
 }
 

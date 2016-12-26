@@ -1,8 +1,10 @@
 package com.moodoff.helper;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -35,6 +37,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by snaskar on 12/21/2016.
@@ -97,13 +100,6 @@ public class ServerManager{
                     Log.e("Start_allmoods_Read", "AllMoods read complete..");
                 } catch (Exception ee) {
                     Log.e("Start_notRd_Err", "Server not reachable i think:"+ee.getMessage());
-                    /*Activity act = (Activity)context;
-                    act.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context,"Sorry!! Server not reachable..",Toast.LENGTH_LONG).show();
-                        }
-                    });*/
                 } finally {
                     try {
                         bufferedReader.close();
@@ -115,6 +111,7 @@ public class ServerManager{
             }
         }).start();
     }
+
     public void readNotificationsFromServerAndWriteToInternalDB(){
         final String userMobileNumber = UserDetails.getPhoneNumber();
         final String serverURL = HttpGetPostInterface.serverURL;
@@ -143,12 +140,13 @@ public class ServerManager{
                             int currentNumberOfNotifications = allYourNotificationFromServer.size();
                             int oldNumberOfNotifications = AppData.totalNoOfNot;
                             if(currentNumberOfNotifications>oldNumberOfNotifications){
-                                AppData.allNotifications = allYourNotificationFromServer;
-                                AppData.totalNoOfNot = currentNumberOfNotifications;
                                 dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
                                 dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
+                                //AppData.allNotifications = allYourNotificationFromServer;
+                                AppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
+                                AppData.totalNoOfNot = currentNumberOfNotifications;
                                 Log.e("ServerManager_allNot","Some new notifications written to DB..");
-                                Log.e("ServerManager_allNot",allYourNotificationFromServer.toString());
+                                //Log.e("ServerManager_allNot",allYourNotificationFromServer.toString());
 
                                 // Display the notification alert
                                 displayAlertNotificationOnTopBarOfPhone(context);
@@ -171,44 +169,61 @@ public class ServerManager{
     }
     private void displayAlertNotificationOnTopBarOfPhone(final Context context){
         final Activity currActivity = (Activity)context;
-        NotificationCompat.Builder builder =
+        final NotificationCompat.Builder builder =
             new NotificationCompat.Builder(currActivity)
                     .setSmallIcon(R.drawable.btn_dedicate)
                     .setColor(001500)
                     .setContentTitle("MoodOff")
                     .setContentText(UserDetails.getUserName()+ "!! You got new notifications!!");
 
-        Intent notificationIntent;
+        final Intent notificationIntent = new Intent(currActivity, Start.class);
+
         if(currActivity==null){
-            notificationIntent = new Intent(currActivity, Start.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         }
         else{
             currActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(context,"Hey!! New notification. Sorry!! You have to close and restart the app to see the new notifications!!",Toast.LENGTH_LONG).show();
-                    //designNotPanel(1);
-                    ViewPager viewPager = (ViewPager) AllTabs.mViewPager.findViewById(R.id.container);
-                    int currentTab = viewPager.getCurrentItem();
-                    //viewPager.setCurrentItem(1);
-                    //viewPager.getAdapter().notifyDataSetChanged();
+                    if(isAppForground(context)) {
+                        Log.e("SM","Here yoooooo foreground");
+                        NotificationFragment.changeDetected = true;
+                        Toast.makeText(context,"Hey! You got new notifications!!",Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Log.e("SM","Here yoooooo");
+                        Start.switchToTab = 1;
+                        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        PendingIntent contentIntent = PendingIntent.getActivity(currActivity, 0, notificationIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+                        builder.setContentIntent(contentIntent);
+                        builder.setAutoCancel(true);
+
+                        // Add as notification
+                        NotificationManager manager = (NotificationManager) currActivity.getSystemService(Context.NOTIFICATION_SERVICE);
+                        manager.notify(0, builder.build());
+
+                    }
                 }
             });
-            notificationIntent = new Intent(currActivity, NotificationFragment.class);
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        }
-        PendingIntent contentIntent = PendingIntent.getActivity(currActivity, 0, notificationIntent,
-            PendingIntent.FLAG_CANCEL_CURRENT);
-        builder.setContentIntent(contentIntent);
-        builder.setAutoCancel(true);
 
+        }
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Ringtone r = RingtoneManager.getRingtone(currActivity, notification);
         r.play();
 
-        // Add as notification
-        NotificationManager manager = (NotificationManager) currActivity.getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(0, builder.build());
+
+    }
+
+    public boolean isAppForground(Context mContext) {
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (!tasks.isEmpty()) {
+            ComponentName topActivity = tasks.get(0).topActivity;
+            if (!topActivity.getPackageName().equals(mContext.getPackageName())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

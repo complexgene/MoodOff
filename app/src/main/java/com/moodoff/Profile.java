@@ -354,7 +354,7 @@ public class Profile extends Fragment {
         myEmail.setText(email);
         myDob.setText(dob);
         new UserDetails();
-        myTextStatus.setText(profileDataParsed.get("textStatus"));
+        myTextStatus.setText(profileDataParsed.get("textStatus").replaceAll("_"," "));
         myTextStatus.setTextSize(20);
         myAudioStatusSong=profileDataParsed.get("audioStatusURL");
         textStatusLoveCount.setText(profileDataParsed.get("textStatusLoveCount")+" people loved the status");

@@ -601,7 +601,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     public void onPrepared(MediaPlayer mediaPlayer) {
                         showPlayPauseButton("pause");
-                        displaySongName(songName, currentSong + " " + getCurrentSongDuration(mediaPlayer));
+                        displaySongName(songName, currentSong.substring(0,currentSong.lastIndexOf(".")));
                         if(mediaPlayer!=null) {
                             seekBar.setMax(mediaPlayer.getDuration());
                             seekUpdation();
@@ -623,7 +623,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 if(!mp.isPlaying()) {
                     showPlayPauseButton("pause");
                     currentSong = (String)songNameFromList(currentplayList,currentIndex);
-                    displaySongName(songName, currentSong + " " + getCurrentSongDuration(mp));
+                    displaySongName(songName, currentSong.substring(0,currentSong.lastIndexOf(".")));
                     if(mp!=null) {
                         seekBar.setMax(mp.getDuration());
                         seekUpdation();
@@ -899,6 +899,18 @@ public class GenericMood extends Moods implements View.OnClickListener{
         super.onDetach();
         mListener = null;
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.e("GenericMood","GM on Destroy");
+        if(mp!=null) {
+            mp.reset();
+            mp = null;
+        }
+    }
+
+
 
     /**
      * This interface must be implemented by activities that contain this

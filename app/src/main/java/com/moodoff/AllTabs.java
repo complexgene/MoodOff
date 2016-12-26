@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,6 +54,11 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        Log.e("ALLTABS","I am called again..");
+
+        mViewPager.setCurrentItem(Start.switchToTab);
+        mViewPager.getAdapter().notifyDataSetChanged();
 
         //Request all the dangerous permissions over here
 
@@ -130,6 +136,11 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_all_tabs, container, false);
 
+            Log.e("ALLTABS","I am called again..");
+
+            /*mViewPager.setCurrentItem(Start.switchToTab);
+            mViewPager.getAdapter().notifyDataSetChanged();*/
+
             return rootView;
         }
     }
@@ -186,5 +197,14 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
         }
 
     }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Log.e("Start","BACK Pressed..");
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }

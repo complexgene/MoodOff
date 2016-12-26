@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
  */
 
 public class ContactsManager {
+    //<KEY:Number,VALUE:Name>
     public static LinkedHashMap<String,String> allReadContacts = new LinkedHashMap<>();
 
 }
