@@ -149,7 +149,7 @@ public class DBHelper extends SQLiteOpenHelper {
             final String timestamp = resultSet.getString(5);
             String data = from_user+" "+to_user+" "+timestamp+" "+type+" "+fileName;
             allNotifications.add(data);
-            Log.e("DBHelper_RDNot",data);
+            //Log.e("DBHelper_RDNot",data);
             resultSet.moveToNext();
         }
         return allNotifications;

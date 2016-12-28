@@ -5,18 +5,17 @@
     android:layout_height="match_parent"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
-    android:paddingTop="20dp"
-    android:paddingBottom="20dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
     android:clickable="true"
     android:orientation="vertical"
-    android:background="@drawable/karaoke_bg7"
+    android:background="@color/light_yellow"
     tools:context="com.moodoff.Moods">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="@color/light_yellow"
         android:id="@+id/firstRowOfMoods"
         >
         <Button
@@ -30,22 +29,20 @@
 
         <Button
             android:id="@+id/btn_party"
-            android:text="Party"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:onClick="putmeoff"
-            android:layout_above="@+id/btn_dance"
-            style="@style/Widget.AppCompat.Button.Colored" />
-
+            android:background="@mipmap/mood_party"
+            />
         <Button
             android:id="@+id/btn_romantic"
-            android:text="Romantic"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:onClick="putmeoff"
-            style="@style/Widget.AppCompat.Button.Colored" />
+            android:background="@mipmap/mood_romantic"
+             />
     </LinearLayout>
 
     <LinearLayout
@@ -90,14 +87,21 @@
         android:background="@color/light_yellow"
         android:id="@+id/thirdRowOfMoods"
         >
-        <Button
-            android:text="old era"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            >
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@mipmap/mood_old_era"
             android:id="@+id/btn_old_era"
             android:layout_weight="1"
             android:onClick="putmeoff"
-            style="@style/Widget.AppCompat.Button.Colored" />
+            />
+        </LinearLayout>
 
         <Button
             android:text="calm"
@@ -134,14 +138,12 @@
             style="@style/Widget.AppCompat.Button.Colored" />
 
         <Button
-            android:text="sad"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/btn_sad"
             android:layout_weight="1"
             android:onClick="putmeoff"
-            style="@style/Widget.AppCompat.Button.Colored" />
-
+            android:background="@mipmap/mood_sad"/>
         <Button
             android:text="Workout"
             android:layout_width="wrap_content"

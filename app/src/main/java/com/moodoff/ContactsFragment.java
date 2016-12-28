@@ -194,8 +194,9 @@ public class ContactsFragment extends Fragment{
             eachContactLayout.setLayoutParams(layoutDetails);
             Button contactNameAndNumber = new Button(ctx);
             contactNameAndNumber.setText(allC.get(eachCntct)+"\n"+eachCntct);
+            contactNameAndNumber.setTextColor(Color.WHITE);
             contactNameAndNumber.setTextSize(16.0f);
-            contactNameAndNumber.setTypeface(Typeface.SERIF);
+            contactNameAndNumber.setTypeface(Typeface.DEFAULT_BOLD);
             contactNameAndNumber.setBackgroundColor(Color.rgb(61,206,175));
             //contactNameAndNumber.setBackgroundResource(R.drawable.buttonborder);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);

@@ -19,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
 
+import java.util.ArrayList;
+
 public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChangeListener,SelectsongFragment.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener,SingSong.OnFragmentInteractionListener,Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
 
     /**
@@ -36,7 +38,7 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
      */
     //private ViewPager mViewPager;
     public static ViewPager mViewPager;
-
+    public static ArrayList<String> tabNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,18 +47,20 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
+        tabNames.clear();tabNames.add("Moods");tabNames.add("ACTIVITY");tabNames.add("PROFILE");
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.addOnPageChangeListener(new NotificationFragment());
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
         Log.e("ALLTABS","I am called again..");
-
         mViewPager.setCurrentItem(Start.switchToTab);
         mViewPager.getAdapter().notifyDataSetChanged();
 
@@ -176,15 +180,12 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Moods";
+                    return tabNames.get(0);
                 case 1: {
-                    return "Activity";
+                    return tabNames.get(1);
                 }
                 case 2: {
-                    return "Profiles";
-                }
-                case 3: {
-                    return "Profiles";
+                    return tabNames.get(2);
                 }
             }
             return null;

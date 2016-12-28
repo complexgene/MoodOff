@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -41,6 +42,7 @@ import android.widget.Toast;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.ServerManager;
 import com.moodoff.model.UserDetails;
 
 import java.io.InputStream;
@@ -59,7 +61,26 @@ import java.util.HashMap;
  * Use the {@link NotificationFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NotificationFragment extends Fragment {
+public class NotificationFragment extends Fragment implements ViewPager.OnPageChangeListener{
+    @Override
+    public void onPageSelected(int position) {
+        Log.e("SMNotFrag","Page selected..");
+        ViewPager viewPager = AllTabs.mViewPager;
+        AllTabs.tabNames.clear();
+        AllTabs.tabNames.add("Moods");AllTabs.tabNames.add("Activity");AllTabs.tabNames.add("Profiles");
+        viewPager.getAdapter().notifyDataSetChanged();
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
     public static int totalNumberOfNotifications = 0;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -115,13 +136,14 @@ public class NotificationFragment extends Fragment {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_notification, container, false);
         setSizes();
+        Log.e("Nota_Frag3","being called..");
 
         try {
             while(Start.notificationFetchNotComplete);
             allNotifications = AppData.allNotifications;
             oldCountOfNotifications = allNotifications.size();
             Log.e("NotificationFrag_SIZE",allNotifications.size()+"");
-            designNotPanel(0);
+            designNotPanel(view);
             showNotPanel();
 
         }
@@ -148,7 +170,7 @@ public class NotificationFragment extends Fragment {
                             @Override
                             public void run() {
                                 if(changeDetected) {
-                                    designNotPanel(0);
+                                    designNotPanel(view);
                                 }
                             }
                         });
@@ -179,36 +201,34 @@ public class NotificationFragment extends Fragment {
 
     public static int oldCountOfNotifications = 0;
 
-    public void designNotPanel(int k){
+    public void designNotPanel(final View view){
         Log.e("Not_Design","called..:"+currentPlayButtonId);
         changeDetected = false;
         mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
         mainParentLayout.removeAllViews();
         mainParentLayout.setBackgroundResource(R.drawable.moodon_bg_notpanel);
-        ScrollView mainParent = new ScrollView(getContext());
+        ScrollView mainParent = new ScrollView(view.getContext());
         mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        LinearLayout ll = new LinearLayout(getContext());
+        LinearLayout ll = new LinearLayout(view.getContext());
         ll.setOrientation(LinearLayout.VERTICAL);
         allNotifications = AppData.allNotifications;
         int difference = allNotifications.size() - oldCountOfNotifications;
         Log.e("NotFrag","Updating notification view:"+difference);
         for (i = 0; i < allNotifications.size(); i++) {
-
-        //    Log.e("NotificationFrag_Each",allNotifications.get(i));
-
+            // Input Parsing
             String[] componentsInNotification = allNotifications.get(i).split(" ");
             String fromUserNumber = componentsInNotification[0];
             String fromUserName = allReadContacts.get(fromUserNumber);
             if(fromUserName == null){
-               if(fromUserNumber.equals(UserDetails.getPhoneNumber())){
-                   fromUserName = "You";
-               }
-               else{
-                fromUserName = fromUserNumber;
-               }
+                if(fromUserNumber.equals(UserDetails.getPhoneNumber())){
+                    fromUserName = "You";
+                }
+                else{
+                    fromUserName = fromUserNumber;
+                }
             }
             String date = componentsInNotification[2];
-            String time = componentsInNotification[3];
+            final String time = componentsInNotification[3];
             final String toUserNumber = componentsInNotification[1];
             String toUserName = allReadContacts.get(toUserNumber);
             if(toUserName == null){
@@ -219,62 +239,53 @@ public class NotificationFragment extends Fragment {
                     toUserName = toUserNumber;
                 }
             }
-            String songName = componentsInNotification[5];
+            final String songName = componentsInNotification[5];
 
-            LinearLayout parent = new LinearLayout(getContext());
+            // Each notification layout
+            LinearLayout parent = new LinearLayout(view.getContext());
             parent.setBackgroundResource(R.color.deep_orange);
             parent.setGravity(Gravity.CENTER_VERTICAL);
             parent.setGravity(Gravity.CENTER_HORIZONTAL);
-
             LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
             layoutDetails.topMargin=25;
-            layoutDetails.leftMargin = 15;
-            layoutDetails.rightMargin = 15;
+            layoutDetails.leftMargin = 10;
+            layoutDetails.rightMargin = 10;
             parent.setLayoutParams(layoutDetails);
             parent.setOrientation(LinearLayout.HORIZONTAL);
 
-            final FloatingActionButton floatingActionButton = new FloatingActionButton(getContext());
-                    floatingActionButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Toast.makeText(getContext(),toUserNumber,Toast.LENGTH_SHORT).show();
-                            //loadProfile(toUserNumber);
-                        }
-                    });
-            floatingActionButton.setImageResource(R.drawable.love_ns);
-            floatingActionButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(21,214,191)));
-            floatingActionButton.setSize(FloatingActionButton.SIZE_MINI);
+            // Love Button
+            final FloatingActionButton loveButton = new FloatingActionButton(view.getContext());
+            final String fromNumberToSend = fromUserNumber;
+            loveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(view.getContext(),toUserNumber,Toast.LENGTH_SHORT).show();
+                    //loadProfile(toUserNumber);
+                    voteLove(fromNumberToSend,toUserNumber,time);
+                }
+            });
+            loveButton.setImageResource(R.drawable.love_ns);
+            loveButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(21,214,191)));
+            loveButton.setSize(FloatingActionButton.SIZE_MINI);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            //layoutDetails.width=leftButtonWidth;
-            //layoutDetails.height=leftButtonHeight;
             layoutDetails.weight=1;
             layoutDetails.gravity=Gravity.CENTER_VERTICAL;
-            //layoutDetails.rightMargin=15;
-            //layoutDetails.topMargin = 25;
             layoutDetails.leftMargin=20;
-            floatingActionButton.setLayoutParams(layoutDetails);
-            parent.addView(floatingActionButton);
+            loveButton.setLayoutParams(layoutDetails);
+            parent.addView(loveButton);
 
-            LinearLayout linearLayout = new LinearLayout(getContext());
+            // Text Notification and SeekBar
+            LinearLayout linearLayout = new LinearLayout(view.getContext());
             linearLayout.setOrientation(LinearLayout.VERTICAL);
-            TextView allN = new TextView(getContext());
-            final SeekBar seekBar = new SeekBar(getContext());
-            seekBar.setEnabled(false);
+            TextView allN = new TextView(view.getContext());
             allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
             allN.setGravity(Gravity.TOP);
             boolean isCurrentUser = fromUserName.trim().equals("You");
-          //  Log.e("Not_USR",isCurrentUser+" "+fromUserName);
             if(isCurrentUser) {
                 parent.setBackgroundResource(R.drawable.eachnotificationfile);
-                //parent.setBackgroundColor(Color.rgb(241,219,127));
-                //allN.setBackgroundColor(Color.rgb(241,219,127));
-                //seekBar.setBackgroundColor(Color.rgb(241,219,127));
             }
             else {
                 parent.setBackgroundResource(R.drawable.registrationdatabox);
-                //parent.setBackgroundColor(Color.rgb(61,206,175));
-                //allN.setBackgroundColor(Color.rgb(61,206,175));
-                //seekBar.setBackgroundColor(Color.rgb(61,206,175));
             }
             allN.setPadding(22,0,10,0);
             allN.setTypeface(Typeface.DEFAULT_BOLD);
@@ -288,24 +299,19 @@ public class NotificationFragment extends Fragment {
             layoutDetails.leftMargin = 15;
             allN.setLayoutParams(layoutDetails);
             allN.setTextColor(Color.BLACK);
-            //allN.setTypeface(Typeface.createFromAsset(getContext().getApplicationContext().getAssets(),"fonts/BLKCHCRY.ttf"));
+            //allN.setTypeface(Typeface.createFromAsset(view.getContext().getApplicationContext().getAssets(),"fonts/BLKCHCRY.ttf"));
             allN.setTypeface(Typeface.SERIF);
             String textToDisplay = "[ "+date+" at "+time.substring(0,time.lastIndexOf(":"))+"]\n"+fromUserName+" > "+toUserName;
-           // Log.e("NotFrag",textToDisplay);
             allN.setText(textToDisplay);
             linearLayout.addView(allN);
-            //seekBar.setBackgroundResource(R.drawable.buttonborder);
-            linearLayout.addView(seekBar);
-            parent.addView(linearLayout);
-
-            final FloatingActionButton playFloatingButton = new FloatingActionButton(getContext());
-            playFloatingButton.setId(i);
+            final SeekBar seekBar = new SeekBar(view.getContext());
+            seekBar.setEnabled(false);
             seekBar.setId((i+1)*1000000);
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     if(mp!=null)
-                    mp.seekTo(seekBar.getProgress());
+                        mp.seekTo(seekBar.getProgress());
                 }
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
@@ -314,12 +320,14 @@ public class NotificationFragment extends Fragment {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 }
             });
+            linearLayout.addView(seekBar);
+            parent.addView(linearLayout);
 
-
+            // Play button
             final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
             //Log.e("NotFrag_songFile",songFileName);
-
-
+            final FloatingActionButton playFloatingButton = new FloatingActionButton(view.getContext());
+            playFloatingButton.setId(i);
             playFloatingButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -337,11 +345,7 @@ public class NotificationFragment extends Fragment {
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.weight=1;
             layoutDetails.gravity = Gravity.CENTER_VERTICAL;
-            //layoutDetails.width=rightButtonWidth;
-            //layoutDetails.height=rightButtonHeight;
             layoutDetails.rightMargin=20;
-            //layoutDetails.topMargin = 25;
-            //layoutDetails.leftMargin=10;
             playFloatingButton.setLayoutParams(layoutDetails);
             parent.addView(playFloatingButton);
 
@@ -350,16 +354,23 @@ public class NotificationFragment extends Fragment {
         mainParent.addView(ll);
         mainParentLayout.addView(mainParent);
         if(mp!=null && mp.isPlaying()){
-            Log.e("Not_Frag","HERE "+currentSeekBar.getId()+" "+mp.getCurrentPosition()+" "+mp.getDuration()+" "+currentPlayButtonId+difference);
+            Log.e("Nota_Frag1","HERE "+currentSeekBar.getId()+" "+currentPlayButtonId+" "+difference);
             currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId+difference)+1)*1000000);
             currentSeekBar.setMax(mp.getDuration());
             currentSeekBar.setEnabled(true);
             seekUpdation();
             currentPlayingButton = (FloatingActionButton)view.findViewById(currentPlayButtonId+difference);
             currentPlayingButton.setImageResource(R.drawable.stop);
+            currentPlayingButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             idOfTheLastPlayButtonClicked = currentPlayButtonId+difference;
         }
     }
+
+    private void voteLove(String from,String to, String ts){
+        ServerManager serverManager = new ServerManager();
+        //serverManager.voteLove(from,to,ts);
+    }
+
     private void loadProfile(String contactNumber){
         /*FragmentTransaction transaction = getFragmentManager().beginTransaction();
         Fragment newFragment = Profile.newInstance(contactNumber,"b");
@@ -374,18 +385,22 @@ public class NotificationFragment extends Fragment {
         dialogView = mainInflater.inflate(R.layout.fragment_profile, mainContainer, false);
     }
     public void playSong(FloatingActionButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName){
-        Log.e("Not_Frag", currentClickedButton.getId() + "");
+        Log.e("Nota_Frag2", currentClickedButton.getId() + "");
         if(currentClickedButton.getId() != idOfTheLastPlayButtonClicked) {
             if (idOfTheLastPlayButtonClicked != -1) {
                 FloatingActionButton lastPlayedButton = (FloatingActionButton) view.findViewById(idOfTheLastPlayButtonClicked);
                 lastPlayedButton.setImageResource(R.drawable.play);
+                lastPlayedButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
                 SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)*1000000);
                 lastSeekBar.setProgress(0);
                 lastSeekBar.setEnabled(false);
             }
             if(mp!=null)mp.reset();
             playButton.setImageResource(R.drawable.stop);
+            playButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             idOfTheLastPlayButtonClicked = currentClickedButton.getId();
+            currentPlayButtonId = idOfTheLastPlayButtonClicked;
+            oldCountOfNotifications = allNotifications.size();
             play(songFileName);
         }
         else {
@@ -394,6 +409,7 @@ public class NotificationFragment extends Fragment {
                 currentSeekBar.setEnabled(false);
                 mp.reset();
                 playButton.setImageResource(R.drawable.play);
+                playButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
             } else {
                 currentSeekBar.setMax(mp.getDuration());
                 currentSeekBar.setEnabled(true);
@@ -401,9 +417,11 @@ public class NotificationFragment extends Fragment {
                 play(songFileName);
                 //mp.start();
                 playButton.setImageResource(R.drawable.stop);
+                playButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             }
         }
     }
+
     public void play(String songFileName){
         mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
         String url = serverSongURL + "romantic/" + songFileName;
@@ -451,17 +469,17 @@ public class NotificationFragment extends Fragment {
     }
     @Override
     public void onDetach() {
-       if(mp!=null) {
-           mp.reset();
-           mp.release();
-           mp = null;
-       }
+        if(mp!=null) {
+            mp.reset();
+            mp.release();
+            mp = null;
+        }
         super.onDetach();
         mListener = null;
     }
     public interface OnFragmentInteractionListener {
-    // TODO: Update argument type and name
-    void onFragmentInteraction(Uri uri);
-}
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
+    }
 
 }

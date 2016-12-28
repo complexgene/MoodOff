@@ -112,7 +112,7 @@ public class Profile extends Fragment {
 
         String profileOfUser = mParam1;
 
-        Toast.makeText(getContext(),"Loading profile of: "+ ContactsManager.allReadContacts.get(profileOfUser),Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(),"Loading profile of: "+ ContactsManager.allReadContacts.get(profileOfUser),Toast.LENGTH_SHORT).show();
 
         setUserProfileData(profileOfUser);
         // Check if its someone else's profile, then remove the edit button

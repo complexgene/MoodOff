@@ -46,6 +46,7 @@ import java.util.List;
 public class ServerManager{
     DBHelper dbOperations;
     Context context;
+    int currentNumberOfNotifications, oldNumberOfNotifications;
 
     public ServerManager(){}
 
@@ -124,7 +125,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            Log.e("ServerManager_Not","Start reading notifications from Server");
+                            //Log.e("ServerManager_Not","Start reading notifications from Server");
                             URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
                             Log.e("ServerManager_ReadURL", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
@@ -137,8 +138,8 @@ public class ServerManager{
                                 data = isr.read();
                             }
                             ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
-                            int currentNumberOfNotifications = allYourNotificationFromServer.size();
-                            int oldNumberOfNotifications = AppData.totalNoOfNot;
+                            currentNumberOfNotifications = allYourNotificationFromServer.size();
+                            oldNumberOfNotifications = AppData.totalNoOfNot;
                             if(currentNumberOfNotifications>oldNumberOfNotifications){
                                 dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
                                 dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
@@ -156,7 +157,7 @@ public class ServerManager{
                                 Log.e("ServerManager_allNot","No new Notifications..");
                             }
 
-                            Log.e("ServerManager_Not_Read", "Notification read complete from server");
+                            //Log.e("ServerManager_Not_Read", "Notification read complete from server");
                         } catch (Exception ee) {
                             Log.e("ServerManager_Not_RdErr", ee.getMessage());
                             ee.printStackTrace();
@@ -187,6 +188,14 @@ public class ServerManager{
                 public void run() {
                     if(isAppForground(context)) {
                         Log.e("SM","Here yoooooo foreground");
+                        if(AllTabs.mViewPager.getCurrentItem()!=1) {
+                            AllTabs.tabNames.clear();
+                            AllTabs.tabNames.add("MOODS");
+                            AllTabs.tabNames.add("ACTIVITY*");
+                            AllTabs.tabNames.add("PROFILES");
+                        }
+                        ViewPager mViewPager = AllTabs.mViewPager;
+                        mViewPager.getAdapter().notifyDataSetChanged();
                         NotificationFragment.changeDetected = true;
                         Toast.makeText(context,"Hey! You got new notifications!!",Toast.LENGTH_LONG).show();
                     }
@@ -214,7 +223,6 @@ public class ServerManager{
 
 
     }
-
     public boolean isAppForground(Context mContext) {
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
@@ -225,5 +233,54 @@ public class ServerManager{
             }
         }
         return true;
+    }
+    public boolean voteLove(String fromUser, String toUser, String ts)
+    {
+        /*new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    Log.e("ServerManager_Not","Start loving the notification");
+                    URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
+                    Log.e("ServerManager_ReadURL", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    InputStream is = urlConnection.getInputStream();
+                    isr = new InputStreamReader(is);
+                    int data = isr.read();
+                    final StringBuilder response = new StringBuilder("");
+                    while (data != -1) {
+                        response.append((char) data);
+                        data = isr.read();
+                    }
+                    ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
+                    int currentNumberOfNotifications = allYourNotificationFromServer.size();
+                    int oldNumberOfNotifications = AppData.totalNoOfNot;
+                    if(currentNumberOfNotifications>oldNumberOfNotifications){
+                        dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
+                        dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
+                        //AppData.allNotifications = allYourNotificationFromServer;
+                        AppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
+                        AppData.totalNoOfNot = currentNumberOfNotifications;
+                        Log.e("ServerManager_allNot","Some new notifications written to DB..");
+                        //Log.e("ServerManager_allNot",allYourNotificationFromServer.toString());
+
+                        // Display the notification alert
+                        displayAlertNotificationOnTopBarOfPhone(context);
+
+                    }
+                    else{
+                        Log.e("ServerManager_allNot","No new Notifications..");
+                    }
+
+                    Log.e("ServerManager_Not_Read", "Notification read complete from server");
+                } catch (Exception ee) {
+                    Log.e("ServerManager_Not_RdErr", ee.getMessage());
+                    ee.printStackTrace();
+                }
+            }
+        }).start();*/
+        return false;
     }
 }
