@@ -22,11 +22,15 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -35,6 +39,7 @@ import android.widget.Toast;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.ServerManager;
 import com.moodoff.model.UserDetails;
 
 import java.io.BufferedReader;
@@ -108,14 +113,14 @@ public class GenericMood extends Moods implements View.OnClickListener{
     View view;
     Bitmap bitmap;
     String imageFilePath;
-    ImageView moodpageBG;
+    ImageView photoView;
 
     //Player variables
     MediaPlayer mp;
     Context context;
     //Buttons
     Button playPauseBtn, stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
-    FloatingActionButton dedicateButton,changeMoodButton;
+    FloatingActionButton dedicateButton,changeMoodButton, menuButton;
     ProgressBar spinner,storyLoadSpinner;
     SeekBar seekBar;
     TextView songName = null, storyTitleTV, storyBodyTV, duration;
@@ -138,10 +143,12 @@ public class GenericMood extends Moods implements View.OnClickListener{
         shuffleBtn = (Button) view.findViewById(R.id.shuffleButton);
         dedicateButton = (FloatingActionButton) view.findViewById(R.id.btn_dedicate);
         changeMoodButton = (FloatingActionButton) view.findViewById(R.id.btn_changemood);
+        menuButton = (FloatingActionButton)view.findViewById(R.id.btn_menu);
         spinner = (ProgressBar) view.findViewById(R.id.progressBar);
         storyLoadSpinner = (ProgressBar) view.findViewById(R.id.load_story_spinner);
         seekBar = (SeekBar) view.findViewById(R.id.seekBar);
         duration = (TextView) view.findViewById(R.id.duration);
+        photoView = (ImageView) view.findViewById(R.id.photoView);
         playPauseBtn.setOnClickListener(this);
         stopBtn.setOnClickListener(this);
         nextBtn.setOnClickListener(this);
@@ -155,8 +162,75 @@ public class GenericMood extends Moods implements View.OnClickListener{
         currentMood = mParam1;
     }
 
-    public String getStoryName(){
-        return "story1.txt";
+    public void showMenu(){
+        PopupMenu popupMenu = new PopupMenu(view.getContext(),menuButton);
+        popupMenu.getMenuInflater().inflate(R.menu.genericmoodbg_popup,popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                String selectedOption = item.getTitle().toString();
+                if(selectedOption.equalsIgnoreCase("Show Story")){
+                    showItemInMiddle(1);
+                }
+                else {
+                    if (selectedOption.equalsIgnoreCase("Choose From gallery")) {
+                        showItemInMiddle(2);
+                    } else {
+                        if (selectedOption.equalsIgnoreCase("Capture using Camera")) {
+                            showItemInMiddle(3);
+                        }
+                        else {
+                            if (selectedOption.equalsIgnoreCase("Show last Image")) {
+                                showItemInMiddle(4);
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
+    }
+
+    public void showItemInMiddle(int selectedOption){
+        switch(selectedOption){
+            case 1:{
+                photoView.setVisibility(View.GONE);
+                storyLoadSpinner.setVisibility(View.VISIBLE);
+                ServerManager serverManager = new ServerManager();
+                serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
+                break;
+
+            }
+            case 2:{
+                break;
+            }
+            case 3:{
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/"+currentMood+"/");
+                pictureDirectory.mkdirs();
+                String pictureName = getPictureName();
+                File imageFile = new File(pictureDirectory,pictureName);
+                // Directory creation complete
+                Uri picture = Uri.fromFile(imageFile);
+                // We have to create an URI resource because putExtra expects URI resource as the second argument.
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,picture);
+                // Start the Activity Now
+                startActivityForResult(cameraIntent,0);
+                break;
+            }
+            case 4:{
+                imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/moodoff/"+currentMood+"/"+getPictureName();
+                if(!(new File(imageFilePath).exists())){
+                    Toast.makeText(getContext(), "Not yet taken any photo for this mood", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    bitmap = BitmapFactory.decodeFile(imageFilePath);
+                    photoView.setImageBitmap(bitmap);
+                    photoView.setVisibility(View.VISIBLE);
+                }
+            }
+        }
     }
 
     @Override
@@ -168,51 +242,17 @@ public class GenericMood extends Moods implements View.OnClickListener{
 
         init();
         //Toast.makeText(getContext(),"You selected mood: "+(char)(mParam1.charAt(0)-32)+mParam1.substring(1),Toast.LENGTH_LONG).show();
-        new Handler().postDelayed(new Runnable() {
+
+        menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                new Thread(new Runnable() {
-                    HttpURLConnection urlConnection = null;
-                    BufferedReader bufferedReader = null;
-                    @Override
-                    public void run() {
-                        try {
-                            URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/" + currentMood + "/" + getStoryName());
-                            Log.e("GenericMood_Story_url", url.toString());
-                            urlConnection = (HttpURLConnection) url.openConnection();
-                            InputStream is = urlConnection.getInputStream();
-                            InputStreamReader isr = new InputStreamReader(is);
-                            bufferedReader = new BufferedReader(isr);
-                            final StringBuilder storyBody = new StringBuilder("");
-                            String body="";
-                            final String title=bufferedReader.readLine();
-                            while ((body = bufferedReader.readLine()) != null) {
-                                storyBody.append(body);
-                            }
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    storyTitleTV.setText(title);
-                                    storyBodyTV.setText(storyBody.toString());
-                                    storyLoadSpinner.setVisibility(View.GONE);
-                                }
-                            });
-
-                        } catch (Exception ee) {
-                            Log.e("GenericM_StoryReadErr", ee.getMessage());
-                        } finally {
-                            try {
-                                bufferedReader.close();
-                            } catch (Exception ee) {
-                                Log.e("GenericM_Err", "BufferedReader couldn't be closed");
-                            }
-                            urlConnection.disconnect();
-
-                        }
-                    }
-                }).start();
+            public void onClick(View v) {
+                showMenu();
             }
-        },0);
+        });
+
+        storyLoadSpinner.setVisibility(View.VISIBLE);
+        ServerManager serverManager = new ServerManager();
+        serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
 
 
         if (currentMood != "") {
@@ -239,11 +279,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
             }
         });
 
-
-        //moodpageBG = (ImageView) view.findViewById(R.id.photoView);
-        //imageFilePath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/moodoff/"+currentMood+"/mogambo.jpg";
-        //bitmap = BitmapFactory.decodeFile(imageFilePath);
-        //moodpageBG.setImageBitmap(bitmap);
 
         changeMoodButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -274,7 +309,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             }
         });
 
-        FloatingActionButton cameraButton = (FloatingActionButton)view.findViewById(R.id.btn_camera);
+        /*FloatingActionButton cameraButton = (FloatingActionButton)view.findViewById(R.id.btn_camera);
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -290,7 +325,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 // Start the Activity Now
                 startActivityForResult(cameraIntent,0);
             }
-        });
+        });*/
 
         final FloatingActionButton loveButton = (FloatingActionButton)view.findViewById(R.id.btn_love);
         loveButton.setOnClickListener(new View.OnClickListener() {
@@ -385,9 +420,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         return view;
     }
 
-
-    public void navigateContacts(View v)
-    {
+    public void navigateContacts(View v){
         if(mp==null || !mp.isPlaying()){
             Toast.makeText(getActivity().getApplicationContext(),"You have to play a song to dedicate.",Toast.LENGTH_SHORT).show();
         }
@@ -397,9 +430,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             startActivityForResult(it, 1);
         }
     }
-    static String getPictureName(){
-        return "mogambo.jpg";
-    }
+    static String getPictureName(){return "mogambo.jpg";}
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
@@ -450,9 +481,12 @@ public class GenericMood extends Moods implements View.OnClickListener{
         }
         if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
-                imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/moodoff/mogambo.jpg";
+                imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/moodoff/"+currentMood+"/"+getPictureName();
+                Log.e("Geeeeeeneeerd",imageFilePath.toString());
                 bitmap = BitmapFactory.decodeFile(imageFilePath);
-                moodpageBG.setImageBitmap(bitmap);
+                photoView.setImageBitmap(bitmap);
+                photoView.setVisibility(View.VISIBLE);
+                Log.e("Geeeeeeneeerd","GGGGGGGGGGGGGGGGMMMMMMM");
             }
         }
     }

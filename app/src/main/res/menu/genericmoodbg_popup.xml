@@ -1,0 +1,30 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.moodoff.AllTabs"
+    >
+    <item
+        android:id="@+id/imagebg"
+        android:orderInCategory="100"
+        android:title="Select Image"
+        app:showAsAction="never" >
+        <menu>
+            <item android:id="@+id/selectFromGallery"
+                android:title="Choose from Gallery"/>
+            <item android:id="@+id/captureUsingCamera"
+                android:title="Capture using Camera"/>
+
+        </menu>
+    </item>
+    <item
+        android:id="@+id/lastImageBG"
+        android:orderInCategory="100"
+        android:title="Show last Image"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/storybg"
+        android:orderInCategory="100"
+        android:title="Show Story"
+        app:showAsAction="never" />
+
+</menu>

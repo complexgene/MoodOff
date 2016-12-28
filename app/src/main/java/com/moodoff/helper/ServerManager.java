@@ -21,7 +21,9 @@ import android.support.v4.view.PagerTitleStrip;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TabHost;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.AllTabs;
@@ -168,6 +170,7 @@ public class ServerManager{
             }
         },7000);
     }
+
     private void displayAlertNotificationOnTopBarOfPhone(final Context context){
         final Activity currActivity = (Activity)context;
         final NotificationCompat.Builder builder =
@@ -282,5 +285,55 @@ public class ServerManager{
             }
         }).start();*/
         return false;
+    }
+
+    private String getStoryName(String moodType){return "story1.txt";}
+
+    public void loadStory(final String currentMood, final Activity curActivity, final TextView storyTitleTV, final TextView storyBodyTV, final ProgressBar storyLoadSpinner){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    HttpURLConnection urlConnection = null;
+                    BufferedReader bufferedReader = null;
+                    @Override
+                    public void run() {
+                        try {
+                            URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/" + currentMood + "/" + getStoryName(currentMood));
+                            Log.e("GenericMood_Story_url", url.toString());
+                            urlConnection = (HttpURLConnection) url.openConnection();
+                            InputStream is = urlConnection.getInputStream();
+                            InputStreamReader isr = new InputStreamReader(is);
+                            bufferedReader = new BufferedReader(isr);
+                            final StringBuilder storyBody = new StringBuilder("");
+                            String body="";
+                            final String title=bufferedReader.readLine();
+                            while ((body = bufferedReader.readLine()) != null) {
+                                storyBody.append(body);
+                            }
+                            curActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    storyTitleTV.setText(title);
+                                    storyBodyTV.setText(storyBody.toString());
+                                    storyLoadSpinner.setVisibility(View.GONE);
+                                }
+                            });
+
+                        } catch (Exception ee) {
+                            Log.e("GenericM_StoryReadErr", ee.getMessage());
+                        } finally {
+                            try {
+                                bufferedReader.close();
+                            } catch (Exception ee) {
+                                Log.e("GenericM_Err", "BufferedReader couldn't be closed");
+                            }
+                            urlConnection.disconnect();
+
+                        }
+                    }
+                }).start();
+            }
+        },0);
     }
 }
