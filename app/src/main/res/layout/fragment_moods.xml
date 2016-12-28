@@ -3,155 +3,161 @@
     android:id="@+id/allmoods"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
     android:clickable="true"
     android:orientation="vertical"
-    android:background="@color/light_yellow"
+    android:background="@color/black"
     tools:context="com.moodoff.Moods">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_height="0dp"
         android:id="@+id/firstRowOfMoods"
+        android:background="@color/black"
+        android:layout_weight="1"
+        android:layout_marginTop="5dp"
         >
         <Button
             android:id="@+id/btn_ontour"
-            android:text="On tour"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            style="@style/Widget.AppCompat.Button.Colored" />
+            android:background="@drawable/mood_ontour"
+             />
 
         <Button
             android:id="@+id/btn_party"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            android:background="@mipmap/mood_party"
+            android:background="@drawable/mood_party"
             />
         <Button
             android:id="@+id/btn_romantic"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            android:background="@mipmap/mood_romantic"
+            android:background="@drawable/mood_romantic"
              />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/light_yellow"
+        android:background="@color/black"
         android:id="@+id/secondRowOfMoods"
+        android:layout_marginTop="5dp"
         >
     <Button
         android:text="miss u"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:id="@+id/btn_missu"
         android:layout_weight="1"
+        android:layout_marginLeft="5dp"
         android:onClick="putmeoff"
-        style="@style/Widget.AppCompat.Button.Colored" />
+         />
 
     <Button
         android:text="dance"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:id="@+id/btn_dance"
         android:layout_weight="1"
+        android:layout_marginLeft="5dp"
         android:onClick="putmeoff"
-        style="@style/Widget.AppCompat.Button.Colored" />
+         />
 
     <Button
-        android:text="in love "
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:id="@+id/btn_inlove"
         android:layout_weight="1"
+        android:layout_marginLeft="5dp"
         android:onClick="putmeoff"
-        style="@style/Widget.AppCompat.Button.Colored" />
+        android:background="@drawable/mood_inlove" />
 
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/light_yellow"
+        android:background="@color/black"
         android:id="@+id/thirdRowOfMoods"
+        android:layout_marginTop="5dp"
         >
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:layout_weight="1"
-            >
         <Button
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="@mipmap/mood_old_era"
+            android:background="@drawable/mood_oldera"
             android:id="@+id/btn_old_era"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
             />
-        </LinearLayout>
 
         <Button
             android:text="calm"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:id="@+id/btn_calm"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            style="@style/Widget.AppCompat.Button.Colored" />
+         />
 
         <Button
-            android:text="crazy"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:id="@+id/btn_crazy"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            style="@style/Widget.AppCompat.Button.Colored" />
+            android:background="@drawable/mood_crazy"
+         />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/light_yellow"
+        android:background="@color/black"
         android:id="@+id/fourthRowOfMoods"
-        >
+        android:layout_marginTop="5dp">
         <Button
             android:text="Friends"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:id="@+id/btn_friends"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            style="@style/Widget.AppCompat.Button.Colored" />
+         />
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:id="@+id/btn_sad"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            android:background="@mipmap/mood_sad"/>
+            android:background="@drawable/mood_sad"/>
         <Button
-            android:text="Workout"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:id="@+id/btn_workout"
             android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            style="@style/Widget.AppCompat.Button.Colored" />
+            android:background="@drawable/mood_workout"
+             />
     </LinearLayout>
 
 </LinearLayout>
