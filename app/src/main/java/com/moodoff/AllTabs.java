@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.Fragment;
@@ -21,7 +22,7 @@ import android.widget.TabHost;
 
 import java.util.ArrayList;
 
-public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChangeListener,SelectsongFragment.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener,SingSong.OnFragmentInteractionListener,Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
+public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener,SingSong.OnFragmentInteractionListener,Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -39,6 +40,7 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
     //private ViewPager mViewPager;
     public static ViewPager mViewPager;
     public static ArrayList<String> tabNames = new ArrayList<>();
+    private  TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,29 +59,15 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.addOnPageChangeListener(new NotificationFragment());
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
         Log.e("ALLTABS","I am called again..");
         mViewPager.setCurrentItem(Start.switchToTab);
         mViewPager.getAdapter().notifyDataSetChanged();
 
+        //setUpTabIcons();
         //Request all the dangerous permissions over here
-
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-
-    }
-
-    @Override
-    public void onPageSelected(int position) {
-
-    }
-
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
     }
 
@@ -94,8 +82,18 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
     public void onFragmentInteraction(Uri uri) {
         // Just to control the nullPointerException
     }
+    private int[] tabIcons = {
+            R.drawable.changemood,
+            R.drawable.btn_dedicate,
+            R.drawable.tab_profile
+    };
+    private void setUpTabIcons(){
+        tabLayout.getTabAt(0).setIcon(tabIcons[0]);
+        tabLayout.getTabAt(1).setIcon(tabIcons[1]);
+        tabLayout.getTabAt(2).setIcon(tabIcons[2]);
+    }
 
-    /*@Override
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -106,9 +104,8 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
-    }*/
+    }
 
     /**
      * A placeholder fragment containing a simple view.
@@ -144,6 +141,15 @@ public class AllTabs extends AppCompatActivity implements ViewPager.OnPageChange
 
             /*mViewPager.setCurrentItem(Start.switchToTab);
             mViewPager.getAdapter().notifyDataSetChanged();*/
+
+            /*FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            Fragment newFragment = Moods.newInstance("replacedA","b");
+            // Replace whatever is in the fragment_container view with this fragment,
+            // and add the transaction to the back stack if needed
+            //transaction.replace(R.id.allmoods, newFragment);
+            transaction.replace(R.id.fragment, newFragment);
+            transaction.addToBackStack("mainA");*/
+            //transaction.commitAllowingStateLoss();
 
             return rootView;
         }

@@ -160,7 +160,7 @@ public class ContactsFragment extends Fragment{
         Button myProfile = new Button(getContext());
         myProfile.setText("My Profile");
         myProfile.setBackgroundColor(Color.WHITE);
-        myProfile.setBackgroundResource(R.drawable.buttonborder);
+        myProfile.setBackgroundResource(R.drawable.buttonborder_own_notification);
         designDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         designDetails.leftMargin = 20;
         designDetails.topMargin = 20;

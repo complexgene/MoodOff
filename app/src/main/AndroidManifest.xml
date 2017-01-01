@@ -15,22 +15,33 @@
         android:icon="@mipmap/icon_moodon"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".PermissionRequest">
+        android:theme="@style/AppTheme" >
+        <activity android:name=".PermissionRequest"
+            android:screenOrientation="portrait"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".AllTabs"
             android:label="@string/title_activity_all_tabs"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".RegistrationActivity" />
-        <activity android:name=".helper.DBInternal" />
-        <activity android:name=".ContactList" />
-        <activity android:name=".Start"></activity>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"
+            />
+        <activity android:name=".RegistrationActivity"
+            android:screenOrientation="portrait"
+            />
+        <activity android:name=".helper.DBInternal"
+            android:screenOrientation="portrait"
+            />
+        <activity android:name=".ContactList"
+            android:screenOrientation="portrait"
+            />
+        <activity android:name=".Start"
+            android:screenOrientation="portrait"
+            />
     </application>
 
 </manifest>

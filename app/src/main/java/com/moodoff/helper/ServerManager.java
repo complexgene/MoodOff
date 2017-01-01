@@ -287,6 +287,57 @@ public class ServerManager{
         return false;
     }
 
+    public void writeStatusChange(final int type, final String newValue, final Activity curActivity, final TextView userTextStatus){
+        // type:0 for TEXT ,,,, type:1 for AUDIO
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    HttpURLConnection urlConnection = null;
+                    InputStreamReader isr = null;
+                    @Override
+                    public void run() {
+                        try {
+                            URL url = new URL(HttpGetPostInterface.serverURL+"/users/update/" + type + "/" + UserDetails.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
+                            Log.e("ServerM_ASModf_url", url.toString());
+                            urlConnection = (HttpURLConnection) url.openConnection();
+                            urlConnection.setDoOutput(true);
+                            InputStream is = urlConnection.getInputStream();
+                            isr = new InputStreamReader(is);
+                            int data = isr.read();
+                            final StringBuilder response = new StringBuilder("");
+                            while (data != -1) {
+                                response.append((char) data);
+                                data = isr.read();
+                            }
+                            Log.e("ServerM_ASModf_RES",response.toString());
+                            curActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(response.toString().equals("true")){
+                                        if(type==0)
+                                            userTextStatus.setText(newValue);
+                                    }
+                                }
+                            });
+
+                        } catch (Exception ee) {
+                            Log.e("ServerM_ASModf_Err", ee.getMessage());
+                        } finally {
+                            try {
+                                isr.close();
+                            } catch (Exception ee) {
+                                Log.e("ServerM_ASModf_Err", "BufferedReader couldn't be closed");
+                            }
+                            urlConnection.disconnect();
+
+                        }
+                    }
+                }).start();
+            }
+        },0);
+    }
+
     private String getStoryName(String moodType){return "story1.txt";}
 
     public void loadStory(final String currentMood, final Activity curActivity, final TextView storyTitleTV, final TextView storyBodyTV, final ProgressBar storyLoadSpinner){
@@ -335,5 +386,54 @@ public class ServerManager{
                 }).start();
             }
         },0);
+    }
+
+    public void loveTextStatus(final String user, final TextView txtViewToChange, final Activity curActivity){
+    /*    new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    HttpURLConnection urlConnection = null;
+                    InputStreamReader isr = null;
+                    @Override
+                    public void run() {
+                        try {
+                            URL url = new URL("http://192.168.2.4:5789/controller/moodoff/users/update/" + type + "/" + UserDetails.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
+                            Log.e("ServerM_ASModf_url", url.toString());
+                            urlConnection = (HttpURLConnection) url.openConnection();
+                            urlConnection.setDoOutput(true);
+                            InputStream is = urlConnection.getInputStream();
+                            isr = new InputStreamReader(is);
+                            int data = isr.read();
+                            final StringBuilder response = new StringBuilder("");
+                            while (data != -1) {
+                                response.append((char) data);
+                                data = isr.read();
+                            }
+                            Log.e("ServerM_ASModf_RES",response.toString());
+                            curActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(response.toString().equals("true")){
+                                        int curValue = Integer.parseInt(txtViewToChange.getText().toString());
+                                        txtViewToChange.setText((curValue+1)+" people loved the status");
+                                    }
+                                }
+                            });
+
+                        } catch (Exception ee) {
+                            Log.e("ServerM_ASModf_Err", ee.getMessage());
+                        } finally {
+                            try {
+                                isr.close();
+                            } catch (Exception ee) {
+                                Log.e("ServerM_ASModf_Err", "BufferedReader couldn't be closed");
+                            }
+                            urlConnection.disconnect();
+                        }
+                    }
+                }).start();
+            }
+        },0);*/
     }
 }

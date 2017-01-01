@@ -142,7 +142,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         repBtn = (Button) view.findViewById(R.id.repeatButton);
         shuffleBtn = (Button) view.findViewById(R.id.shuffleButton);
         dedicateButton = (FloatingActionButton) view.findViewById(R.id.btn_dedicate);
-        changeMoodButton = (FloatingActionButton) view.findViewById(R.id.btn_changemood);
+        //changeMoodButton = (FloatingActionButton) view.findViewById(R.id.btn_changemood);
         menuButton = (FloatingActionButton)view.findViewById(R.id.btn_menu);
         spinner = (ProgressBar) view.findViewById(R.id.progressBar);
         storyLoadSpinner = (ProgressBar) view.findViewById(R.id.load_story_spinner);
@@ -280,7 +280,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         });
 
 
-        changeMoodButton.setOnClickListener(new View.OnClickListener() {
+ /*       changeMoodButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Display display = getActivity().getWindowManager().getDefaultDisplay();
@@ -307,7 +307,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                     songPlaylist.addView(songNameInText);
                 }
             }
-        });
+        });*/
 
         /*FloatingActionButton cameraButton = (FloatingActionButton)view.findViewById(R.id.btn_camera);
         cameraButton.setOnClickListener(new View.OnClickListener() {

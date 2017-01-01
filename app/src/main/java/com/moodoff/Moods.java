@@ -139,8 +139,6 @@ public class Moods extends Fragment {
             }
         });
 
-        ViewPager viewPager = (ViewPager) AllTabs.mViewPager.findViewById(R.id.container);
-
 
         return rootView;
     }

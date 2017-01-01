@@ -1,5 +1,6 @@
 package com.moodoff;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -21,6 +22,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +31,8 @@ import android.widget.Toast;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.Messenger;
+import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
@@ -86,14 +91,14 @@ public class Profile extends Fragment {
         loveAudioStatus = (FloatingActionButton)view.findViewById(R.id.loveAudioStatus);
         editBasicInfo = (FloatingActionButton)view.findViewById(R.id.editBasicInfo);
         myAudioStatusSong = new String();
-        selectRingTone = (ImageButton)view.findViewById(R.id.selectRingTone);
+        editAudioStatus = (ImageButton)view.findViewById(R.id.editAudioStatus);
         editTextStatus = (ImageButton)view.findViewById(R.id.editTextStatus);
     }
 
     View view,dialogView;
     TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount;
     String myAudioStatusSong;
-    ImageButton selectRingTone, editTextStatus;
+    ImageButton editAudioStatus, editTextStatus;
     Button okButtonWidth,cancelButtonWidth,okButton,cancelButton;
     FloatingActionButton playAudioStatusButton, loveTextStatus, loveAudioStatus, editBasicInfo;
     int screenHeight, screenWidth;
@@ -101,6 +106,7 @@ public class Profile extends Fragment {
     LayoutInflater mainInflater;
     LinearLayout dialogContainer;
     StoreRetrieveDataInterface fileOperations;
+    String profileOfUser;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -110,42 +116,52 @@ public class Profile extends Fragment {
 
         init();
 
-        String profileOfUser = mParam1;
+        profileOfUser = mParam1;
+        String p=ContactsManager.allReadContacts.get(profileOfUser);
 
-        //Toast.makeText(getContext(),"Loading profile of: "+ ContactsManager.allReadContacts.get(profileOfUser),Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(),"Loading profile of: "+ (p==null?UserDetails.getUserName():p),Toast.LENGTH_SHORT).show();
 
-        setUserProfileData(profileOfUser);
         // Check if its someone else's profile, then remove the edit button
         if(!profileOfUser.equals(UserDetails.getPhoneNumber())){
-            selectRingTone.setVisibility(View.GONE);editTextStatus.setVisibility(View.GONE);editBasicInfo.setVisibility(View.INVISIBLE);
+            editAudioStatus.setVisibility(View.GONE);editTextStatus.setVisibility(View.GONE);editBasicInfo.setVisibility(View.INVISIBLE);
         }
 
-        selectRingTone.setOnClickListener(new View.OnClickListener() {
+        setUserProfileData(profileOfUser);
+
+        editTextStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 editStatus(0);
             }
         });
-        editTextStatus.setOnClickListener(new View.OnClickListener() {
+        editAudioStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 editStatus(1);
             }
         });
+
         playAudioStatusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playSong(myAudioStatusSong);
+                String myAudioStatusSongURL = HttpGetPostInterface.serverSongURL+myAudioStatusSong.replaceAll("@","/");
+                Messenger.print(getContext(),myAudioStatusSongURL);
+                playSong(myAudioStatusSongURL);
             }
         });
         loveTextStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               // loveTheTextStatus();
+               loveTheTextStatus(profileOfUser, textStatusLoveCount, getActivity());
             }
         });
 
         return view;
+    }
+
+    private void loveTheTextStatus(String user, TextView txtViewToChange, Activity curActivity){
+        ServerManager serverManager = new ServerManager();
+        serverManager.loveTextStatus(user, txtViewToChange, curActivity);
     }
 
     private void playSong(String songURL){
@@ -163,10 +179,10 @@ public class Profile extends Fragment {
         cancelButton = (Button)dialogView.findViewById(R.id.songselectcancel);
 
         if(textOrAudioStatus==0){
-            editUserAudioStatus(fbDialogue);
+            editUserTextStatus(fbDialogue);
         }
         else{
-            editUserTextStatus(fbDialogue);
+            editUserAudioStatus(fbDialogue);
         }
         getAndSetScreenSizes();
         setWidthOfButtonAcrossScreen();
@@ -190,7 +206,7 @@ public class Profile extends Fragment {
                     Toast.makeText(getContext(),"Same as previous status",Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    if(writeTheStatusChangeToFile(tv.getText().toString())){
+                    if(writeTheStatusChangeToServerAndFile(0,tv.getText().toString())){
                         myTextStatus.setText(tv.getText());
                     }
                     else{
@@ -206,21 +222,25 @@ public class Profile extends Fragment {
                 fbDialogue.dismiss();
             }
         });
-
     }
-
-    private boolean writeTheStatusChangeToFile(String newStatus){
+    private boolean writeTheStatusChangeToServerAndFile(int type, String newStatus){
         try {
+            String statusType = (type==0)?"textStatus":"audioStatus";
+            ServerManager serverManager = new ServerManager();
+            serverManager.writeStatusChange(type, newStatus, getActivity(), myTextStatus);
+            Log.e("Profile_"+statusType+"Chng","Server Change DONE");
             fileOperations = new StoreRetrieveDataImpl("UserData.txt");
             fileOperations.beginWriteTransaction();
-            if(fileOperations.getValueFor("textStatus")==null){
-                fileOperations.createNewData("textStatus",newStatus);
+            if(fileOperations.getValueFor(statusType)==null){
+                fileOperations.createNewData(statusType,newStatus);
             }
             else{
-                fileOperations.updateValueFor("textStatus",newStatus);
+                fileOperations.updateValueFor(statusType,newStatus);
             }
             fileOperations.endWriteTransaction();
-            UserDetails.setUserTextStatus(newStatus);
+            if(type==0)UserDetails.setUserTextStatus(newStatus);
+            else if(type==1){myAudioStatusSong=newStatus;UserDetails.setUserAudioStatusSong(newStatus);}
+            Log.e("Profile_"+statusType+"Chng","Internal File Change DONE");
             return true;
         } catch (IOException e) {
             Log.e("Profile_writeToFile_Err","Couldn't save the file:"+e.getMessage());
@@ -229,83 +249,92 @@ public class Profile extends Fragment {
 
     }
 
+    ArrayList<String> allSongsInMap = new ArrayList<>();
     private void editUserAudioStatus(final Dialog fbDialogue){
         int playButtonId = 0;
         statusChangeTitle.setText("Edit your Audio Status");
         dialogContainer.removeAllViews();
         HashMap<String,ArrayList<String>> allSongs = AppData.allMoodPlayList;
-        for(final String eachMood : allSongs.keySet()){
-            /*LinearLayout moodTypeLayout = new LinearLayout(dialogView.getContext());
-            moodTypeLayout.setBackgroundColor(Color.CYAN);
-            TextView moodType = new TextView(dialogView.getContext());
-            moodType.setText(eachMood);
-            moodTypeLayout.addView(moodType);
-            dialogContainer.addView(moodTypeLayout);
-            */for(final String eachSong : allSongs.get(eachMood)){
-                LinearLayout eachSongPanel = new LinearLayout(getContext());
-                eachSongPanel.setOrientation(LinearLayout.VERTICAL);
-                LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                layoutDetails.topMargin = 25;
-                eachSongPanel.setLayoutParams(layoutDetails);
-                eachSongPanel.setBackgroundColor(Color.RED);
-                eachSongPanel.setGravity(Gravity.CENTER_VERTICAL);
-                TextView songName = new TextView(dialogView.getContext());
-                songName.setText(eachSong.replaceAll("_"," ").replaceAll("\\.mp3",""));
-                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                layoutDetails.topMargin = 15;
-                songName.setGravity(Gravity.CENTER_HORIZONTAL);
-                songName.setTypeface(Typeface.DEFAULT_BOLD);
-                songName.setLayoutParams(layoutDetails);
-                eachSongPanel.addView(songName);
+        final RadioGroup rg = new RadioGroup(getContext());
 
-                LinearLayout playButtonAndSeekBar = new LinearLayout(getContext());
-                playButtonAndSeekBar.setGravity(Gravity.CENTER_VERTICAL);
-                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                layoutDetails.leftMargin = 50;
-                layoutDetails.bottomMargin = 15;
-                playButtonAndSeekBar.setLayoutParams(layoutDetails);
-                final FloatingActionButton playButton = new FloatingActionButton(getContext());
-                playButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                playButton.setImageResource(R.drawable.play);
-                playButton.setSize(FloatingActionButton.SIZE_MINI);
-                playButton.setId(++playButtonId);
-                playButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //playSong(eachSong);
-                        Toast.makeText(getContext(),eachSong,Toast.LENGTH_SHORT).show();
-                    }
-                });
-                SeekBar seekBarForEachSong = new SeekBar(getContext());
-                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                layoutDetails.rightMargin = 50;
-                seekBarForEachSong.setLayoutParams(layoutDetails);
-                playButtonAndSeekBar.addView(playButton);
-                playButtonAndSeekBar.addView(seekBarForEachSong);
-
-                eachSongPanel.addView(playButtonAndSeekBar);
-                dialogContainer.addView(eachSongPanel);
+        for(final String eachMood : allSongs.keySet()) {
+            for(String eachSong : allSongs.get(eachMood)) {
+                allSongsInMap.add(eachMood+" : "+eachSong);
             }
         }
-        okButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        RadioButton[] allSongsRadio = new RadioButton[allSongsInMap.size()];
 
+        for(int i=0;i<allSongsInMap.size();i++){
+            final String eachMood = allSongsInMap.get(i).split(" : ")[0];
+            final String eachSong = allSongsInMap.get(i).split(" : ")[1];
+            rg.setOrientation(LinearLayout.VERTICAL);
+            LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.topMargin = 25;
+            rg.setLayoutParams(layoutDetails);
+            rg.setBackgroundColor(Color.RED);
+            rg.setGravity(Gravity.CENTER_VERTICAL);
+            TextView songName = new TextView(dialogView.getContext());
+            songName.setText(eachSong.replaceAll("\\.mp3",""));
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.topMargin = 15;
+            songName.setGravity(Gravity.CENTER_HORIZONTAL);
+            songName.setTypeface(Typeface.DEFAULT_BOLD);
+            songName.setLayoutParams(layoutDetails);
+            rg.addView(songName);
+
+            LinearLayout playButtonAndSeekBar = new LinearLayout(getContext());
+            playButtonAndSeekBar.setGravity(Gravity.CENTER_VERTICAL);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.leftMargin = 50;
+            layoutDetails.bottomMargin = 15;
+            playButtonAndSeekBar.setLayoutParams(layoutDetails);
+            final FloatingActionButton playButton = new FloatingActionButton(getContext());
+            playButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            playButton.setImageResource(R.drawable.play);
+            playButton.setSize(FloatingActionButton.SIZE_MINI);
+            playButton.setId(++playButtonId);
+            playButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String songURL = HttpGetPostInterface.serverSongURL+eachMood+"/"+eachSong;
+                    Messenger.print(getContext(),songURL);
+                    Log.e("ProfilePLAYBTN",songURL);
+                    //playSong(songURL);
+                }
+            });
+            SeekBar seekBarForEachSong = new SeekBar(getContext());
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.rightMargin = 50;
+            seekBarForEachSong.setLayoutParams(layoutDetails);
+            allSongsRadio[i] = new RadioButton(getContext());
+            rg.addView(allSongsRadio[i]);
+            rg.addView(playButton);
+            rg.addView(seekBarForEachSong);
             }
-        });
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+            dialogContainer.addView(rg);
+            okButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String moodAndSong = allSongsInMap.get(rg.getCheckedRadioButtonId()-1);
+                    String songStorePattern = moodAndSong.replace(" : ","@");
+                    Messenger.print(getContext(),songStorePattern);
+                    if(writeTheStatusChangeToServerAndFile(1,songStorePattern)){
+                        myAudioStatusSong = songStorePattern;
+                        Messenger.print(getContext(),"Audio Status Updated..");
+                    }
+                }
+            });
+            cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 fbDialogue.dismiss();
             }
         });
-
     }
 
     boolean profileDetailsNotRetrievedYet = true;
     HashMap<String,String> profileDataParsed = new HashMap<>();
     private void setUserProfileData(final String userPhoneNumber){
-
         final String serverURL = HttpGetPostInterface.serverURL;
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
@@ -357,6 +386,7 @@ public class Profile extends Fragment {
         myTextStatus.setText(profileDataParsed.get("textStatus").replaceAll("_"," "));
         myTextStatus.setTextSize(20);
         myAudioStatusSong=profileDataParsed.get("audioStatusURL");
+        Messenger.print(getContext(),myAudioStatusSong);
         textStatusLoveCount.setText(profileDataParsed.get("textStatusLoveCount")+" people loved the status");
         audioStatusLoveCount.setText(profileDataParsed.get("audioStatusLoveCount")+" people loved the status");
     }

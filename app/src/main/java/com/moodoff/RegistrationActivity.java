@@ -73,7 +73,7 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 if (validateRegistrationData()){
-                    Toast.makeText(getApplicationContext(),"Registering...Wait!!",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),"Registering...Wait!!",Toast.LENGTH_SHORT).show();
                     progressRegistration.setVisibility(View.VISIBLE);
                     new Thread(new Runnable() {
                         @Override
@@ -251,11 +251,12 @@ public class RegistrationActivity extends AppCompatActivity {
                     dob = birthday.getText().toString(),
                     em = email.getText().toString(),
                     textStatus = status_text.getText().toString().replaceAll(" ","_"),
+                    audioStatus = "romantic@HERO.mp3",
                     userProfileString;
 
-            userProfileString = nm + "/" + pn + "/" + em + "/" + dob + "/" + textStatus;
+            userProfileString = nm + "/" + pn + "/" + em + "/" + dob + "/" + textStatus + "/" + audioStatus;
             final String Url = serverURL+"/users/" + userProfileString;
-            dbOperations.todoWorkEntry(Url);
+            //dbOperations.todoWorkEntry(Url);
 
             new Thread(new Runnable() {
                 @Override
@@ -318,8 +319,8 @@ public class RegistrationActivity extends AppCompatActivity {
             rd.createNewData("phoneNo", mobile_number.getText().toString());
             rd.createNewData("dob", birthday.getText().toString());
             rd.createNewData("email", email.getText().toString());
-            rd.createNewData("textStatus","Using MoodOff");
-            rd.createNewData("audioStatus","Using MoodOff");
+            rd.createNewData("textStatus",status_text.getText().toString().replaceAll(" ","_"));
+            rd.createNewData("audioStatus","romantic@HERO.mp3");
             rd.endWriteTransaction();
             return true;
         } catch (IOException e) {
