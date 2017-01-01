@@ -2,28 +2,19 @@ package com.moodoff;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -45,10 +36,6 @@ import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.model.UserDetails;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -401,7 +388,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             idOfTheLastPlayButtonClicked = currentClickedButton.getId();
             currentPlayButtonId = idOfTheLastPlayButtonClicked;
             oldCountOfNotifications = allNotifications.size();
-            play(songFileName);
+            play(songFileName,currentPlayButtonId);
         }
         else {
             if(mp.isPlaying()){
@@ -414,7 +401,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 currentSeekBar.setMax(mp.getDuration());
                 currentSeekBar.setEnabled(true);
                 seekUpdation();
-                play(songFileName);
+                play(songFileName,currentPlayButtonId);
                 //mp.start();
                 playButton.setImageResource(R.drawable.stop);
                 playButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
@@ -422,7 +409,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         }
     }
 
-    public void play(String songFileName){
+    public void play(String songFileName,int currentPlayButtonId){
+        final FloatingActionButton currentPlayButton = (FloatingActionButton) view.findViewById(currentPlayButtonId);
         mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
         String url = serverSongURL + "romantic/" + songFileName;
         Log.e("Not_Frag_SongURL", url.toString()+" sB id:"+currentSeekBar.getId());
@@ -433,6 +421,12 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             currentSeekBar.setMax(mp.getDuration());
             seekUpdation();
             mp.start();
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    currentSeekBar.setMax(0);
+                    currentPlayButton.setImageResource(R.drawable.play);
+                }
+            });
         } catch (Exception ee) {
             Log.e("Not_Frag_Err", "abc" + ee.getMessage());
         }
