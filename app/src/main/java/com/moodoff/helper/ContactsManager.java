@@ -1,5 +1,6 @@
 package com.moodoff.helper;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 /**
@@ -9,5 +10,7 @@ import java.util.LinkedHashMap;
 public class ContactsManager {
     //<KEY:Number,VALUE:Name>
     public static LinkedHashMap<String,String> allReadContacts = new LinkedHashMap<>();
+    public static ArrayList<String> allReadContactsFromDBServer = new ArrayList<>();
+    public static ArrayList<String> friendsWhoUsesApp = new ArrayList<>();
 
 }

@@ -279,54 +279,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
             }
         });
 
-
- /*       changeMoodButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Display display = getActivity().getWindowManager().getDefaultDisplay();
-                Point size = new Point();
-                display.getSize(size);
-                int width = size.x/2;
-                int height = size.y;
-
-                final Dialog fbDialogue = new Dialog(view.getContext(), android.R.style.Theme_Black);
-                fbDialogue.getWindow().setBackgroundDrawableResource(R.color.black);
-                fbDialogue.getWindow().setLayout(width,height);
-                fbDialogue.setContentView(R.layout.layout_playlist);
-                fbDialogue.setCancelable(true);
-                fbDialogue.show();
-
-                //Populate the playlist layout file
-                View vv = inflater.inflate(R.layout.layout_playlist,container,false);
-                LinearLayout songPlaylist = (LinearLayout)vv.findViewById(R.id.songPlaylist);
-                Log.e("GenericMood_PlayListSz",currentplayList.size()+"");
-                for(String eachSong:currentplayList){
-                    TextView songNameInText = new TextView(getContext());
-                    songNameInText.setTextColor(Color.YELLOW);
-                    songNameInText.setText(eachSong);
-                    songPlaylist.addView(songNameInText);
-                }
-            }
-        });*/
-
-        /*FloatingActionButton cameraButton = (FloatingActionButton)view.findViewById(R.id.btn_camera);
-        cameraButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/"+currentMood+"/");
-                pictureDirectory.mkdirs();
-                String pictureName = getPictureName();
-                File imageFile = new File(pictureDirectory,pictureName);
-                // Directory creation complete
-                Uri picture = Uri.fromFile(imageFile);
-                // We have to create an URI resource because putExtra expects URI resource as the second argument.
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,picture);
-                // Start the Activity Now
-                startActivityForResult(cameraIntent,0);
-            }
-        });*/
-
         final FloatingActionButton loveButton = (FloatingActionButton)view.findViewById(R.id.btn_love);
         loveButton.setOnClickListener(new View.OnClickListener() {
             @Override

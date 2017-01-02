@@ -41,6 +41,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.moodoff.helper.HttpGetPostInterface.serverURL;
+
 /**
  * Created by snaskar on 12/21/2016.
  */
@@ -57,12 +59,53 @@ public class ServerManager{
         dbOperations = new DBHelper(context);
     }
 
+    public void fetchContactsFromServer() {
+        new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            BufferedReader bufferedReader = null;
+            @Override
+            public void run() {
+                try {
+                    Log.e("ServerManager_CNTCT_RD","Start reading contacts from Server");
+                    URL url = new URL(serverURL + "/users/all");
+                    Log.e("ServerManager_ReadURL", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    InputStream is = urlConnection.getInputStream();
+                    isr = new InputStreamReader(is);
+                    int data = isr.read();
+                    final StringBuilder response = new StringBuilder("");
+                    while (data != -1) {
+                        response.append((char) data);
+                        data = isr.read();
+                    }
+                    Log.e("ServerManager_CNTCT_RD",response.toString());
+                    ContactsManager.allReadContactsFromDBServer = ParseNotificationData.parseAllContacts(response.toString());
+                    ArrayList<String> contactNumbers = new ArrayList<>(),contactsToBeRemoved = new ArrayList<>();
+                    for(String eachContact:ContactsManager.allReadContacts.keySet()) {
+                        //contactsInList.add(allC.get(eachContact) + " " + eachContact);
+                        contactNumbers.add(eachContact);
+                        contactsToBeRemoved.add(eachContact);
+                    }
+                    contactsToBeRemoved.removeAll(ContactsManager.allReadContactsFromDBServer);
+                    contactNumbers.removeAll(contactsToBeRemoved);
+                    Log.e("ServerManager_CNTCTAPP", contactNumbers.toString());
+                    ContactsManager.friendsWhoUsesApp = contactNumbers;
+
+                    Start.fetchContactsFromServerNotComplete = false;
+                    } catch (Exception ee) {
+                    Log.e("ServerManager_Not_RdErr", ee.getMessage());
+                    ee.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     public void readPlayListFromServer(){
         final ArrayList<String> allMoods = new ArrayList<String>();
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
             BufferedReader bufferedReader = null;
-
             @Override
             public void run() {
                 try {
@@ -298,7 +341,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(HttpGetPostInterface.serverURL+"/users/update/" + type + "/" + UserDetails.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
+                            URL url = new URL(serverURL+"/users/update/" + type + "/" + UserDetails.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
                             Log.e("ServerM_ASModf_url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             urlConnection.setDoOutput(true);

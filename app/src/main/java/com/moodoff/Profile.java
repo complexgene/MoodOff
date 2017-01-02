@@ -89,6 +89,7 @@ public class Profile extends Fragment {
         playAudioStatusButton = (FloatingActionButton)view.findViewById(R.id.playAudioStatus);
         loveTextStatus = (FloatingActionButton)view.findViewById(R.id.loveTextStatus);
         loveAudioStatus = (FloatingActionButton)view.findViewById(R.id.loveAudioStatus);
+        txtViewCurrentMood = (TextView)view.findViewById(R.id.txtView_currentMood);
         editBasicInfo = (FloatingActionButton)view.findViewById(R.id.editBasicInfo);
         myAudioStatusSong = new String();
         editAudioStatus = (ImageButton)view.findViewById(R.id.editAudioStatus);
@@ -97,6 +98,7 @@ public class Profile extends Fragment {
 
     View view,dialogView;
     TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount;
+    TextView txtViewCurrentMood;
     String myAudioStatusSong;
     ImageButton editAudioStatus, editTextStatus;
     Button okButtonWidth,cancelButtonWidth,okButton,cancelButton;
@@ -223,6 +225,7 @@ public class Profile extends Fragment {
             }
         });
     }
+
     private boolean writeTheStatusChangeToServerAndFile(int type, String newStatus){
         try {
             String statusType = (type==0)?"textStatus":"audioStatus";
@@ -371,6 +374,7 @@ public class Profile extends Fragment {
         }).start();
         //showProfileData();
     }
+
     private void showProfileData(){
         String name = profileDataParsed.get("name");
         if(name.length()>17){name=name.substring(0,17)+"...";}
@@ -390,6 +394,7 @@ public class Profile extends Fragment {
         textStatusLoveCount.setText(profileDataParsed.get("textStatusLoveCount")+" people loved the status");
         audioStatusLoveCount.setText(profileDataParsed.get("audioStatusLoveCount")+" people loved the status");
     }
+
     private void getAndSetScreenSizes(){
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -397,6 +402,7 @@ public class Profile extends Fragment {
         screenWidth = size.x;
         screenHeight = size.y;
     }
+
     public void setWidthOfButtonAcrossScreen(){
         okButtonWidth = (Button)dialogView.findViewById(R.id.songselectok);
         cancelButtonWidth = (Button)dialogView.findViewById(R.id.songselectcancel);

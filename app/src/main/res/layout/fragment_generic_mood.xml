@@ -2,13 +2,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
+    android:background="@color/black"
     android:layout_width="match_parent"
     android:id="@+id/genericmood"
     android:layout_height="match_parent"
     android:clickable="true"
+    android:layout_marginTop="0dp"
     tools:context="com.moodoff.GenericMood">
-    <!-- TODO: Update blank fragment layout -->
-
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/storyAndPlayer"
+        android:background="#072c45"
+        >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,19 +24,7 @@
         android:background="#13f9f9"
         android:gravity="right"
         >
-        <!--<android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="7dp"
-            android:src="@drawable/changemood"
-            android:id="@+id/btn_changemood"
-            app:backgroundTint="@color/light_yellow"
-            android:layout_alignTop="@+id/btn_love"
-            android:layout_toLeftOf="@+id/btn_love"
-            android:layout_toStartOf="@+id/btn_love"
-            android:layout_marginEnd="7dp"
-            app:fabSize="mini"
-            />-->
+
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,28 +37,15 @@
 
     </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/storyAndPlayer"
-        android:background="#072c45"
-        android:layout_below="@id/storyTitle"
-        >
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_above="@+id/seekBar"
+            android:layout_below="@+id/storyTitle"
             android:id="@+id/spaceForImageOrStory"
             >
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="fitXY"
-                android:id="@+id/photoView"
-                android:background="@drawable/karaoke_bg7"
-                android:visibility="gone"
-                />
+
             <LinearLayout
                 android:id="@+id/likeAndStoryTitle"
                 android:layout_width="match_parent"
@@ -93,6 +74,16 @@
                     android:layout_marginRight="10dp"
                     android:id="@+id/tv_storytitle" />
             </LinearLayout>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:id="@+id/photoView"
+                android:background="@drawable/karaoke_bg7"
+                android:visibility="gone"
+                />
+
             <ScrollView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -119,12 +110,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="5dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:layout_above="@+id/seekBar"
+            android:paddingLeft="3dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:paddingRight="3dp"
+            android:layout_above="@+id/playerControls"
             android:background="@color/black"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:id="@+id/songNameAndDuration"
             >
             <android.support.design.widget.FloatingActionButton
@@ -136,7 +128,6 @@
                 app:backgroundTint="#13f9f9"
                 app:fabSize="mini"
                 />
-
             <android.support.design.widget.FloatingActionButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -180,6 +171,13 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"-->
+        <LinearLayout
+            android:id="@+id/playerControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentBottom="true"
+            >
         <SeekBar
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
@@ -187,89 +185,87 @@
             android:layout_above="@+id/buttons"
             android:background="#13f9f9"
             style="@style/Widget.AppCompat.SeekBar" />
-        <LinearLayout
-            android:id="@+id/buttons"
-            android:layout_alignParentBottom="true"
-            android:orientation="horizontal"
-            android:background="#13f9f9"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_centerHorizontal="true"
-            >
-
-            <Button
-                android:id="@+id/repeatButton"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@mipmap/repeat_none"
+            <LinearLayout
+                android:id="@+id/buttons"
+                android:orientation="horizontal"
+                android:background="#13f9f9"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text=""
-                android:onClick="onClickRepeatButton" />
-            <Button
-                android:id="@+id/prevButton"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_width="@dimen/mp_buttons_hw"
-                android:layout_height="@dimen/mp_buttons_hw"
-                android:background="@mipmap/prev"
-                android:layout_weight="1"
-                android:text=""
-                android:onClick="onClickPrevButton" />
-            <Button
-                android:id="@+id/playPauseBtn"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_width="@dimen/mp_buttons_hw"
-                android:layout_height="@dimen/mp_buttons_hw"
-                android:background="@mipmap/play"
-                android:layout_weight="1"
-                android:text=""
-                android:visibility="visible"
-                android:onClick="onClickPlayOrPauseButton" />
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
                 android:layout_centerHorizontal="true"
-                android:visibility="gone"/>
-            <Button
-                android:id="@+id/stopButton"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_width="@dimen/mp_buttons_hw"
-                android:layout_height="@dimen/mp_buttons_hw"
-                android:background="@mipmap/stop"
-                android:layout_weight="1"
-                android:text=""
-                android:onClick="onClickStopButton" />
-            <Button
-                android:id="@+id/nextButton"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_width="@dimen/mp_buttons_hw"
-                android:layout_height="@dimen/mp_buttons_hw"
-                android:background="@mipmap/next"
-                android:layout_weight="1"
-                android:text=""
-                android:onClick="onClickNextButton" />
-
-            <Button
-                android:id="@+id/shuffleButton"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_marginRight="7dp"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@mipmap/shuffle"
-                android:layout_weight="1"
-                android:text=""
-                android:onClick="onClickShuffleButton" />
+                >
+                <Button
+                    android:id="@+id/repeatButton"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@mipmap/repeat_none"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:onClick="onClickRepeatButton" />
+                <Button
+                    android:id="@+id/prevButton"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_width="@dimen/mp_buttons_hw"
+                    android:layout_height="@dimen/mp_buttons_hw"
+                    android:background="@mipmap/prev"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:onClick="onClickPrevButton" />
+                <Button
+                    android:id="@+id/playPauseBtn"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_width="@dimen/mp_buttons_hw"
+                    android:layout_height="@dimen/mp_buttons_hw"
+                    android:background="@mipmap/play"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:visibility="visible"
+                    android:onClick="onClickPlayOrPauseButton" />
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_centerHorizontal="true"
+                    android:visibility="gone"/>
+                <Button
+                    android:id="@+id/stopButton"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_width="@dimen/mp_buttons_hw"
+                    android:layout_height="@dimen/mp_buttons_hw"
+                    android:background="@mipmap/stop"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:onClick="onClickStopButton" />
+                <Button
+                    android:id="@+id/nextButton"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_width="@dimen/mp_buttons_hw"
+                    android:layout_height="@dimen/mp_buttons_hw"
+                    android:background="@mipmap/next"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:onClick="onClickNextButton" />
+                <Button
+                    android:id="@+id/shuffleButton"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginRight="7dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@mipmap/shuffle"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:onClick="onClickShuffleButton" />
+        </LinearLayout>
         </LinearLayout>
 
         <ProgressBar
@@ -277,10 +273,9 @@
             android:layout_height="wrap_content"
             android:id="@+id/load_story_spinner"
             android:indeterminateTint="#FF0000"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="130dp" />
-
+            android:layout_marginTop="107dp"
+            android:layout_below="@+id/spaceForImageOrStory"
+            android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
 

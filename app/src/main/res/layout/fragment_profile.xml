@@ -269,9 +269,19 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="#FF0000"
+                android:layout_marginLeft="5dp"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:fontFamily="serif"
+                android:text="[LIVE]:"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:textColor="@android:color/holo_red_light"
                 android:layout_marginLeft="5dp"
-                android:text="Currently Listening to Mood..."
+                android:text="Listening to Mood..."
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:fontFamily="serif" />

@@ -40,7 +40,7 @@ public class Start extends AppCompatActivity {
     public static int switchToTab = 0;
     private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 100;
     private String serverURL = HttpGetPostInterface.serverURL;
-    public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true;
+    public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true, fetchContactsFromServerNotComplete = true;
     ProgressBar spinner;
     TextView greet;
     SQLiteDatabase mydatabase;
@@ -178,12 +178,13 @@ public class Start extends AppCompatActivity {
                 fetchContacts();
                 while (fetchContactsNotComplete) ;
                 fetchNotifications();
+                fetchContactsFromServer();
                 try {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             final Intent mainIntent = new Intent(Start.this, AllTabs.class);
-                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete) ;
+                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete || fetchContactsFromServerNotComplete) ;
                             Log.e("Start_AllTabsLaunch", "AllTabs will be launched");
                             Start.this.startActivity(mainIntent);
                             Start.this.finish();
@@ -194,6 +195,11 @@ public class Start extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void fetchContactsFromServer(){
+        ServerManager serverManager = new ServerManager();
+        serverManager.fetchContactsFromServer();
     }
 
     private void startAutoBots(){

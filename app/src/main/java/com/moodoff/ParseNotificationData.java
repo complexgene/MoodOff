@@ -15,6 +15,22 @@ import java.util.HashMap;
 
 public class ParseNotificationData {
 
+    public static ArrayList<String> parseAllContacts(String contactsInJson){
+        ArrayList<String> allContactNumbersInServer = new ArrayList<>();
+        try {
+            JSONObject jsonRootObject = new JSONObject(contactsInJson);
+            JSONArray jsonArray = jsonRootObject.optJSONArray("allUserPhoneNumbers");
+            for(int i=0;i<jsonArray.length();i++){
+                allContactNumbersInServer.add(jsonArray.get(i).toString());
+            }
+            Log.e("ParseNot_CNTCServer",allContactNumbersInServer.toString());
+        }
+        catch(Exception ee){
+            ee.printStackTrace();
+        }
+        return allContactNumbersInServer;
+    }
+
     public static ArrayList<String> getNotification(String raw_json)
     {
         String strJson = raw_json;
