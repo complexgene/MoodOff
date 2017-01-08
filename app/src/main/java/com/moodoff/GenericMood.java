@@ -1,12 +1,10 @@
 package com.moodoff;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -17,19 +15,14 @@ import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -40,13 +33,11 @@ import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.ServerManager;
+import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.UserDetails;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -116,18 +107,21 @@ public class GenericMood extends Moods implements View.OnClickListener{
     ImageView photoView;
 
     //Player variables
-    MediaPlayer mp;
+    public static MediaPlayer mp;
     Context context;
     //Buttons
-    Button playPauseBtn, stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
+    Button stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
+    public static Button playPauseBtn;
     FloatingActionButton dedicateButton,changeMoodButton, menuButton;
-    ProgressBar spinner,storyLoadSpinner;
+    ProgressBar storyLoadSpinner;
+    public static ProgressBar spinner;
     SeekBar seekBar;
     TextView songName = null, storyTitleTV, storyBodyTV, duration;
     Handler seekHandler = new Handler();
     ArrayList<String> currentplayList = null;
     String currentSong = "", currentMood = "", playListFilePath = "";
-    int currentIndex = 0, repParm = 0, playOrPauseParm = 0, timeElapsedOrTimeLeft = 0;
+    int currentIndex = 0, repParm = 0, timeElapsedOrTimeLeft = 0;
+    public static int playOrPauseParm = 0, isPlayOrPauseFromGM = 0;
     DBHelper dbOperations;
 
     public void init(){
@@ -634,12 +628,15 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 //after the song is prepared in asynchronous mode
                 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     public void onPrepared(MediaPlayer mediaPlayer) {
+                        isPlayOrPauseFromGM = 1;
                         showPlayPauseButton("pause");
                         displaySongName(songName, currentSong.substring(0,currentSong.lastIndexOf(".")));
                         if(mediaPlayer!=null) {
                             seekBar.setMax(mediaPlayer.getDuration());
                             seekUpdation();
                         }
+                        ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+                        validateMediaPlayer.initialiseAndValidateMediaPlayer("mood","play");
                         mediaPlayer.start();
                     }
                 });
@@ -655,6 +652,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             } else {
                 //for playing paused song
                 if(!mp.isPlaying()) {
+                    isPlayOrPauseFromGM = 1;
                     showPlayPauseButton("pause");
                     currentSong = (String)songNameFromList(currentplayList,currentIndex);
                     displaySongName(songName, currentSong.substring(0,currentSong.lastIndexOf(".")));
@@ -662,6 +660,8 @@ public class GenericMood extends Moods implements View.OnClickListener{
                         seekBar.setMax(mp.getDuration());
                         seekUpdation();
                     }
+                    ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+                    validateMediaPlayer.initialiseAndValidateMediaPlayer("mood","play");
                     mp.start();
                 }
             }
@@ -678,6 +678,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             if(mp.isPlaying()) {
                 mp.pause();
             }
+            isPlayOrPauseFromGM = 1;
             showPlayPauseButton("play");
             Log.e("GenericMood_MPPause","MediaPlayer Paused Done");
         } catch (Exception e){
@@ -690,6 +691,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     public void onClickStopButton(View v) {
         try{
             releaseMediaPlayerObject();
+            isPlayOrPauseFromGM = 1;
             showPlayPauseButton("play");
             seekBar.setMax(0);
         } catch (Exception e){
@@ -707,7 +709,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     }
 
     /*set play or pause button for display*/
-    public void showPlayPauseButton(String playOrPause) {
+    public static void showPlayPauseButton(String playOrPause) {
         try {
             playOrPause = playOrPause.toLowerCase();
             if (playOrPause == "play") {
@@ -869,7 +871,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     }
 
     /*release and return the nullified mediaplayer object*/
-    public void releaseMediaPlayerObject() {
+    public static void releaseMediaPlayerObject() {
         try {
             if (mp != null) {
                 if(mp.isPlaying()){mp.stop();}
@@ -905,7 +907,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     }
 
     /*Toast error message*/
-    public void toastError(String error) {
+    public static void toastError(String error) {
         //Toast.makeText(view.getContext(), "Oops! Somehing went wrong\n"+error.toString(), Toast.LENGTH_LONG).show();
         Log.e("GenericMood_MPissue",error);
     }

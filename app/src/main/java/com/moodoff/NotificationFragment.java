@@ -34,6 +34,7 @@ import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.ServerManager;
+import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.UserDetails;
 
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
     int i= 0;
     View view,dialogView;
-    MediaPlayer mp;
+    public static MediaPlayer mp;
     TextView allNotificationsTextView;
     FrameLayout mainParentLayout;
     ArrayList<String> allNotifications;
@@ -143,7 +144,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
     Activity act;
     int currentPlayButtonId = -1;
-    FloatingActionButton currentPlayingButton;
+    public static FloatingActionButton currentPlayingButton;
     public static boolean changeDetected = false;
     private void showNotPanel(){
         act = (Activity)view.getContext();
@@ -169,7 +170,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
     }
 
-    SeekBar currentSeekBar;
+    public static SeekBar currentSeekBar;
     Handler seekHandler = new Handler();
 
     Runnable run = new Runnable() {
@@ -180,10 +181,14 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     };
 
     public void seekUpdation() {
-        if (mp!=null) {
-            currentSeekBar.setProgress(mp.getCurrentPosition());
-            seekHandler.postDelayed(run, 10);
+        try {
+            if (mp!=null || currentSeekBar!=null) {
+                currentSeekBar.setProgress(mp.getCurrentPosition());
+                seekHandler.postDelayed(run, 10);
+            }
+        } catch(Exception e) {
         }
+
     }
 
     public static int oldCountOfNotifications = 0;
@@ -371,8 +376,12 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
         dialogView = mainInflater.inflate(R.layout.fragment_profile, mainContainer, false);
     }
+
+    public static FloatingActionButton playOrStopButton;
+
     public void playSong(FloatingActionButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName){
         Log.e("Nota_Frag2", currentClickedButton.getId() + "");
+        playOrStopButton = playButton;
         if(currentClickedButton.getId() != idOfTheLastPlayButtonClicked) {
             if (idOfTheLastPlayButtonClicked != -1) {
                 FloatingActionButton lastPlayedButton = (FloatingActionButton) view.findViewById(idOfTheLastPlayButtonClicked);
@@ -383,35 +392,43 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 lastSeekBar.setEnabled(false);
             }
             if(mp!=null)mp.reset();
-            playButton.setImageResource(R.drawable.stop);
-            playButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
+            playOrStopButton.setImageResource(R.drawable.stop);
+            playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             idOfTheLastPlayButtonClicked = currentClickedButton.getId();
             currentPlayButtonId = idOfTheLastPlayButtonClicked;
             oldCountOfNotifications = allNotifications.size();
+            ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+            validateMediaPlayer.initialiseAndValidateMediaPlayer("notification","play");
             play(songFileName,currentPlayButtonId);
         }
         else {
             if(mp.isPlaying()){
-                currentSeekBar.setProgress(0);
-                currentSeekBar.setEnabled(false);
-                mp.reset();
-                playButton.setImageResource(R.drawable.play);
-                playButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
-            } else {
+                    currentSeekBar.setProgress(0);
+                    currentSeekBar.setEnabled(false);
+                    mp.reset();
+                    playOrStopButton.setImageResource(R.drawable.play);
+                    playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
+                    ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+                    validateMediaPlayer.initialiseAndValidateMediaPlayer("notification","stop");
+                }
+            else {
                 currentSeekBar.setMax(mp.getDuration());
                 currentSeekBar.setEnabled(true);
                 seekUpdation();
+                ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+                validateMediaPlayer.initialiseAndValidateMediaPlayer("notification","play");
                 play(songFileName,currentPlayButtonId);
                 //mp.start();
-                playButton.setImageResource(R.drawable.stop);
-                playButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
+                playOrStopButton.setImageResource(R.drawable.stop);
+                playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             }
         }
     }
 
     public void play(String songFileName,int currentPlayButtonId){
         final FloatingActionButton currentPlayButton = (FloatingActionButton) view.findViewById(currentPlayButtonId);
-        mp = SingleTonMediaPlayer.getSingleTonMediaPlayerInstance();
+        releaseMediaPlayerObject(mp);
+        mp = new MediaPlayer();
         String url = serverSongURL + "romantic/" + songFileName;
         Log.e("Not_Frag_SongURL", url.toString()+" sB id:"+currentSeekBar.getId());
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -431,6 +448,18 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             Log.e("Not_Frag_Err", "abc" + ee.getMessage());
         }
     }
+
+    /*release and return the nullified mediaplayer object*/
+    public static void releaseMediaPlayerObject(MediaPlayer mp) {
+        try {
+            if (mp != null) {
+                if(mp.isPlaying()){mp.stop();}
+                mp.release();
+                mp = null;
+            }
+        } catch(Exception e){e.fillInStackTrace();e.printStackTrace();}
+    }
+
     public int leftButtonHeight,leftButtonWidth,rightButtonHeight,rightButtonWidth,textViewWidth,textViewHeight;
     public void setSizes(){
         Display display = getActivity().getWindowManager().getDefaultDisplay();

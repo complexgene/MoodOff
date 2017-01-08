@@ -8,8 +8,8 @@ import java.util.HashMap;
  */
 
 public interface HttpGetPostInterface {
-    final String serverURL = "http://192.168.2.3:5789/controller/moodoff";
-    //final String serverURL = "http://hipilab.com/moodoff";
+    //final String serverURL = "http://192.168.2.3:5789/controller/moodoff";
+    final String serverURL = "http://hipilab.com/moodoff";
     final String serverSongURL = "http://hipilab.com/data/songs/";
     final String serverStoriesURL = "http://hipilab.com/data/stories/";
     public void postDataToServer(String Url, HashMap<String,String> extraParameters);
