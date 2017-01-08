@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -142,9 +143,8 @@ public class GenericMood extends Moods implements View.OnClickListener{
     Handler seekHandler = new Handler();
     ArrayList<String> currentplayList = null;
     String currentSong = "", currentMood = "", playListFilePath = "";
-    int currentIndex = 0, repParm = 0, timeElapsedOrTimeLeft = 0;
     public static int playOrPauseParm = 0, isPlayOrPauseFromGM = 0;
-    int currentIndex = 0, repParm = 0, playOrPauseParm = 0, timeElapsedOrTimeLeft = 0;
+    int currentIndex = 0, repParm = 0, timeElapsedOrTimeLeft = 0;
     int numberOfChances = 5;
     DBHelper dbOperations;
     StoreRetrieveDataInterface fileOperations = new StoreRetrieveDataImpl("UserData.txt");
