@@ -13,6 +13,7 @@ public class UserDetails {
     private static String dateOfBirth;
     private static String userTextStatus;
     private static String userAudioStatusSong;
+    private static int score;
 
     public UserDetails(){
         userAudioStatusSong = HttpGetPostInterface.serverSongURL+"romantic/HERO.mp3";
@@ -62,5 +63,13 @@ public class UserDetails {
 
     public static void setUserAudioStatusSong(String userAudioStatusSong) {
         UserDetails.userAudioStatusSong = userAudioStatusSong;
+    }
+
+    public static int getScore() {
+        return score;
+    }
+
+    public static void setScore(int score) {
+        UserDetails.score = score;
     }
 }

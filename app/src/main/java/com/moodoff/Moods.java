@@ -95,7 +95,7 @@ public class Moods extends Fragment {
                 /*Intent openInternalDBActivity = new Intent(getActivity(), DBInternal.class);
                 startActivity(openInternalDBActivity);*/
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                Fragment newFragment = GenericMood.newInstance("on_tour","b");
+                Fragment newFragment = ContactsFragment.newInstance("on_tour","b");
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack if needed
                 transaction.replace(R.id.allmoods, newFragment);
@@ -122,7 +122,7 @@ public class Moods extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                Fragment newFragment = GenericMood.newInstance("party","b");
+                Fragment newFragment = Profile.newInstance("party","b");
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack if needed
                 transaction.replace(R.id.allmoods, newFragment);

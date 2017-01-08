@@ -66,6 +66,7 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         mViewPager.setCurrentItem(Start.switchToTab);
         mViewPager.getAdapter().notifyDataSetChanged();
 
+        mViewPager.setOffscreenPageLimit(2);
         //setUpTabIcons();
         //Request all the dangerous permissions over here
 

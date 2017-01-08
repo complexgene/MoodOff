@@ -166,11 +166,13 @@ public class RegistrationActivity extends AppCompatActivity {
         contactsColumns.put("name","VARCHAR");
         dboperations.createTable("allcontacts",contactsColumns);
         Log.e("RegistrationAct_TBL","allcontacts table created.");
+
         LinkedHashMap<String,String> worktodoColumns = new LinkedHashMap<>();
         worktodoColumns.put("id","INTEGER PRIMARY KEY AUTOINCREMENT");
         worktodoColumns.put("api","VARCHAR");
         dboperations.createTable("worktodo",worktodoColumns);
         Log.e("RegistrationAct_TBL","worktodo table created.");
+
         LinkedHashMap<String,String> profilesColumns = new LinkedHashMap<>();
         profilesColumns.put("id","VARCHAR PRIMARY KEY");
         profilesColumns.put("name","VARCHAR");
@@ -180,6 +182,7 @@ public class RegistrationActivity extends AppCompatActivity {
         profilesColumns.put("audiostatus","VARCHAR");
         dboperations.createTable("profiles",profilesColumns);
         Log.e("RegistrationAct_TBL","profiles table created.");
+
         LinkedHashMap<String,String> rnotificationsColumns = new LinkedHashMap<>();
         rnotificationsColumns.put("from_user_id","VARCHAR");
         rnotificationsColumns.put("to_user_id","VARCHAR");
@@ -189,15 +192,15 @@ public class RegistrationActivity extends AppCompatActivity {
         rnotificationsColumns.put("create_ts","VARCHAR");
         dboperations.createTable("rnotifications",rnotificationsColumns);
         Log.e("RegistrationAct_TBL","rnotifications table created");
-        /*HashMap<String,String> wnotificationsColumns = new HashMap<>();
-        wnotificationsColumns.put("from_user_id","VARCHAR");
-        wnotificationsColumns.put("to_user_id","VARCHAR");
-        wnotificationsColumns.put("file_name","VARCHAR");
-        wnotificationsColumns.put("type","VARCHAR");
-        wnotificationsColumns.put("send_done","TINYINT(1)");
-        wnotificationsColumns.put("create_ts","TIMESTAMP");
-        dboperations.createTable("rnotifications",wnotificationsColumns);
-        Log.e("RegistrationAct_TBL","Write Notifications table created");*/
+
+        LinkedHashMap<String,String> playListColumns = new LinkedHashMap<>();
+        playListColumns.put("date","VARCHAR");
+        playListColumns.put("mood_type","VARCHAR");
+        playListColumns.put("song_name","VARCHAR");
+        playListColumns.put("artist_name","VARCHAR");
+        playListColumns.put("movie_or_album_name","VARCHAR");
+        dboperations.createTable("playlist",playListColumns);
+        Log.e("RegistrationAct_TBL","playlist table created");
     }
 
     public void setDate() {
@@ -321,6 +324,7 @@ public class RegistrationActivity extends AppCompatActivity {
             rd.createNewData("email", email.getText().toString());
             rd.createNewData("textStatus",status_text.getText().toString().replaceAll(" ","_"));
             rd.createNewData("audioStatus","romantic@HERO.mp3");
+            rd.createNewData("score","0");
             rd.endWriteTransaction();
             return true;
         } catch (IOException e) {

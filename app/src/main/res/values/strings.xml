@@ -8,4 +8,10 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_all_parts">AllParts</string>
+    <string name="story">
+ "Mom I am getting late!" I said standing in front of the mirror, checking my appearance. mom emerged out of the kitchen with a tea cup
+        and said "come home a little early today!" "why you going somewhere?" I said as I took the cup from mom. "no, someone's going to
+        visit us today." mom said as she tried to hide her smile. "who?" I asked suspiciously. "I told you about the boy Mr.Mehra
+        recommended, To avoid family drama it was best to say no at the moment.
+</string>
 </resources>

@@ -27,6 +27,7 @@
         <activity
             android:name=".AllTabs"
             android:label="@string/title_activity_all_tabs"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"
             />
