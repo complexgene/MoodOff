@@ -330,7 +330,7 @@
             <android.support.design.widget.FloatingActionButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
+                android:layout_marginRight="2dp"
                 android:src="@drawable/love_ns"
                 android:id="@+id/btn_love"
                 app:backgroundTint="#13f9f9"
@@ -343,7 +343,15 @@
                 android:src="@drawable/btn_dedicate"
                 android:id="@+id/btn_dedicate"
                 app:backgroundTint="#13f9f9"
-                android:layout_marginEnd="7dp"
+                app:fabSize="mini"
+                />
+            <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="2dp"
+                android:src="@drawable/see_playlist"
+                android:id="@+id/btn_playlist"
+                app:backgroundTint="#13f9f9"
                 app:fabSize="mini"
                 />
             <TextView
@@ -354,7 +362,7 @@
                 android:scrollHorizontally="true"
                 android:gravity="left"
                 android:paddingLeft="2dp"
-                android:text="[ Click on Play to play Random Song ]"
+                android:text="[ Song Name ]"
                 android:textColor="#FFFF00"
                 android:background="#000000"
                 android:textSize="13sp"

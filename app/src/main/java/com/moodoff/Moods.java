@@ -65,7 +65,7 @@ public class Moods extends Fragment {
 
     }
     View rootView;
-    Button btnRomantic,btnParty,btnOnTour,btnInLove,btnDance,btnMissU;
+    Button btnRomantic,btnParty,btnOnTour,btnInLove,btnDance,btnSad;
     ExpandableListView moodlist;
     RelativeLayout layout;
     ViewGroup mainContainer;
@@ -84,51 +84,32 @@ public class Moods extends Fragment {
         btnOnTour = (Button)rootView.findViewById(R.id.btn_ontour);
         btnInLove = (Button)rootView.findViewById(R.id.btn_inlove);
         btnDance = (Button)rootView.findViewById(R.id.btn_dance);
-        btnMissU = (Button)rootView.findViewById(R.id.btn_missu);
+        btnSad = (Button)rootView.findViewById(R.id.btn_sad);
 
         showAllButtons();
-        //Toast.makeText(getContext(), "here I am", Toast.LENGTH_SHORT).show();
 
         btnOnTour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent openInternalDBActivity = new Intent(getActivity(), DBInternal.class);
-                startActivity(openInternalDBActivity);*/
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                Fragment newFragment = ContactsFragment.newInstance("on_tour","b");
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack if needed
-                transaction.replace(R.id.allmoods, newFragment);
-                transaction.addToBackStack(null);
-                transaction.commitAllowingStateLoss();
-                putAllButtonsOff();
+                startParticularMood("on_tour");
             }
         });
         btnRomantic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                Fragment newFragment = GenericMood.newInstance("romantic","b");
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack if needed
-                //transaction.replace(R.id.allmoods, newFragment);
-                transaction.replace(R.id.allmoods, newFragment);
-                transaction.addToBackStack("genericmood_romantic");
-                transaction.commitAllowingStateLoss();
-                putAllButtonsOff();
+                startParticularMood("romantic");
             }
         });
         btnParty.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                Fragment newFragment = Profile.newInstance("party","b");
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack if needed
-                transaction.replace(R.id.allmoods, newFragment);
-                transaction.addToBackStack(null);
-                transaction.commitAllowingStateLoss();
-                putAllButtonsOff();
+                startParticularMood("party");
+            }
+        });
+        btnSad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("sad");
             }
         });
         btnDance.setOnClickListener(new View.OnClickListener() {
@@ -139,16 +120,27 @@ public class Moods extends Fragment {
             }
         });
 
-
         return rootView;
     }
+
+    private void startParticularMood(String moodType){
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        Fragment newFragment = GenericMood.newInstance(moodType,"b");
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack if needed
+        transaction.replace(R.id.allmoods, newFragment);
+        transaction.addToBackStack(null);
+        transaction.commitAllowingStateLoss();
+        putAllButtonsOff();
+    }
+
     public void putAllButtonsOff(){
         btnRomantic.setVisibility(View.INVISIBLE);
         btnParty.setVisibility(View.INVISIBLE);
         btnOnTour.setVisibility(View.INVISIBLE);
         btnInLove.setVisibility(View.INVISIBLE);
         btnDance.setVisibility(View.INVISIBLE);
-        btnMissU.setVisibility(View.INVISIBLE);
+        btnSad.setVisibility(View.INVISIBLE);
 //        layout.setVisibility(View.VISIBLE);
     }
     public void showAllButtons(){
@@ -157,7 +149,7 @@ public class Moods extends Fragment {
         btnOnTour.setVisibility(View.VISIBLE);
         btnInLove.setVisibility(View.VISIBLE);
         btnDance.setVisibility(View.VISIBLE);
-        btnMissU.setVisibility(View.VISIBLE);
+        btnSad.setVisibility(View.VISIBLE);
         //layout.setVisibility(View.VISIBLE);
     }
 /*

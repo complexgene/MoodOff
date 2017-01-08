@@ -135,7 +135,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     //Buttons
     Button stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
     public static Button playPauseBtn;
-    FloatingActionButton dedicateButton,changeMoodButton, menuButton;
+    FloatingActionButton dedicateButton,playListButton, menuButton;
     ProgressBar storyLoadSpinner;
     public static ProgressBar spinner;
     SeekBar seekBar;
@@ -162,6 +162,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         repBtn = (Button) view.findViewById(R.id.repeatButton);
         shuffleBtn = (Button) view.findViewById(R.id.shuffleButton);
         dedicateButton = (FloatingActionButton) view.findViewById(R.id.btn_dedicate);
+        playListButton = (FloatingActionButton)view.findViewById(R.id.btn_playlist);
         //changeMoodButton = (FloatingActionButton) view.findViewById(R.id.btn_changemood);
         menuButton = (FloatingActionButton)view.findViewById(R.id.btn_menu);
         spinner = (ProgressBar) view.findViewById(R.id.progressBar);
@@ -178,6 +179,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         repBtn.setOnClickListener(this);
         shuffleBtn.setOnClickListener(this);
         dedicateButton.setOnClickListener(this);
+        playListButton.setOnClickListener(this);
         seekBar.setOnClickListener(this);
         duration.setOnClickListener(this);
         disableButton(prevBtn);
@@ -590,7 +592,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 String currentUser = UserDetails.getPhoneNumber();
                 char type = 'S';
                 final String stredittext=data.getStringExtra("selectedContact");
-                final String Url = "notifications/"+currentUser+"/"+stredittext.split(" ")[1]+"/"+currentSong+"/"+type;
+                final String Url = "notifications/"+currentUser+"/"+stredittext.split(" ")[1]+"/"+currentMood+"@"+currentSong+"/"+type;
 
                 new Thread(new Runnable() {
                     @Override
@@ -693,7 +695,16 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 break;
             case R.id.duration:
                 onClickDuration(view);
+                break;
+            case R.id.btn_playlist:
+                showPlayList();
+                break;
         }
+    }
+
+    private void showPlayList(){
+        ArrayList<String> allSongsOfCurrentMood = AppData.allMoodPlayList.get(currentMood);
+        Log.e("GM_UGETSONGS",allSongsOfCurrentMood.toString());
     }
 
     public void onClickDuration(View v) {

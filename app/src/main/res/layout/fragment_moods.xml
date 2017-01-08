@@ -56,8 +56,16 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:id="@+id/btn_missu"
-            android:background="@drawable/mood_missu"
+            android:id="@+id/btn_sad"
+            android:layout_weight="1"
+            android:layout_marginLeft="5dp"
+            android:onClick="putmeoff"
+            android:background="@drawable/mood_sad"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/mood_oldera"
+            android:id="@+id/btn_old_era"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
@@ -66,21 +74,14 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:id="@+id/btn_dance"
-            android:background="@drawable/mood_dance"
+            android:id="@+id/btn_workout"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
+            android:background="@drawable/mood_workout"
             />
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:id="@+id/btn_inlove"
-            android:layout_weight="1"
-            android:layout_marginLeft="5dp"
-            android:onClick="putmeoff"
-            android:background="@drawable/mood_inlove" />
+
 
     </LinearLayout>
 
@@ -95,8 +96,8 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="@drawable/mood_oldera"
-            android:id="@+id/btn_old_era"
+            android:id="@+id/btn_dance"
+            android:background="@drawable/mood_dance"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
@@ -145,20 +146,21 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:id="@+id/btn_sad"
+            android:id="@+id/btn_missu"
+            android:background="@drawable/mood_missu"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            android:background="@drawable/mood_sad"/>
+            />
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:id="@+id/btn_workout"
+            android:id="@+id/btn_inlove"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:onClick="putmeoff"
-            android:background="@drawable/mood_workout"
-            />
+            android:background="@drawable/mood_inlove" />
+
     </LinearLayout>
 
 </LinearLayout>

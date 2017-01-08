@@ -429,7 +429,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         final FloatingActionButton currentPlayButton = (FloatingActionButton) view.findViewById(currentPlayButtonId);
         releaseMediaPlayerObject(mp);
         mp = new MediaPlayer();
-        String url = serverSongURL + "romantic/" + songFileName;
+        String[] moodTypeAndSong = songFileName.split("@");
+        String url = serverSongURL + moodTypeAndSong[0]+"/"+moodTypeAndSong[1];
         Log.e("Not_Frag_SongURL", url.toString()+" sB id:"+currentSeekBar.getId());
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
