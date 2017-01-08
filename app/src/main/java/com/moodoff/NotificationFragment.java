@@ -184,7 +184,9 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         try {
             if (mp!=null || currentSeekBar!=null) {
                 currentSeekBar.setProgress(mp.getCurrentPosition());
-                seekHandler.postDelayed(run, 10);
+                if(currentSeekBar.getMax()!=0) {
+                    seekHandler.postDelayed(run, 10);
+                }
             }
         } catch(Exception e) {
         }

@@ -353,6 +353,7 @@
                 android:id="@+id/btn_playlist"
                 app:backgroundTint="#13f9f9"
                 app:fabSize="mini"
+                android:onClick="showPlayList"
                 />
             <TextView
                 android:id="@+id/nameOfSong"

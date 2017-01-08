@@ -4,28 +4,14 @@ package com.moodoff.helper;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.media.MediaPlayer;
-import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
-import android.widget.Button;
 
 import com.moodoff.GenericMood;
 import com.moodoff.NotificationFragment;
+import com.moodoff.Profile;
 import com.moodoff.R;
 
 import java.util.ArrayList;
-
-class GenericMoodTab{
-    MediaPlayer mediaPlayer = null;
-    Button onPauseButton = null;
-}
-class NotificationTab{
-    MediaPlayer mediaPlayer = null;
-    FloatingActionButton onStopButton = null;
-}
-class ProfileTab{
-    MediaPlayer mediaPlayer = null;
-    FloatingActionButton onStopButton = null;
-}
 
 public class ValidateMediaPlayer {
 
@@ -41,11 +27,9 @@ public class ValidateMediaPlayer {
         return validateMediaPlayer;
     }
 
-//    GenericMoodTab genericMoodTab = new GenericMoodTab();
-//    NotificationTab notificationTab = new NotificationTab();
     GenericMood genericMoodTab = new GenericMood();
     NotificationFragment notificationTab = new NotificationFragment();
-    ProfileTab profileTab = new ProfileTab();
+    Profile profileTab = new Profile();
 
     ListOfTabs tabListObj = new ListOfTabs();
     ArrayList<String> listOfTabs = tabListObj.getListOfTabs();
@@ -93,9 +77,10 @@ public class ValidateMediaPlayer {
                                 if(profileTab.mediaPlayer.isPlaying()){
                                     Log.e("ValidateMP","profile-stop");
                                     profileTab.mediaPlayer.stop();
-                                    if(profileTab.onStopButton!=null){
-                                        profileTab.onStopButton.setImageResource(R.drawable.play);
-                                    }
+                                    profileTab.releaseMediaPlayerObject(profileTab.mediaPlayer);
+                                    profileTab.showPlayStopButton("play");
+                                    profileTab.seekBar.setMax(0);
+                                    profileTab.seekBar.setClickable(false);
                                 }
                             }
                             break;

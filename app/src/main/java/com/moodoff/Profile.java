@@ -8,8 +8,11 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -22,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
@@ -35,6 +39,7 @@ import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
+import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.UserDetails;
 
 import java.io.IOException;
@@ -94,6 +99,9 @@ public class Profile extends Fragment {
         myAudioStatusSong = new String();
         editAudioStatus = (ImageButton)view.findViewById(R.id.editAudioStatus);
         editTextStatus = (ImageButton)view.findViewById(R.id.editTextStatus);
+        seekBar = (SeekBar)view.findViewById(R.id.myAudioStatusProgressBar);
+        seekBar.setClickable(false);
+        spinner = (ProgressBar) view.findViewById(R.id.profileProgressBar);
     }
 
     View view,dialogView;
@@ -102,13 +110,19 @@ public class Profile extends Fragment {
     String myAudioStatusSong;
     ImageButton editAudioStatus, editTextStatus;
     Button okButtonWidth,cancelButtonWidth,okButton,cancelButton;
-    FloatingActionButton playAudioStatusButton, loveTextStatus, loveAudioStatus, editBasicInfo;
+    FloatingActionButton loveTextStatus, loveAudioStatus, editBasicInfo;
     int screenHeight, screenWidth;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
     LinearLayout dialogContainer;
     StoreRetrieveDataInterface fileOperations;
     String profileOfUser;
+    public static FloatingActionButton playAudioStatusButton;
+    public static MediaPlayer mediaPlayer = null;
+    public static Boolean isSongPlaying = false;
+    public static ProgressBar spinner;
+    public static SeekBar seekBar;
+    Handler seekHandler = new Handler();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -146,9 +160,10 @@ public class Profile extends Fragment {
         playAudioStatusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.e("Profile_AudioSong",myAudioStatusSong.toString());
                 String myAudioStatusSongURL = HttpGetPostInterface.serverSongURL+myAudioStatusSong.replaceAll("@","/");
                 Messenger.print(getContext(),myAudioStatusSongURL);
-                playSong(myAudioStatusSongURL);
+                playAudioStatusSong(myAudioStatusSongURL);
             }
         });
         loveTextStatus.setOnClickListener(new View.OnClickListener() {
@@ -157,17 +172,132 @@ public class Profile extends Fragment {
                loveTheTextStatus(profileOfUser, textStatusLoveCount, getActivity());
             }
         });
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mediaPlayer.seekTo(seekBar.getProgress());
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+        });
 
         return view;
+    }
+
+    Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            seekUpdation();
+        }
+    };
+
+    public void seekUpdation() {
+        if (mediaPlayer!=null) {
+            seekBar.setProgress(mediaPlayer.getCurrentPosition());
+            if(seekBar.getMax()!=0) {
+                seekHandler.postDelayed(run, 10);
+            }
+        }
+    }
+
+    private void playAudioStatusSong(String songURL){
+        // Write the code to play the song and handle the seekbar too
+        showSpinner();
+        releaseMediaPlayerObject(mediaPlayer);
+        mediaPlayer = new MediaPlayer();
+        Log.e("Profile_SongPlayURL",songURL.toString());
+        if(isSongPlaying==false) {
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            try{
+                //mp = MediaPlayer.create(this, Uri.parse(url));
+                mediaPlayer.setDataSource(songURL);
+                mediaPlayer.prepareAsync();
+            } catch (IllegalArgumentException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mediaPlayer); e.printStackTrace();
+            } catch (IllegalStateException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mediaPlayer); e.printStackTrace();
+            } catch (IOException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mediaPlayer); e.printStackTrace();
+            } catch (Exception e) {toastError(e.getMessage()); releaseMediaPlayerObject(mediaPlayer); e.printStackTrace();
+            }
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    showPlayStopButton("stop");
+                    seekBar.setClickable(true);
+                    if(mediaPlayer!=null) {
+                        seekBar.setMax(mediaPlayer.getDuration());
+                        seekUpdation();
+                    }
+                    ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+                    validateMediaPlayer.initialiseAndValidateMediaPlayer("profile","play");
+                    mediaPlayer.start();
+                }
+            });
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    showPlayStopButton("play");
+                    seekBar.setMax(0);
+                    seekBar.setClickable(false);
+                }
+            });
+        } else {
+            Log.e("Profile_MP","Playing stop player");
+            ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+            validateMediaPlayer.initialiseAndValidateMediaPlayer("profile","stop");
+            showPlayStopButton("play");
+            mediaPlayer.stop();
+            seekBar.setMax(0);
+            seekBar.setClickable(false);
+        }
+    }
+
+    /*set play or pause button for display*/
+    public static void showPlayStopButton(String playOrPause) {
+        try {
+            playOrPause = playOrPause.toLowerCase();
+            if (playOrPause == "play") {
+                isSongPlaying = false;
+                playAudioStatusButton.setImageResource(R.drawable.play);
+            } else {
+                isSongPlaying = true;
+                playAudioStatusButton.setImageResource(R.drawable.stop);
+            }
+            spinner.setVisibility(ProgressBar.GONE);
+            playAudioStatusButton.setVisibility(Button.VISIBLE);
+        } catch(Exception e){
+            toastError(e.getMessage());
+            releaseMediaPlayerObject(mediaPlayer);
+        }
+    }
+
+    public static void releaseMediaPlayerObject(MediaPlayer mp) {
+        try {
+            if (mp != null) {
+                if(mp.isPlaying()){mp.stop();}
+                mp.release();
+                mp = null;
+            }
+        } catch(Exception e){e.fillInStackTrace();e.printStackTrace();}
+    }
+
+    /*show spinner in place of play/pause button*/
+    public void showSpinner() {
+        try {
+            playAudioStatusButton.setVisibility(Button.GONE);
+            spinner.setVisibility(ProgressBar.VISIBLE);
+        } catch(Exception e){toastError(e.getMessage());}
+    }
+
+    /*Toast error message*/
+    public static void toastError(String error) {
+        //Toast.makeText(view.getContext(), "Oops! Somehing went wrong\n"+error.toString(), Toast.LENGTH_LONG).show();
+        Log.e("GenericMood_MPissue",error);
     }
 
     private void loveTheTextStatus(String user, TextView txtViewToChange, Activity curActivity){
         ServerManager serverManager = new ServerManager();
         serverManager.loveTextStatus(user, txtViewToChange, curActivity);
-    }
-
-    private void playSong(String songURL){
-        // Write the code to play the song and handle the seekbar too
     }
 
     private void editStatus(int textOrAudioStatus){
