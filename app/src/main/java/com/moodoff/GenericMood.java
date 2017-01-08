@@ -1,5 +1,6 @@
 package com.moodoff;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -7,20 +8,28 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.CalendarContract;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.TextKeyListener;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +37,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -38,8 +48,12 @@ import android.widget.Toast;
 
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBHelper;
+import com.moodoff.helper.HangManWords;
 import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
+import com.moodoff.helper.StoreRetrieveDataImpl;
+import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
 
 import java.io.BufferedReader;
@@ -47,10 +61,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -128,7 +144,10 @@ public class GenericMood extends Moods implements View.OnClickListener{
     ArrayList<String> currentplayList = null;
     String currentSong = "", currentMood = "", playListFilePath = "";
     int currentIndex = 0, repParm = 0, playOrPauseParm = 0, timeElapsedOrTimeLeft = 0;
+    int numberOfChances = 5;
     DBHelper dbOperations;
+    StoreRetrieveDataInterface fileOperations = new StoreRetrieveDataImpl("UserData.txt");
+    LinearLayout gamePanel;
 
     public void init(){
         dbOperations = new DBHelper(getContext());
@@ -149,6 +168,8 @@ public class GenericMood extends Moods implements View.OnClickListener{
         seekBar = (SeekBar) view.findViewById(R.id.seekBar);
         duration = (TextView) view.findViewById(R.id.duration);
         photoView = (ImageView) view.findViewById(R.id.photoView);
+        gamePanel = (LinearLayout)view.findViewById(R.id.gamePanel);
+        gamePanel.setVisibility(View.GONE);
         playPauseBtn.setOnClickListener(this);
         stopBtn.setOnClickListener(this);
         nextBtn.setOnClickListener(this);
@@ -160,6 +181,16 @@ public class GenericMood extends Moods implements View.OnClickListener{
         duration.setOnClickListener(this);
         disableButton(prevBtn);
         currentMood = mParam1;
+
+        // Game init
+        newGame = (Button)view.findViewById(R.id.newgame);
+        checkTheLetter = (Button)view.findViewById(R.id.checkTheLetter);
+        tvv = (TextView)view.findViewById(R.id.tv_storytitle);
+        pointsEarned = (TextView)view.findViewById(R.id.totalScore);
+        selectedLetters = (TextView)view.findViewById(R.id.selectedLetters);
+        chosenLetter = (EditText)view.findViewById(R.id.guessedLetter);
+        cartoon = (ImageView)view.findViewById(R.id.cartoon);
+        loveStory = (FloatingActionButton) view.findViewById(R.id.like_story);
     }
 
     public void showMenu(){
@@ -169,7 +200,10 @@ public class GenericMood extends Moods implements View.OnClickListener{
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 String selectedOption = item.getTitle().toString();
-                if(selectedOption.equalsIgnoreCase("Show Story")){
+                if(selectedOption.equalsIgnoreCase("Play Game")){
+                    showItemInMiddle(5);
+                }
+                else if(selectedOption.equalsIgnoreCase("Show Story")){
                     showItemInMiddle(1);
                 }
                 else {
@@ -192,9 +226,14 @@ public class GenericMood extends Moods implements View.OnClickListener{
         popupMenu.show();
     }
 
-    public void showItemInMiddle(int selectedOption){
+    TextView txtView_selectedWord,points;
+    char[] wordToFill;
+    int totalScore=UserDetails.getScore();
+    public void showItemInMiddle(final int selectedOption){
         switch(selectedOption){
             case 1:{
+                storyBodyTV.setVisibility(View.VISIBLE);
+                gamePanel.setVisibility(View.GONE);
                 photoView.setVisibility(View.GONE);
                 storyLoadSpinner.setVisibility(View.VISIBLE);
                 ServerManager serverManager = new ServerManager();
@@ -203,9 +242,15 @@ public class GenericMood extends Moods implements View.OnClickListener{
 
             }
             case 2:{
+                gamePanel.setVisibility(View.GONE);
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);//
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"),2);
                 break;
             }
             case 3:{
+                gamePanel.setVisibility(View.GONE);
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/"+currentMood+"/");
                 pictureDirectory.mkdirs();
@@ -220,6 +265,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 break;
             }
             case 4:{
+                gamePanel.setVisibility(View.GONE);
                 imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/moodoff/"+currentMood+"/"+getPictureName();
                 if(!(new File(imageFilePath).exists())){
                     Toast.makeText(getContext(), "Not yet taken any photo for this mood", Toast.LENGTH_SHORT).show();
@@ -230,15 +276,167 @@ public class GenericMood extends Moods implements View.OnClickListener{
                     photoView.setVisibility(View.VISIBLE);
                 }
             }
+            case 5: {
+                newGame.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        resetGameView();
+                        launchGame();
+                    }
+                });
+
+                resetGameView();
+                launchGame();
+
+            }
         }
     }
 
+    private void resetGameView(){
+        newGame.setEnabled(false);
+        gamePanel.setVisibility(View.VISIBLE);
+        photoView.setVisibility(View.GONE);
+        storyBodyTV.setVisibility(View.GONE);
+        loveStory.setVisibility(View.INVISIBLE);
+        tvv.setText("Guess The Word");
+        chosenLetter.setText("");
+        chosenLetter.setEnabled(true);
+        selectedLetters.setText("");
+        txtView_selectedWord = (TextView)view.findViewById(R.id.selectedWord);
+        points = (TextView)view.findViewById(R.id.totalScore);
+    }
+    // Game Variables
+
+    Button newGame,checkTheLetter;
+    FloatingActionButton loveStory;
+    TextView tvv,pointsEarned,selectedLetters;
+    EditText chosenLetter;
+    ImageView cartoon;
+    // Finished Declaration
+
+    private  void launchGame(){
+        numberOfChances=5;
+        ArrayList<String> words = HangManWords.getAllWords();
+        int randomNo = new Random().nextInt(words.size());
+        final String selectedWord = words.get(randomNo);
+        Log.e("GM_SELECTEDWORD",selectedWord);
+        pointsEarned.setText(""+totalScore); // Get the points from DB
+        cartoon.setImageResource(R.drawable.c1);
+        StringBuilder sb = new StringBuilder("");
+        for(int i=0;i<selectedWord.length();i++){
+            sb.append(" _");
+        }
+        wordToFill = sb.toString().toCharArray();
+        txtView_selectedWord.setText(String.valueOf(wordToFill));
+
+        chosenLetter.setFilters(new InputFilter[]{new InputFilter.AllCaps(),new InputFilter.LengthFilter(1)});
+
+        checkTheLetter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String enteredLetter = chosenLetter.getText().toString();
+                if(enteredLetter.equals("")) {
+                    Messenger.print(getContext(), "Add some letter to try");
+                }
+                else
+                {
+                    char letterPressed = enteredLetter.charAt(0);
+                    selectedLetters.setText(selectedLetters.getText()+" "+letterPressed);
+                    Log.e("GM_LETTERFOUND",""+letterPressed);
+                    if(checkIfLetterIsInWordAndUpdateCartoon(selectedWord, letterPressed)){
+                        //char matchedLetter = s.toString().charAt(s.toString().length()-1);
+                        ArrayList<Integer> getPos = fillPlacesOfWord(selectedWord,letterPressed);
+                        Log.e("GM_POSEXPOSED",getPos.toString());
+                        //char[] wordToFill = selectedWord.toCharArray();
+                        for(Integer eachPosition : getPos){
+                            wordToFill[eachPosition+eachPosition+1] = letterPressed;
+                        }
+                        //points.setText(""+totalScore);
+                        txtView_selectedWord.setText(String.valueOf(wordToFill));
+                        int idx = -1;
+                        idx = txtView_selectedWord.getText().toString().indexOf("_");
+                        if(idx==-1){
+                            chosenLetter.setEnabled(false);
+                            totalScore+=(selectedWord.length()*3);
+                            points.setText(""+totalScore);
+                            UserDetails.setScore(totalScore);
+                            fileOperations.beginWriteTransaction();
+                            fileOperations.updateValueFor("score",String.valueOf(totalScore));
+                            fileOperations.endWriteTransaction();
+                            newGame.setEnabled(true);
+                        }
+
+                    }
+                    else{
+                        int pic1 = R.drawable.c1,pic2 = R.drawable.c2,
+                                pic3 = R.drawable.c3,pic4 = R.drawable.c4,
+                                pic5 = R.drawable.c5,pic6 = R.drawable.c6;
+                        Log.e("GM_FAILED",""+numberOfChances);
+                        switch (numberOfChances){
+                            case 5:{
+                                cartoon.setImageResource(pic2);
+                                break;
+                            }
+                            case 4:{
+                                cartoon.setImageResource(pic3);
+                                break;
+                            }
+                            case 3:{
+                                cartoon.setImageResource(pic4);
+                                break;
+                            }
+                            case 2:{
+                                cartoon.setImageResource(pic5);
+                                break;
+                            }
+                            case 1:{
+                                cartoon.setImageResource(pic6);
+                                newGame.setEnabled(true);
+                                chosenLetter.setEnabled(false);
+                                break;
+                            }
+                        }
+                        numberOfChances--;
+                    }
+                    chosenLetter.setText("");
+                }
+            }
+        });
+    }
+
+
+    private ArrayList<Integer> fillPlacesOfWord(String word, char matchedLetter){
+        ArrayList<Integer> characterPositions = new ArrayList<>();
+        for(int i=0;i<word.length();i++){
+            if((word.charAt(i))==(matchedLetter))
+            characterPositions.add(i);
+        }
+        Log.e("GM_CHARSFOUNDAT",characterPositions.toString());
+        return characterPositions;
+    }
+
+    private boolean checkIfLetterIsInWordAndUpdateCartoon(String selectedWord, char c){
+        char charToCompare = c;
+        for(int i=0;i<selectedWord.length();i++){
+            if((selectedWord.charAt(i))==charToCompare){
+                Log.e("GM_MATCHED","MATCHED_"+charToCompare+"_"+selectedWord);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    LayoutInflater mainInflater;
+    ViewGroup mainContainer;
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
+
+        mainInflater = inflater;
+        mainContainer = container;
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
-        view.setBackgroundColor(Color.WHITE);
+        //view.setBackgroundColor(Color.WHITE);
 
         init();
         //Toast.makeText(getContext(),"You selected mood: "+(char)(mParam1.charAt(0)-32)+mParam1.substring(1),Toast.LENGTH_LONG).show();
@@ -253,7 +451,6 @@ public class GenericMood extends Moods implements View.OnClickListener{
         storyLoadSpinner.setVisibility(View.VISIBLE);
         ServerManager serverManager = new ServerManager();
         serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
-
 
         if (currentMood != "") {
             currentplayList = readList(currentMood);
@@ -382,7 +579,9 @@ public class GenericMood extends Moods implements View.OnClickListener{
             startActivityForResult(it, 1);
         }
     }
+
     static String getPictureName(){return "mogambo.jpg";}
+
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
@@ -439,6 +638,31 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 photoView.setImageBitmap(bitmap);
                 photoView.setVisibility(View.VISIBLE);
                 Log.e("Geeeeeeneeerd","GGGGGGGGGGGGGGGGMMMMMMM");
+            }
+        }
+        if (requestCode == 2)
+        {
+            if (resultCode == Activity.RESULT_OK)
+            {
+                if (data != null)
+                {
+                    try
+                    {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), data.getData());
+                        photoView.setImageBitmap(bitmap);
+                        photoView.setVisibility(View.VISIBLE);
+                        photoView.setAdjustViewBounds(true);
+                        Log.e("GM_gallery","Photo set");
+
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED)
+            {
+                Toast.makeText(getActivity(), "Cancelled", Toast.LENGTH_SHORT).show();
             }
         }
     }

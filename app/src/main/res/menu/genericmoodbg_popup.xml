@@ -26,5 +26,11 @@
         android:orderInCategory="100"
         android:title="Show Story"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/playGame"
+        android:orderInCategory="100"
+        android:title="Play Game"
+        app:showAsAction="never" />
+
 
 </menu>

@@ -13,30 +13,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/storyAndPlayer"
-        android:background="#072c45"
+        android:background="#0ddeaa"
         >
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:id="@+id/storyTitle"
-        android:background="#13f9f9"
-        android:gravity="right"
-        >
-
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:backgroundTint="#f5322f"
-            android:layout_marginRight="7dp"
-            android:src="@drawable/more_options"
-            android:id="@+id/btn_menu"
-            app:fabSize="mini"
-            />
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:id="@+id/storyTitle"
+            android:background="#13f9f9"
+            android:gravity="right"
+            >
 
-    </LinearLayout>
+            <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:backgroundTint="#f5322f"
+                android:layout_marginRight="7dp"
+                android:src="@drawable/more_options"
+                android:id="@+id/btn_menu"
+                app:fabSize="mini"
+                />
 
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -44,7 +43,7 @@
             android:orientation="vertical"
             android:layout_below="@+id/storyTitle"
             android:id="@+id/spaceForImageOrStory"
-            >
+            android:layout_above="@+id/songNameAndDuration">
 
             <LinearLayout
                 android:id="@+id/likeAndStoryTitle"
@@ -83,10 +82,218 @@
                 android:background="@drawable/karaoke_bg7"
                 android:visibility="gone"
                 />
+            <LinearLayout
+                android:id="@+id/gamePanel"
+                android:background="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="5dp"
+                android:paddingTop="5dp"
+                android:paddingRight="5dp"
+                android:paddingBottom="5dp"
+                android:orientation="vertical"
+                >
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorPrimary"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:gravity="center"
+                    >
+                    <Button
+                        android:id="@+id/newgame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginLeft="5dp"
+                        android:text="New Game"
+                        android:textStyle="bold"
+                        android:background="@drawable/registrationdatabox"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:text="How To Play"
+                        android:textColor="@color/black"
+                        android:fontFamily="serif" />
+                    <android.support.design.widget.FloatingActionButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/knowhow"
+                        android:layout_marginRight="5dp"
+                        app:fabSize="mini"
+                        />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <LinearLayout
+                    android:id="@+id/pointsAndCartoon"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:gravity="center"
+                    android:background="@color/light_yellow"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="Total Points:"
+                        android:textStyle="bold"
+                        android:textSize="25dp"
+                        android:textColor="@android:color/black"
+                        android:fontFamily="sans-serif-condensed" />
+                    <TextView
+                        android:id="@+id/totalScore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textStyle="bold"
+                        android:textSize="25dp"
+                        android:textColor="@android:color/black"
+                        android:fontFamily="sans-serif-condensed" />
+
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <LinearLayout
+                    android:id="@+id/wordSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:gravity="center"
+                    android:background="@color/notification_me"
+                    >
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        >
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="The secret word is below"
+                            />
+
+                        <TextView
+                            android:id="@+id/selectedWord"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="25dp"
+                            android:text="_ _ _ _ _"
+                            />
+                    </LinearLayout>
+                    <ImageView
+                        android:id="@+id/cartoon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_gravity="right"
+                        android:src="@drawable/c1"
+                        />
+
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/light_yellow"
+                    android:gravity="center"
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="5dp"
+                        android:text="Type here: "
+                        android:layout_gravity="center"
+                        />
+
+                    <EditText
+                        android:id="@+id/guessedLetter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:hint="TYPE"
+                        android:text=""
+                        android:textStyle="normal|bold"
+                        android:textSize="18sp"
+                        android:selectAllOnFocus="false" />
+                    <Button
+                        android:id="@+id/checkTheLetter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/registrationdatabox"
+                        android:text="APPLY"
+                        android:minHeight="30dp"
+                        android:layout_marginRight="5dp"
+                        />
+                    <ImageView
+                        android:id="@+id/expression"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:src="@drawable/correctletter"
+                        android:visibility="gone"
+                        />
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/darker_gray"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingLeft="5dp"
+                        android:orientation="vertical"
+                        android:layout_gravity="center"
+                        >
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Selected Letters:"
+                            />
+                        <TextView
+                            android:id="@+id/selectedLetters"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="A,B,C,D"
+                            android:textStyle="normal|bold"
+                            android:textColor="@color/black" />
+                    </LinearLayout>
+
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+
+            </LinearLayout>
 
             <ScrollView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:isScrollContainer="false"
                 android:layout_below="@id/likeAndStoryTitle"
                 android:id="@+id/scrollView3">
                 <TextView
@@ -104,6 +311,7 @@
                     android:fontFamily="serif"
                     android:textSize="15sp" />
             </ScrollView>
+
 
         </LinearLayout>
 
@@ -178,13 +386,13 @@
             android:orientation="vertical"
             android:layout_alignParentBottom="true"
             >
-        <SeekBar
-            android:id="@+id/seekBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/buttons"
-            android:background="#13f9f9"
-            style="@style/Widget.AppCompat.SeekBar" />
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/buttons"
+                android:background="#13f9f9"
+                style="@style/Widget.AppCompat.SeekBar" />
             <LinearLayout
                 android:id="@+id/buttons"
                 android:orientation="horizontal"
@@ -265,7 +473,7 @@
                     android:layout_weight="1"
                     android:text=""
                     android:onClick="onClickShuffleButton" />
-        </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <ProgressBar
@@ -274,6 +482,7 @@
             android:id="@+id/load_story_spinner"
             android:indeterminateTint="#FF0000"
             android:layout_marginTop="107dp"
+            android:visibility="gone"
             android:layout_below="@+id/spaceForImageOrStory"
             android:layout_centerHorizontal="true" />
 

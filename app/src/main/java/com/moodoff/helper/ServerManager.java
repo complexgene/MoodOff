@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -39,6 +40,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.moodoff.helper.HttpGetPostInterface.serverURL;
@@ -101,8 +103,7 @@ public class ServerManager{
         }).start();
     }
 
-    public void readPlayListFromServer(){
-        final ArrayList<String> allMoods = new ArrayList<String>();
+    public void readPlayListFromServer(final Context curContext, final String todaysDate){
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
             BufferedReader bufferedReader = null;
@@ -143,6 +144,22 @@ public class ServerManager{
                         allSongInAMood = new ArrayList<String>();
                     }
                     Start.moodsAndSongsFetchNotComplete = false;
+                    DBHelper dbOperations = new DBHelper(curContext);
+                    SQLiteDatabase writeDB = dbOperations.getWritableDatabase();
+                    writeDB.execSQL("delete from playlist");
+                    Log.e("Start_Playlist","Deleted all songs from playlist");
+
+                    HashMap<String,ArrayList<String>> allSongs = AppData.allMoodPlayList;
+                    for(String moodType : allSongs.keySet())
+                    {
+                        ArrayList<String> songs = allSongs.get(moodType);
+                        for(String eachSong : songs) {
+                            String queryToFireToInsertSong = "insert into playlist values('" + todaysDate + "','"+ moodType +"','"+ eachSong +"','xxx','xxx')";
+                            Log.e("Start_QUERYINSRT",queryToFireToInsertSong);
+                            writeDB.execSQL(queryToFireToInsertSong);
+                        }
+                    }
+                    Log.e("Start_Playlist","Songs written to DB");
                     Log.e("Start_allmoods_Read", "AllMoods read complete..");
                 } catch (Exception ee) {
                     Log.e("Start_notRd_Err", "Server not reachable i think:"+ee.getMessage());
@@ -172,7 +189,7 @@ public class ServerManager{
                         try {
                             //Log.e("ServerManager_Not","Start reading notifications from Server");
                             URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
-                            Log.e("ServerManager_ReadURL", url.toString());
+                            //Log.e("ServerManager_ReadURL", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
                             isr = new InputStreamReader(is);
@@ -187,11 +204,14 @@ public class ServerManager{
                             oldNumberOfNotifications = AppData.totalNoOfNot;
                             if(currentNumberOfNotifications>oldNumberOfNotifications){
                                 dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
+                                //stopWriteToReadTableCopyScript();
                                 dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
+                                //deleteAllNotificationsFromServerReadtable(UserMobileNumber);
+                                //startWriteToReadTableCopyScript();
                                 //AppData.allNotifications = allYourNotificationFromServer;
                                 AppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
                                 AppData.totalNoOfNot = currentNumberOfNotifications;
-                                Log.e("ServerManager_allNot","Some new notifications written to DB..");
+                                //Log.e("ServerManager_allNot","Some new notifications written to DB..");
                                 //Log.e("ServerManager_allNot",allYourNotificationFromServer.toString());
 
                                 // Display the notification alert
@@ -199,7 +219,7 @@ public class ServerManager{
 
                             }
                             else{
-                                Log.e("ServerManager_allNot","No new Notifications..");
+                                //Log.e("ServerManager_allNot","No new Notifications..");
                             }
 
                             //Log.e("ServerManager_Not_Read", "Notification read complete from server");
@@ -211,7 +231,7 @@ public class ServerManager{
                 }).start();
                 readNotificationsFromServerAndWriteToInternalDB();
             }
-        },7000);
+        },10000);
     }
 
     private void displayAlertNotificationOnTopBarOfPhone(final Context context){

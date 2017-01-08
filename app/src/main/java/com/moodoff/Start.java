@@ -34,6 +34,7 @@ import java.net.HttpURLConnection;
 import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class Start extends AppCompatActivity {
@@ -66,6 +67,7 @@ public class Start extends AppCompatActivity {
                 UserDetails.setDateOfBirth(rd.getValueFor("dob"));
                 UserDetails.setUserTextStatus(rd.getValueFor("textStatus"));
                 UserDetails.setUserAudioStatusSong(rd.getValueFor("audioStatus"));
+                UserDetails.setScore(Integer.parseInt(rd.getValueFor("score")));
                 rd.endReadTransaction();
                 return true;
             }
@@ -140,11 +142,46 @@ public class Start extends AppCompatActivity {
         return dbOperations.readNotificationsFromInternalDB();
     }
 
-    private void fetchMoodsAndPlayListFiles() {
-        ServerManager reads = new ServerManager();
-        reads.readPlayListFromServer();
-    }
+    private boolean checkEntryOfPlaylistInInternalTableAndReadIfRequired(String todaysDate){
+        SQLiteDatabase readData = dbOpr.getReadableDatabase();
+        Cursor resultSet = readData.rawQuery("Select * from playlist where date='"+todaysDate+"'", null);
+        // If todays playlist file is not downloaded yet
+        if(resultSet.getCount()==0)return false;
+        // File downloaded
+        HashMap<String,ArrayList<String>> allSongs = new HashMap<>();
+        resultSet.moveToFirst();
+        Log.e("Start_TBLDetect",resultSet.getCount()+" no of rows..");
+        while (!resultSet.isAfterLast()) {
+            String moodType = resultSet.getString(1);
+            String songName = resultSet.getString(2);
+            String artistName = resultSet.getString(3);
+            String movieOrAlbumname = resultSet.getString(3);
 
+            if(allSongs.containsKey(moodType)){
+                allSongs.get(moodType).add(songName);
+            }
+            else{
+                ArrayList<String> songs = new ArrayList<>();
+                songs.add(songName);
+                allSongs.put(moodType,songs);
+            }
+            resultSet.moveToNext();
+        }
+        AppData.allMoodPlayList = allSongs;
+        moodsAndSongsFetchNotComplete = false;
+        return true;
+    }
+    private void fetchMoodsAndPlayListFiles() {
+        Calendar c = Calendar.getInstance();
+        String todaysDate = c.get(Calendar.DATE)+"-"+c.get(Calendar.MONTH)+"-"+c.get(Calendar.YEAR);
+        Log.e("Start_Date",todaysDate);
+        if(!checkEntryOfPlaylistInInternalTableAndReadIfRequired(todaysDate)) {
+         // Not yet downloaded to internal table and will be downloaded only once.
+            Log.e("Start_MOOD","Downloading the playlist for the first itme of day..");
+            ServerManager reads = new ServerManager();
+            reads.readPlayListFromServer(this,todaysDate);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,18 +215,20 @@ public class Start extends AppCompatActivity {
                 fetchContacts();
                 while (fetchContactsNotComplete) ;
                 fetchNotifications();
-                fetchContactsFromServer();
+                //fetchContactsFromServer();
+                Log.e("Start_FILEREADS","DONEEEEEEEEEEEEEEEEE");
                 try {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             final Intent mainIntent = new Intent(Start.this, AllTabs.class);
-                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete || fetchContactsFromServerNotComplete) ;
+                            Log.e("Start_FILEREADS",notificationFetchNotComplete+" "+moodsAndSongsFetchNotComplete);
+                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete) ;
                             Log.e("Start_AllTabsLaunch", "AllTabs will be launched");
                             Start.this.startActivity(mainIntent);
                             Start.this.finish();
                         }
-                    }, 0);
+                    }, 2000);
                 } catch (Exception ee) {
                     Log.e("Start_AllTabsLaunchErr", "Error in Alltabs Launch");
                 }
