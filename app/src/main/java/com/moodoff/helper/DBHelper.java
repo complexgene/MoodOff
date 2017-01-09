@@ -201,8 +201,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
                     mydatabaseW = getWritableDatabase();
-                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
-                    Log.e("Start_InsertQuery",insertQuery);
+                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact).replaceAll("'","\'")+"');";
+                    Log.e("DBHelper_INSRT",insertQuery);
                     mydatabaseW.execSQL(insertQuery);
                 }
 

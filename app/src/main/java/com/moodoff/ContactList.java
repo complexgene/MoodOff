@@ -140,6 +140,8 @@ public class ContactList extends AppCompatActivity {
             while (cursor.moveToNext()) {
                 String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                if(name==null)
+                    name=" ";
                 name = name.replaceAll("'", "\'");
                 //Log.i("Names", name);
                 if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {

@@ -1,36 +1,27 @@
 package com.moodoff;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Point;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
-import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.CalendarContract;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.InputFilter;
-import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.method.TextKeyListener;
 import android.util.Log;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,24 +41,22 @@ import com.moodoff.helper.HangManWords;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
-import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
+import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.UserDetails;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Random;
 
 import static android.app.Activity.RESULT_OK;
-
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -705,6 +694,31 @@ public class GenericMood extends Moods implements View.OnClickListener{
     private void showPlayList(){
         ArrayList<String> allSongsOfCurrentMood = AppData.allMoodPlayList.get(currentMood);
         Log.e("GM_UGETSONGS",allSongsOfCurrentMood.toString());
+        PopupMenu popupMenu = new PopupMenu(view.getContext(),playListButton);
+        popupMenu.getMenuInflater().inflate(R.menu.genericmoodplaylist_popup,popupMenu.getMenu());
+
+        for(int i=0;i<allSongsOfCurrentMood.size();i++) {
+            String songName = allSongsOfCurrentMood.get(i).replaceAll("_"," ");
+            popupMenu.getMenu().add(songName.substring(0, songName.lastIndexOf(".")));
+        }
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                String selectedOption = item.getTitle().toString();
+                int songIndex = currentplayList.indexOf(selectedOption.replaceAll(" ","_")+".mp3");
+                Log.e("GM_PLAYLIST",selectedOption+" index:"+songIndex);
+
+                onClickStopButton(view);
+                currentIndex = songIndex;
+                onClickPlayButton(view);
+
+                return true;
+            }
+        });
+
+        popupMenu.show();
+
     }
 
     public void onClickDuration(View v) {
@@ -816,7 +830,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 //for playing new song
                 showSpinner();
                 currentSong = (String) songNameFromList(currentplayList, currentIndex);
-                displaySongName(songName, "Downloading the song...please wait");
+                displaySongName(songName, "Loading...");
                 setSongSource(currentIndex, currentMood);
                 mp.setLooping(false);
                 //after the song is prepared in asynchronous mode
