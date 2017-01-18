@@ -75,9 +75,11 @@ public class PermissionRequest extends AppCompatActivity {
             return true;
         }
         else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_CONTACTS,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.CAMERA},
-                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
+                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+            }
         }
         return false;
     }

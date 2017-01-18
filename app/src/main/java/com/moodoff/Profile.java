@@ -454,6 +454,7 @@ public class Profile extends Fragment {
                     if(writeTheStatusChangeToServerAndFile(1,songStorePattern)){
                         myAudioStatusSong = songStorePattern;
                         Messenger.print(getContext(),"Audio Status Updated..");
+                        fbDialogue.dismiss();
                     }
                 }
             });

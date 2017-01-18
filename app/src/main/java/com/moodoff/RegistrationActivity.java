@@ -325,6 +325,7 @@ public class RegistrationActivity extends AppCompatActivity {
             rd.createNewData("textStatus",status_text.getText().toString().replaceAll(" ","_"));
             rd.createNewData("audioStatus","romantic@HERO.mp3");
             rd.createNewData("score","0");
+            rd.createNewData("numberOfOldNotifications","0");
             rd.endWriteTransaction();
             return true;
         } catch (IOException e) {

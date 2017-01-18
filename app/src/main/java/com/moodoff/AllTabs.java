@@ -49,7 +49,7 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        tabNames.clear();tabNames.add("Moods");tabNames.add("ACTIVITY");tabNames.add("PROFILE");
+        tabNames.clear();tabNames.add("MOODS");tabNames.add("ACTIVITY");tabNames.add("PROFILE");
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 

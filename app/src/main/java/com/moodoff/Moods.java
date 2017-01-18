@@ -15,8 +15,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBInternal;
+import com.moodoff.helper.Messenger;
 
 
 /**
@@ -65,7 +68,7 @@ public class Moods extends Fragment {
 
     }
     View rootView;
-    Button btnRomantic,btnParty,btnOnTour,btnInLove,btnDance,btnSad;
+    Button btnRomantic,btnParty,btnOnTour,btnInLove,btnDance,btnSad,btnWorkOut,btnFriends,btnMissU,btnOldEra,btnCrazy,btnCalm;
     ExpandableListView moodlist;
     RelativeLayout layout;
     ViewGroup mainContainer;
@@ -79,12 +82,18 @@ public class Moods extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_moods, container,
                 false);
         //rootView.setBackgroundColor(Color.WHITE);
-        btnRomantic = (Button)rootView.findViewById(R.id.btn_romantic);
-        btnParty = (Button)rootView.findViewById(R.id.btn_party);
         btnOnTour = (Button)rootView.findViewById(R.id.btn_ontour);
-        btnInLove = (Button)rootView.findViewById(R.id.btn_inlove);
-        btnDance = (Button)rootView.findViewById(R.id.btn_dance);
+        btnParty = (Button)rootView.findViewById(R.id.btn_party);
+        btnRomantic = (Button)rootView.findViewById(R.id.btn_romantic);
         btnSad = (Button)rootView.findViewById(R.id.btn_sad);
+        btnOldEra = (Button)rootView.findViewById(R.id.btn_old_era);
+        btnWorkOut = (Button)rootView.findViewById(R.id.btn_workout);
+        btnDance = (Button)rootView.findViewById(R.id.btn_dance);
+        btnCalm = (Button)rootView.findViewById(R.id.btn_calm);
+        btnCrazy = (Button)rootView.findViewById(R.id.btn_crazy);
+        btnFriends = (Button)rootView.findViewById(R.id.btn_friends);
+        btnMissU = (Button)rootView.findViewById(R.id.btn_missu);
+        btnInLove = (Button)rootView.findViewById(R.id.btn_inlove);
 
         showAllButtons();
 
@@ -94,22 +103,34 @@ public class Moods extends Fragment {
                 startParticularMood("on_tour");
             }
         });
-        btnRomantic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startParticularMood("romantic");
-            }
-        });
         btnParty.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startParticularMood("party");
             }
         });
+        btnRomantic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("romantic");
+            }
+        });
         btnSad.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startParticularMood("sad");
+            }
+        });
+        btnOldEra.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("old_era");
+            }
+        });
+        btnWorkOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("work_out");
             }
         });
         btnDance.setOnClickListener(new View.OnClickListener() {
@@ -119,19 +140,59 @@ public class Moods extends Fragment {
                 startActivity(openInternalDBActivity);
             }
         });
+        btnCalm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("calm");
+            }
+        });
+        btnCrazy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("crazy");
+            }
+        });
+        btnFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("friends");
+            }
+        });
+        btnMissU.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("missu");
+            }
+        });
+        btnInLove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startParticularMood("in_love");
+            }
+        });
+
 
         return rootView;
     }
 
     private void startParticularMood(String moodType){
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        Fragment newFragment = GenericMood.newInstance(moodType,"b");
-        // Replace whatever is in the fragment_container view with this fragment,
-        // and add the transaction to the back stack if needed
-        transaction.replace(R.id.allmoods, newFragment);
-        transaction.addToBackStack(null);
-        transaction.commitAllowingStateLoss();
-        putAllButtonsOff();
+        if(AppData.allMoodPlayList.containsKey(moodType)) {
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            Fragment newFragment = GenericMood.newInstance(moodType, "b");
+            // Replace whatever is in the fragment_container view with this fragment,
+            // and add the transaction to the back stack if needed
+            transaction.replace(R.id.allmoods, newFragment);
+            transaction.addToBackStack(null);
+            transaction.commitAllowingStateLoss();
+            putAllButtonsOff();
+        /*Intent ii = new Intent(getContext(),GenericSelectedMood.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("selectedmood",moodType);
+        startActivity(ii);*/
+        }
+        else{
+            Messenger.print(getContext(),"Sorry!! There is no songs yet in this mood..");
+        }
     }
 
     public void putAllButtonsOff(){

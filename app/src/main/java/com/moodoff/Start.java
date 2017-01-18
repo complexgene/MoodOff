@@ -156,7 +156,7 @@ public class Start extends AppCompatActivity {
             String songName = resultSet.getString(2);
             String artistName = resultSet.getString(3);
             String movieOrAlbumname = resultSet.getString(3);
-
+            Log.e("Start_MOOD",moodType+" "+songName);
             if(allSongs.containsKey(moodType)){
                 allSongs.get(moodType).add(songName);
             }
@@ -180,6 +180,10 @@ public class Start extends AppCompatActivity {
             Log.e("Start_MOOD","Downloading the playlist for the first itme of day..");
             ServerManager reads = new ServerManager();
             reads.readPlayListFromServer(this,todaysDate);
+        }
+        else{
+            Log.e("Start_MOOD","As playlist file already fetched to internal DB so will ste the lock to FALSE");
+            Start.moodsAndSongsFetchNotComplete = false;
         }
     }
 

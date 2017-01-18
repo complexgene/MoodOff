@@ -215,7 +215,7 @@ public class ServerManager{
                                 //Log.e("ServerManager_allNot",allYourNotificationFromServer.toString());
 
                                 // Display the notification alert
-                                displayAlertNotificationOnTopBarOfPhone(context);
+                                displayAlertNotificationOnTopBarOfPhone(context,(currentNumberOfNotifications-oldNumberOfNotifications));
 
                             }
                             else{
@@ -234,7 +234,7 @@ public class ServerManager{
         },10000);
     }
 
-    private void displayAlertNotificationOnTopBarOfPhone(final Context context){
+    private void displayAlertNotificationOnTopBarOfPhone(final Context context, final int diff){
         final Activity currActivity = (Activity)context;
         final NotificationCompat.Builder builder =
             new NotificationCompat.Builder(currActivity)
@@ -257,7 +257,17 @@ public class ServerManager{
                         if(AllTabs.mViewPager.getCurrentItem()!=1) {
                             AllTabs.tabNames.clear();
                             AllTabs.tabNames.add("MOODS");
-                            AllTabs.tabNames.add("ACTIVITY*");
+                            // Getting the number of last unseen notifications from Userdata file
+                            StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("UserData.txt");
+                            fileOpr.beginReadTransaction();
+                            int lastNumberOfUnseenNotifications = Integer.parseInt(fileOpr.getValueFor("numberOfOldNotifications"));
+                            fileOpr.endReadTransaction();
+                            int currentNumberOfUnseenNotifications = lastNumberOfUnseenNotifications+diff;
+                            fileOpr.beginWriteTransaction();
+                            fileOpr.updateValueFor("numberOfOldNotifications",String.valueOf(currentNumberOfUnseenNotifications));
+                            fileOpr.endWriteTransaction();
+                            // Read Complete
+                            AllTabs.tabNames.add("ACTIVITY["+currentNumberOfUnseenNotifications+"]");
                             AllTabs.tabNames.add("PROFILES");
                         }
                         ViewPager mViewPager = AllTabs.mViewPager;

@@ -17,9 +17,9 @@
         android:id="@+id/title_registration"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="5dp"
         android:typeface="monospace"
-        android:textSize="30sp"
+        android:textSize="25sp"
         android:fontFamily="serif"
         android:textStyle="normal|bold" />
     <LinearLayout
@@ -30,21 +30,24 @@
         android:layout_below="@id/title_registration"
         >
 
-    <EditText
-        android:id="@+id/name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:digits="ABCDEFGHâ€Œâ€‹IJKLMNOPQRSTUVWXYZ "
-        android:inputType="textCapCharacters"
-        android:hint="Name"
-        android:textStyle="normal|bold"
-        android:background="@drawable/registrationdatabox"
-        android:textAlignment="center"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:layout_marginTop="10dp"
-         />
-    <EditText
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="ABCDEFGHâ€Œâ€‹IJKLMNOPQRSTUVWXYZ "
+            android:inputType="textCapCharacters"
+            android:hint="Name"
+            android:textStyle="normal|bold"
+            android:background="@drawable/registrationdatabox"
+            android:textAlignment="center"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginTop="10dp"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/darker_gray"
+            />
+
+        <EditText
         android:id="@+id/phone_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,10 +59,11 @@
         android:textStyle="normal|bold"
         android:background="@drawable/registrationdatabox"
         android:textAlignment="center"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:layout_marginTop="10dp"
-        />
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginTop="10dp"
+            android:textColorHint="@android:color/darker_gray"
+            />
     <EditText
         android:id="@+id/date_of_birth"
         android:layout_width="match_parent"
@@ -73,9 +77,10 @@
         android:background="@drawable/registrationdatabox"
         android:layout_centerVertical="true"
         android:textAlignment="center"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:layout_marginTop="10dp"
+        android:textColorHint="@android:color/darker_gray"
         />
 
     <EditText
@@ -88,10 +93,12 @@
         android:maxLines="1"
         android:inputType="textWebEmailAddress"
         android:background="@drawable/registrationdatabox"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:layout_marginTop="10dp"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:textColorHint="@android:color/darker_gray"
+        />
 
         <EditText
         android:id="@+id/status_text"
@@ -100,10 +107,46 @@
             android:hint="Text Status for your profile"
             android:textStyle="normal|bold"
             android:background="@drawable/registrationdatabox"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:layout_marginTop="10dp"
-            android:textAlignment="center" />
+            android:fontFamily="cursive"
+            android:textAlignment="center"
+            android:textColorHint="@android:color/darker_gray"
+            android:textColorLink="?attr/colorButtonNormal" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center"
+            >
+            <EditText
+                android:id="@+id/otp"
+                android:layout_gravity=""
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Enter the OTP received"
+                android:textStyle="normal|bold"
+                android:background="@drawable/registrationdatabox"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:layout_marginTop="10dp"
+                android:textAlignment="center"
+                android:textColorHint="@android:color/darker_gray"
+                android:textColor="@android:color/white" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:background="@color/light_yellow"
+                android:layout_gravity="center"
+                android:text="SEND OTP"
+                />
+        </LinearLayout>
 </LinearLayout>
 
     <TextView

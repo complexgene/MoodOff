@@ -34,6 +34,8 @@ import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.ServerManager;
+import com.moodoff.helper.StoreRetrieveDataImpl;
+import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.UserDetails;
 
@@ -50,6 +52,7 @@ import java.util.HashMap;
  * create an instance of this fragment.
  */
 public class NotificationFragment extends Fragment implements ViewPager.OnPageChangeListener{
+    StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("Userdata.txt");
     @Override
     public void onPageSelected(int position) {
         Log.e("SMNotFrag","Page selected..");
@@ -57,6 +60,9 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         AllTabs.tabNames.clear();
         AllTabs.tabNames.add("Moods");AllTabs.tabNames.add("Activity");AllTabs.tabNames.add("Profiles");
         viewPager.getAdapter().notifyDataSetChanged();
+        fileOpr.beginWriteTransaction();
+        fileOpr.updateValueFor("numberOfOldNotifications","0");
+        fileOpr.endWriteTransaction();
     }
 
     @Override
@@ -200,7 +206,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         changeDetected = false;
         mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
         mainParentLayout.removeAllViews();
-        mainParentLayout.setBackgroundResource(R.drawable.moodon_bg_notpanel);
+        //mainParentLayout.setBackgroundResource(R.drawable.moodon_bg_notpanel);
         ScrollView mainParent = new ScrollView(view.getContext());
         mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         LinearLayout ll = new LinearLayout(view.getContext());
@@ -211,7 +217,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         for (i = 0; i < allNotifications.size(); i++) {
             // Input Parsing
             String[] componentsInNotification = allNotifications.get(i).split(" ");
-            String fromUserNumber = componentsInNotification[0];
+            final String fromUserNumber = componentsInNotification[0];
             String fromUserName = allReadContacts.get(fromUserNumber);
             if(fromUserName == null){
                 if(fromUserNumber.equals(UserDetails.getPhoneNumber())){
@@ -221,7 +227,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     fromUserName = fromUserNumber;
                 }
             }
-            String date = componentsInNotification[2];
+            final String date = componentsInNotification[2];
             final String time = componentsInNotification[3];
             final String toUserNumber = componentsInNotification[1];
             String toUserName = allReadContacts.get(toUserNumber);
@@ -253,9 +259,10 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             loveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(view.getContext(),toUserNumber,Toast.LENGTH_SHORT).show();
+                    String urlToFire = fromUserNumber+"/"+toUserNumber+"/"+date+"_"+time;
+                    Toast.makeText(view.getContext(),urlToFire,Toast.LENGTH_SHORT).show();
                     //loadProfile(toUserNumber);
-                    voteLove(fromNumberToSend,toUserNumber,time);
+                    //voteLove(fromNumberToSend,toUserNumber,date+"_"+time);
                 }
             });
             loveButton.setImageResource(R.drawable.love_ns);

@@ -1,397 +1,403 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/entireProfile"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/master_bg"
-    tools:context="com.moodoff.Profile">
-
-    <LinearLayout
-        android:id="@+id/userDetails"
+    android:layout_width="match_parent"
+    >
+    <RelativeLayout
+        android:id="@+id/entireProfile"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#c2ec95"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="5dp"
-        >
-        <ImageButton
-            android:id="@+id/profileImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_marginRight="10dp"
-            android:background="@drawable/snaskar_9620332800"
-            />
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/editBasicInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:backgroundTint="#ecc595"
-            android:layout_marginTop="5dp"
-            android:src="@drawable/edit"
-            app:fabSize="mini" />
-        <TableLayout
-            android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/master_bg"
+        tools:context="com.moodoff.Profile">
+
+        <LinearLayout
+            android:id="@+id/userDetails"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#c2ec95"
+            android:layout_marginLeft="5dp"
             android:layout_marginTop="5dp"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="MyName"
-                android:textStyle="normal|bold"
-                android:textSize="18sp"
-                android:textColor="@color/black"
-                android:id="@+id/username"
-                android:fontFamily="serif-monospace" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="MyPhoneNumber"
-                android:textStyle="normal|bold"
-                android:textSize="18sp"
-                android:textColor="@color/black"
-                android:id="@+id/userPhNo"
-                android:fontFamily="serif-monospace" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="MyMailId"
-                android:textStyle="normal|bold"
-                android:textSize="18sp"
-                android:textColor="@color/black"
-                android:id="@+id/useremailId"
-                android:fontFamily="serif-monospace"
-                android:typeface="monospace" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="MyDOB"
-                android:textStyle="normal|bold"
-                android:textSize="18sp"
-                android:textColor="@color/black"
-                android:id="@+id/userdob"
-                android:fontFamily="serif-monospace"
-                android:typeface="monospace" />
-        </TableLayout>
-
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/userTextStatus"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/userDetails"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:background="@color/white"
-        >
-
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="#dbdabf"
-              >
-            <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/holo_red_light"
-            android:layout_marginLeft="5dp"
-            android:text="Text Status"
-            android:textStyle="bold"
-            android:textSize="18sp"
-                android:fontFamily="serif" />
-          </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        >
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/editTextStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            app:fabSize="mini"
-            android:src="@drawable/edit"
-            app:backgroundTint="#ecc595"
-            android:text="Change"
-            />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/myTextStatus"
-            android:paddingLeft="5dp"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:maxLength="200"
-            android:text="Life is fantastic when its about watching you.."
-            android:typeface="normal"
-            android:fontFamily="cursive" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="3dp"
-        >
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/loveTextStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:src="@drawable/love_s"
-            app:backgroundTint="#13f9f9"
-            app:fabSize="mini" />
-        />
-            <TextView
-                android:id="@+id/textStatusLoveCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:text="X people loved the text status"
-                android:textSize="16sp"
-                android:textStyle="normal|bold"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/colorPrimary" />
-
-    </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/userAudioStatus"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/userTextStatus"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:background="@color/white"
-        >
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:background="#dbdabf"
+            android:layout_marginRight="5dp"
             >
-            <TextView
+            <ImageButton
+                android:id="@+id/profileImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/holo_red_light"
                 android:layout_marginLeft="5dp"
-                android:text="Audio Status"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:fontFamily="serif" />
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/snaskar_9620332800"
+                />
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/editBasicInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:backgroundTint="#ecc595"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/edit"
+                app:fabSize="mini" />
+            <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#c2ec95"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="MyName"
+                    android:textStyle="normal|bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:id="@+id/username"
+                    android:fontFamily="serif-monospace" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="MyPhoneNumber"
+                    android:textStyle="normal|bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:id="@+id/userPhNo"
+                    android:fontFamily="serif-monospace" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="MyMailId"
+                    android:textStyle="normal|bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:id="@+id/useremailId"
+                    android:fontFamily="serif-monospace"
+                    android:typeface="monospace" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="MyDOB"
+                    android:textStyle="normal|bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:id="@+id/userdob"
+                    android:fontFamily="serif-monospace"
+                    android:typeface="monospace" />
+            </TableLayout>
 
         </LinearLayout>
         <LinearLayout
-            android:orientation="horizontal"
+            android:id="@+id/userTextStatus"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:layout_below="@id/userDetails"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@color/white"
             >
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/editAudioStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                app:fabSize="mini"
-                android:src="@drawable/edit"
-                app:backgroundTint="#ecc595"
-                />
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/playAudioStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:src="@drawable/play"
-                app:fabSize="mini"
-                app:backgroundTint="#ffff00" />
-            <ProgressBar
-                android:id="@+id/profileProgressBar"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="3dp"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_centerHorizontal="true"
-                android:visibility="gone"/>
-            <SeekBar
+
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/myAudioStatusProgressBar"
-                android:layout_marginLeft="5dp"
-            />
+                android:background="#dbdabf"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_light"
+                    android:layout_marginLeft="5dp"
+                    android:text="Text Status"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:fontFamily="serif" />
+            </LinearLayout>
 
-        </LinearLayout>
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="3dp"
-            >
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/loveAudioStatus"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
+                android:gravity="center_vertical"
+                >
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/editTextStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    app:fabSize="mini"
+                    android:src="@drawable/edit"
+                    app:backgroundTint="#ecc595"
+                    android:text="Change"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/myTextStatus"
+                    android:paddingLeft="5dp"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:maxLength="200"
+                    android:text="Life is fantastic when its about watching you.."
+                    android:typeface="normal"
+                    android:fontFamily="cursive" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginTop="5dp"
                 android:layout_marginBottom="3dp"
-                android:src="@drawable/love_s"
-                app:backgroundTint="#13f9f9"
-                app:fabSize="mini" />
-            />
-            <TextView
-                android:id="@+id/audioStatusLoveCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingLeft="5dp"
-                android:text="X people loved the audio status"
-                android:textSize="16sp"
-                android:textStyle="normal|bold"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/colorPrimary" />
+                >
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/loveTextStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:src="@drawable/love_s"
+                    app:backgroundTint="#13f9f9"
+                    app:fabSize="mini" />
+                />
+                <TextView
+                    android:id="@+id/textStatusLoveCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:text="X people loved the text status"
+                    android:textSize="16sp"
+                    android:textStyle="normal|bold"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/colorPrimary" />
 
+            </LinearLayout>
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/userAudioStatus"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:background="#dbdabf"
+            android:layout_below="@id/userTextStatus"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@color/white"
             >
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FF0000"
-                android:layout_marginLeft="5dp"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:fontFamily="serif"
-                android:text="[LIVE]:"
+                android:layout_marginBottom="5dp"
+                android:background="#dbdabf"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_light"
+                    android:layout_marginLeft="5dp"
+                    android:text="Audio Status"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:fontFamily="serif" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                >
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/editAudioStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    app:fabSize="mini"
+                    android:src="@drawable/edit"
+                    app:backgroundTint="#ecc595"
+                    />
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/playAudioStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:src="@drawable/play"
+                    app:fabSize="mini"
+                    app:backgroundTint="#ffff00" />
+                <ProgressBar
+                    android:id="@+id/profileProgressBar"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerHorizontal="true"
+                    android:visibility="gone"/>
+                <SeekBar
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/myAudioStatusProgressBar"
+                    android:layout_marginLeft="5dp"
+                    />
+
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="3dp"
+                >
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/loveAudioStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginBottom="3dp"
+                    android:src="@drawable/love_s"
+                    app:backgroundTint="#13f9f9"
+                    app:fabSize="mini" />
                 />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/holo_red_light"
-                android:layout_marginLeft="5dp"
-                android:text="Listening to Mood..."
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:fontFamily="serif" />
+                <TextView
+                    android:id="@+id/audioStatusLoveCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="5dp"
+                    android:text="X people loved the audio status"
+                    android:textSize="16sp"
+                    android:textStyle="normal|bold"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/colorPrimary" />
 
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:background="#dbdabf"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FF0000"
+                    android:layout_marginLeft="5dp"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:fontFamily="serif"
+                    android:text="[LIVE]:"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_light"
+                    android:layout_marginLeft="5dp"
+                    android:text="Listening to Mood..."
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:fontFamily="serif" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                >
+                <Button
+                    android:id="@+id/btn_currentMood"
+                    android:layout_marginLeft="5dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/mood_workout"
+                    />
+                <TextView
+                    android:id="@+id/txtView_currentMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:textSize="20dp"
+                    android:layout_marginRight="30dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:text="Workout"
+                    />
+
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="3dp"
+                >
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/loveCurrentMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:src="@drawable/love_s"
+                    android:layout_gravity="right"
+                    app:backgroundTint="#13f9f9"
+                    app:fabSize="mini" />
+                <TextView
+                    android:id="@+id/loveCurrentMoodCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:text="(X)"
+                    android:textSize="16sp"
+                    android:textStyle="normal|bold"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/colorPrimary" />
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/likeCurrentMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:src="@drawable/like_ns"
+                    android:layout_gravity="right"
+                    app:backgroundTint="#f547"
+                    app:fabSize="mini" />
+                <TextView
+                    android:id="@+id/likeCurrentMoodCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:text="(X)"
+                    android:textSize="16sp"
+                    android:textStyle="normal|bold"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/colorPrimary" />
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/sadCurrentMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:src="@drawable/sad_mood"
+                    android:layout_gravity="right"
+                    app:backgroundTint="#eddaaa"
+                    app:fabSize="mini" />
+                <TextView
+                    android:id="@+id/sadCurrentMoodCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:text="(X)"
+                    android:textSize="16sp"
+                    android:textStyle="normal|bold"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/colorPrimary" />
+
+            </LinearLayout>
         </LinearLayout>
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            >
-            <Button
-                android:id="@+id/btn_currentMood"
-                android:layout_marginLeft="5dp"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/mood_workout"
-                />
-            <TextView
-                android:id="@+id/txtView_currentMood"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:textSize="20dp"
-                android:layout_marginRight="30dp"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:text="Workout"
-                />
 
-        </LinearLayout>
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="3dp"
-            >
+    </RelativeLayout>
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/loveCurrentMood"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:src="@drawable/love_s"
-                android:layout_gravity="right"
-                app:backgroundTint="#13f9f9"
-                app:fabSize="mini" />
-            <TextView
-                android:id="@+id/loveCurrentMoodCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:text="(X)"
-                android:textSize="16sp"
-                android:textStyle="normal|bold"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/colorPrimary" />
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/likeCurrentMood"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:src="@drawable/like_ns"
-                android:layout_gravity="right"
-                app:backgroundTint="#f547"
-                app:fabSize="mini" />
-            <TextView
-                android:id="@+id/likeCurrentMoodCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:text="(X)"
-                android:textSize="16sp"
-                android:textStyle="normal|bold"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/colorPrimary" />
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/sadCurrentMood"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:src="@drawable/sad_mood"
-                android:layout_gravity="right"
-                app:backgroundTint="#eddaaa"
-                app:fabSize="mini" />
-            <TextView
-                android:id="@+id/sadCurrentMoodCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:text="(X)"
-                android:textSize="16sp"
-                android:textStyle="normal|bold"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/colorPrimary" />
-
-        </LinearLayout>
-    </LinearLayout>
-
-</RelativeLayout>
+</ScrollView>
