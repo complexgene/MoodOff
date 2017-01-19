@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -84,6 +85,7 @@ public class Profile extends Fragment {
 
     private void init(){
         view = mainInflater.inflate(R.layout.fragment_profile, mainContainer, false);
+        profileImage = (ImageView)view.findViewById(R.id.profileImage);
         myName = (TextView)view.findViewById(R.id.username);
         myPhNo = (TextView)view.findViewById(R.id.userPhNo);
         myEmail = (TextView)view.findViewById(R.id.useremailId);
@@ -105,6 +107,7 @@ public class Profile extends Fragment {
     }
 
     View view,dialogView;
+    ImageView profileImage;
     TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount;
     TextView txtViewCurrentMood;
     String myAudioStatusSong;
@@ -139,7 +142,7 @@ public class Profile extends Fragment {
 
         // Check if its someone else's profile, then remove the edit button
         if(!profileOfUser.equals(UserDetails.getPhoneNumber())){
-            editAudioStatus.setVisibility(View.GONE);editTextStatus.setVisibility(View.GONE);editBasicInfo.setVisibility(View.INVISIBLE);
+            editAudioStatus.setVisibility(View.GONE);editTextStatus.setVisibility(View.GONE);editBasicInfo.setVisibility(View.GONE);
         }
 
         setUserProfileData(profileOfUser);
@@ -489,7 +492,7 @@ public class Profile extends Fragment {
                     }
                     Log.e("Profile_Data", response.toString());
                     profileDataParsed = ParseNotificationData.parseAndGetProfileData(response.toString());
-                    Log.e("Profile_parsedHM",profileDataParsed.get("name"));
+                    Log.e("Profile_parsedHM",profileDataParsed.get("name")+" "+profileDataParsed.get("genderpic"));
                     profileDetailsNotRetrievedYet = false;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -505,7 +508,9 @@ public class Profile extends Fragment {
         }).start();
         //showProfileData();
     }
-
+    private int getPicFor(String genderType){
+        return (genderType.equals("0"))?R.drawable.man:R.drawable.woman;
+    }
     private void showProfileData(){
         String name = profileDataParsed.get("name");
         if(name.length()>17){name=name.substring(0,17)+"...";}
@@ -515,8 +520,9 @@ public class Profile extends Fragment {
         String dob = profileDataParsed.get("dob");
         myName.setText(name);
         myPhNo.setText(phNo);
-        myEmail.setText(email);
-        myDob.setText(dob);
+        //myEmail.setText(email);
+        //myDob.setText(dob);
+        profileImage.setImageResource(getPicFor(profileDataParsed.get("genderpic")));
         new UserDetails();
         myTextStatus.setText(profileDataParsed.get("textStatus").replaceAll("_"," "));
         myTextStatus.setTextSize(20);

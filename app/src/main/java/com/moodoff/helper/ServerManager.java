@@ -12,6 +12,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -96,7 +97,7 @@ public class ServerManager{
 
                     Start.fetchContactsFromServerNotComplete = false;
                     } catch (Exception ee) {
-                    Log.e("ServerManager_Not_RdErr", ee.getMessage());
+                    Log.e("ServerManager_Not_Err0", ee.getMessage());
                     ee.printStackTrace();
                 }
             }
@@ -202,7 +203,7 @@ public class ServerManager{
                             ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
                             currentNumberOfNotifications = allYourNotificationFromServer.size();
                             oldNumberOfNotifications = AppData.totalNoOfNot;
-                            if(currentNumberOfNotifications>oldNumberOfNotifications){
+                            if((currentNumberOfNotifications>oldNumberOfNotifications)||(AppData.lovedDedicateNewCount>AppData.lovedDedicateOldCount)){
                                 dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
                                 //stopWriteToReadTableCopyScript();
                                 dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
@@ -215,8 +216,13 @@ public class ServerManager{
                                 //Log.e("ServerManager_allNot",allYourNotificationFromServer.toString());
 
                                 // Display the notification alert
-                                displayAlertNotificationOnTopBarOfPhone(context,(currentNumberOfNotifications-oldNumberOfNotifications));
+                                if(currentNumberOfNotifications>oldNumberOfNotifications)
+                                    displayAlertNotificationOnTopBarOfPhone(context,(currentNumberOfNotifications-oldNumberOfNotifications));
+                                else
+                                    NotificationFragment.changeDetected = true;
 
+                                /*else
+                                    displayAlertNotificationOnTopBarOfPhone(context,(AppData.lovedDedicateNewCount-AppData.lovedDedicateOldCount));*/
                             }
                             else{
                                 //Log.e("ServerManager_allNot","No new Notifications..");
@@ -224,7 +230,7 @@ public class ServerManager{
 
                             //Log.e("ServerManager_Not_Read", "Notification read complete from server");
                         } catch (Exception ee) {
-                            Log.e("ServerManager_Not_RdErr", ee.getMessage());
+                            Log.e("ServerManager_Not_Err1", ee.getMessage());
                             ee.printStackTrace();
                         }
                     }
@@ -235,13 +241,24 @@ public class ServerManager{
     }
 
     private void displayAlertNotificationOnTopBarOfPhone(final Context context, final int diff){
+        // Getting the number of last unseen notifications from Userdata file
+        StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("UserData.txt");
+        fileOpr.beginReadTransaction();
+        int lastNumberOfUnseenNotifications = Integer.parseInt(fileOpr.getValueFor("numberOfOldNotifications"));
+        fileOpr.endReadTransaction();
+        final int currentNumberOfUnseenNotifications = lastNumberOfUnseenNotifications+diff;
+        fileOpr.beginWriteTransaction();
+        fileOpr.updateValueFor("numberOfOldNotifications",String.valueOf(currentNumberOfUnseenNotifications));
+        fileOpr.endWriteTransaction();
+        // Read Complete
+
         final Activity currActivity = (Activity)context;
         final NotificationCompat.Builder builder =
             new NotificationCompat.Builder(currActivity)
                     .setSmallIcon(R.drawable.btn_dedicate)
                     .setColor(001500)
                     .setContentTitle("MoodOff")
-                    .setContentText(UserDetails.getUserName()+ "!! You got new notifications!!");
+                    .setContentText(UserDetails.getUserName()+ "!! "+currentNumberOfUnseenNotifications+" unread notifications!!");
 
         final Intent notificationIntent = new Intent(currActivity, Start.class);
 
@@ -257,16 +274,6 @@ public class ServerManager{
                         if(AllTabs.mViewPager.getCurrentItem()!=1) {
                             AllTabs.tabNames.clear();
                             AllTabs.tabNames.add("MOODS");
-                            // Getting the number of last unseen notifications from Userdata file
-                            StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("UserData.txt");
-                            fileOpr.beginReadTransaction();
-                            int lastNumberOfUnseenNotifications = Integer.parseInt(fileOpr.getValueFor("numberOfOldNotifications"));
-                            fileOpr.endReadTransaction();
-                            int currentNumberOfUnseenNotifications = lastNumberOfUnseenNotifications+diff;
-                            fileOpr.beginWriteTransaction();
-                            fileOpr.updateValueFor("numberOfOldNotifications",String.valueOf(currentNumberOfUnseenNotifications));
-                            fileOpr.endWriteTransaction();
-                            // Read Complete
                             AllTabs.tabNames.add("ACTIVITY["+currentNumberOfUnseenNotifications+"]");
                             AllTabs.tabNames.add("PROFILES");
                         }
@@ -310,53 +317,44 @@ public class ServerManager{
         }
         return true;
     }
-    public boolean voteLove(String fromUser, String toUser, String ts)
+    public boolean voteLove(final String urlAPI, final Activity curActivity, final FloatingActionButton loveButton)
     {
-        /*new Thread(new Runnable() {
+        new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
             InputStreamReader isr = null;
             @Override
             public void run() {
                 try {
                     Log.e("ServerManager_Not","Start loving the notification");
-                    URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
+                    URL url = new URL(serverURL+ "/notifications/" + urlAPI);
                     Log.e("ServerManager_ReadURL", url.toString());
                     urlConnection = (HttpURLConnection) url.openConnection();
-                    InputStream is = urlConnection.getInputStream();
-                    isr = new InputStreamReader(is);
-                    int data = isr.read();
-                    final StringBuilder response = new StringBuilder("");
-                    while (data != -1) {
-                        response.append((char) data);
-                        data = isr.read();
-                    }
-                    ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
-                    int currentNumberOfNotifications = allYourNotificationFromServer.size();
-                    int oldNumberOfNotifications = AppData.totalNoOfNot;
-                    if(currentNumberOfNotifications>oldNumberOfNotifications){
-                        dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
-                        dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
-                        //AppData.allNotifications = allYourNotificationFromServer;
-                        AppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
-                        AppData.totalNoOfNot = currentNumberOfNotifications;
-                        Log.e("ServerManager_allNot","Some new notifications written to DB..");
-                        //Log.e("ServerManager_allNot",allYourNotificationFromServer.toString());
-
-                        // Display the notification alert
-                        displayAlertNotificationOnTopBarOfPhone(context);
-
+                    urlConnection.setDoOutput(true);
+                    int responseCode = urlConnection.getResponseCode();
+                    if(responseCode==200){
+                        curActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(curActivity.getApplicationContext(),"You loved a dedicate",Toast.LENGTH_SHORT).show();
+                                loveButton.setImageResource(R.drawable.love_s);
+                            }
+                        });
                     }
                     else{
-                        Log.e("ServerManager_allNot","No new Notifications..");
+                        curActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(curActivity.getApplicationContext(),"Sorry!! Please try after sometime!!",Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
-
                     Log.e("ServerManager_Not_Read", "Notification read complete from server");
                 } catch (Exception ee) {
-                    Log.e("ServerManager_Not_RdErr", ee.getMessage());
+                    Log.e("ServerManager_Not_Err2", ee.getMessage());
                     ee.printStackTrace();
                 }
             }
-        }).start();*/
+        }).start();
         return false;
     }
 

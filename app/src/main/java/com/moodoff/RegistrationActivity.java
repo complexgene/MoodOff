@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +38,7 @@ import static com.moodoff.helper.HttpGetPostInterface.serverURL;
 public class RegistrationActivity extends AppCompatActivity {
 
     EditText name,mobile_number,birthday,email, status_text;
+    RadioGroup genderType;String genderOfUser;
     ProgressBar progressRegistration;
     TextView error;
     Calendar calendar;
@@ -94,6 +97,7 @@ public class RegistrationActivity extends AppCompatActivity {
         birthday = (EditText) findViewById(R.id.date_of_birth);
         email = (EditText) findViewById(R.id.email_id);
         status_text = (EditText) findViewById(R.id.status_text);
+        genderType = (RadioGroup)findViewById(R.id.gender);
         error = (TextView) findViewById(R.id.error_message);
         calendar = Calendar.getInstance();
         year = calendar.get(Calendar.YEAR);
@@ -246,9 +250,18 @@ public class RegistrationActivity extends AppCompatActivity {
         }
     }
 
+    private String getGenderNumber(String gender){
+        switch(gender){
+            case "Male":{return "0";}
+            case "Female":{return "1";}
+            case "NA":{return "2";}
+        }
+        return "2";
+    }
+
     public void register(View view) {
         error.setVisibility(View.VISIBLE);
-
+            genderOfUser = getGenderNumber(((RadioButton)findViewById(genderType.getCheckedRadioButtonId())).getText().toString());
             final String nm = name.getText().toString().replaceAll(" ", "_"),
                     pn = mobile_number.getText().toString(),
                     dob = birthday.getText().toString(),
@@ -257,7 +270,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     audioStatus = "romantic@HERO.mp3",
                     userProfileString;
 
-            userProfileString = nm + "/" + pn + "/" + em + "/" + dob + "/" + textStatus + "/" + audioStatus;
+            userProfileString = nm + "/" + pn + "/" + em + "/" + dob + "/" + genderOfUser +"/" + textStatus + "/" + audioStatus;
             final String Url = serverURL+"/users/" + userProfileString;
             //dbOperations.todoWorkEntry(Url);
 
@@ -274,7 +287,7 @@ public class RegistrationActivity extends AppCompatActivity {
                                       });
                                 // Proide the URL fto which you would fire a post
                         URL url = new URL(Url);
-                        Log.e("RegistrationActivity", url.toString());
+                        Log.e("RegActivity_RegURL", url.toString());
                         urlConnection = (HttpURLConnection) url.openConnection();
                         urlConnection.setDoOutput(true);
                         int responseCode = urlConnection.getResponseCode();
@@ -322,6 +335,7 @@ public class RegistrationActivity extends AppCompatActivity {
             rd.createNewData("phoneNo", mobile_number.getText().toString());
             rd.createNewData("dob", birthday.getText().toString());
             rd.createNewData("email", email.getText().toString());
+            rd.createNewData("gender",genderOfUser);
             rd.createNewData("textStatus",status_text.getText().toString().replaceAll(" ","_"));
             rd.createNewData("audioStatus","romantic@HERO.mp3");
             rd.createNewData("score","0");

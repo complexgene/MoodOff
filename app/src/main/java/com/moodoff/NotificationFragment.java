@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
@@ -229,6 +230,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             }
             final String date = componentsInNotification[2];
             final String time = componentsInNotification[3];
+            final String type = componentsInNotification[4];
+            Log.e("Not_fragTYPEEEMAN",type);
             final String toUserNumber = componentsInNotification[1];
             String toUserName = allReadContacts.get(toUserNumber);
             if(toUserName == null){
@@ -247,7 +250,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             parent.setGravity(Gravity.CENTER_VERTICAL);
             parent.setGravity(Gravity.CENTER_HORIZONTAL);
             LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            layoutDetails.topMargin=25;
+            layoutDetails.topMargin=15;
             layoutDetails.leftMargin = 10;
             layoutDetails.rightMargin = 10;
             parent.setLayoutParams(layoutDetails);
@@ -259,13 +262,22 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             loveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String urlToFire = fromUserNumber+"/"+toUserNumber+"/"+date+"_"+time;
-                    Toast.makeText(view.getContext(),urlToFire,Toast.LENGTH_SHORT).show();
-                    //loadProfile(toUserNumber);
-                    //voteLove(fromNumberToSend,toUserNumber,date+"_"+time);
+                    if(fromUserNumber.equals(UserDetails.getPhoneNumber()))
+                        Messenger.print(getContext(),"You can't love your own dedicated songs!!");
+                    else {
+                        String urlToFire = fromUserNumber + "/" + toUserNumber + "/" + date + "_" + time + "/5";
+                        //loadProfile(toUserNumber);
+                        voteLove(urlToFire, loveButton);
+                    }
                 }
             });
-            loveButton.setImageResource(R.drawable.love_ns);
+            if(type.equals("5")){
+                loveButton.setImageResource(R.drawable.love_s);
+                loveButton.setEnabled(false);
+            }
+            else
+                loveButton.setImageResource(R.drawable.love_ns);
+
             loveButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(21,214,191)));
             loveButton.setSize(FloatingActionButton.SIZE_MINI);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -367,9 +379,9 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         }
     }
 
-    private void voteLove(String from,String to, String ts){
+    private void voteLove(String urlToFire, FloatingActionButton loveButton){
         ServerManager serverManager = new ServerManager();
-        //serverManager.voteLove(from,to,ts);
+        serverManager.voteLove(urlToFire,getActivity(),loveButton);
     }
 
     private void loadProfile(String contactNumber){

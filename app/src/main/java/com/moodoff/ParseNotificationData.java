@@ -6,6 +6,9 @@ package com.moodoff;
 
 import android.util.Log;
 
+import com.moodoff.helper.AppData;
+import com.moodoff.model.UserDetails;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +45,7 @@ public class ParseNotificationData {
             JSONObject jsonTypeObject = jsonRootObject.getJSONObject("allNotifications");
             JSONArray jsonArray = jsonTypeObject.optJSONArray("entry");
             //Iterate the jsonArray and print the info of JSONObjects
+            int lovedDedicateServerCount = 0;
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
@@ -55,11 +59,12 @@ public class ParseNotificationData {
                 String toUser = allData[1];
                 String songName = allData[2];
                 String type = allData[3];
+                if(type.equals("5"))lovedDedicateServerCount++;
                 String ts = allData[4];
 
                 allNotifications.add(fromUser+" "+toUser+" "+ts+" "+type+" "+songName);
-
             }
+            AppData.lovedDedicateNewCount = lovedDedicateServerCount;
             Log.e("ParseNotification",allNotifications.toString());
             return allNotifications;
         } catch (JSONException e) {e.printStackTrace();}
@@ -76,6 +81,7 @@ public class ParseNotificationData {
             String phoneNumber = jsonRootObject.optString("phoneNumber").toString();
             String email = jsonRootObject.optString("email").toString();
             String dob = jsonRootObject.optString("dob");
+            String genderpic = jsonRootObject.optString("genderPic");
             String textStatus = jsonRootObject.optString("textStatus").toString();
             String audioStatusURL = jsonRootObject.optString("audioStatusURL").toString();
             String textStatusLoveCount = jsonRootObject.optString("textStatusLoveCount").toString();
@@ -85,6 +91,7 @@ public class ParseNotificationData {
             allProfileData.put("phoneNumber",phoneNumber);
             allProfileData.put("email",email);
             allProfileData.put("dob",dob);
+            allProfileData.put("genderpic",genderpic);
             allProfileData.put("textStatus",textStatus);
             allProfileData.put("audioStatusURL",audioStatusURL);
             allProfileData.put("textStatusLoveCount",textStatusLoveCount);

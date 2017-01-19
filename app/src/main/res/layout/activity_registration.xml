@@ -43,7 +43,7 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:layout_marginTop="10dp"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textColorHint="@android:color/darker_gray"
             />
 
@@ -118,7 +118,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="2dp"
             android:layout_gravity="center"
             >
             <EditText
@@ -127,7 +127,7 @@
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="Enter the OTP received"
+                android:hint="Leave OTP blank now"
                 android:textStyle="normal|bold"
                 android:background="@drawable/registrationdatabox"
                 android:paddingTop="7dp"
@@ -145,8 +145,44 @@
                 android:background="@color/light_yellow"
                 android:layout_gravity="center"
                 android:text="SEND OTP"
+                android:enabled="false"
                 />
         </LinearLayout>
+        <RadioGroup
+            android:id="@+id/gender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp"
+            >
+            <RadioButton
+                android:id="@+id/male"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/registrationdatabox"
+                android:layout_weight="1"
+                android:textSize="20dp"
+                android:text="Male"
+                />
+            <RadioButton
+                android:id="@+id/female"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/registrationdatabox"
+                android:layout_weight="1"
+                android:textSize="20dp"
+                android:text="Female"
+                />
+            <RadioButton
+                android:id="@+id/na"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/registrationdatabox"
+                android:layout_weight="1"
+                android:textSize="20dp"
+                android:text="NA"
+                />
+        </RadioGroup>
 </LinearLayout>
 
     <TextView
@@ -157,7 +193,7 @@
         android:gravity="center_horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
         android:layout_above="@+id/progressBarRegistration"
         android:visibility="visible"
         />
@@ -165,7 +201,7 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:id="@+id/progressBarRegistration"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/btn_register"
         android:indeterminateTint="@color/little_deep_orange"

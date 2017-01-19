@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.moodoff.ContactList;
+import com.moodoff.model.UserDetails;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -140,11 +141,13 @@ public class DBHelper extends SQLiteOpenHelper {
         mydatabaseReadable = getReadableDatabase();
         Cursor resultSet = mydatabaseReadable.rawQuery("Select * from rnotifications", null);
         resultSet.moveToFirst();
+        int countLoveType = 0;
         while (!resultSet.isAfterLast()) {
             final String from_user = resultSet.getString(0);
             final String to_user = resultSet.getString(1);
             final String fileName = resultSet.getString(2);
             final String type = resultSet.getString(3);
+            if(type.equals("5"))countLoveType++;
             final int send_done = resultSet.getInt(4);
             final String timestamp = resultSet.getString(5);
             String data = from_user+" "+to_user+" "+timestamp+" "+type+" "+fileName;
@@ -152,11 +155,14 @@ public class DBHelper extends SQLiteOpenHelper {
             //Log.e("DBHelper_RDNot",data);
             resultSet.moveToNext();
         }
+        AppData.lovedDedicateOldCount = countLoveType;
         return allNotifications;
     }
     public void writeNewNotificationsToInternalDB(ArrayList<String> newNotifications){
         myDatabaseWritable = getWritableDatabase();
+        ArrayList<String> loveUpdateMarkerQueries = new ArrayList<>();
         for(String eachNotification : newNotifications){
+            Log.e("DBHelper",eachNotification);
             String[] allData = eachNotification.split(" ");
             String fromUser = allData[0];
             String toUser = allData[1];
@@ -169,8 +175,12 @@ public class DBHelper extends SQLiteOpenHelper {
             String fileName = allData[4];
 
             String queryToFire = "insert into rnotifications values('"+fromUser+"','"+toUser+"','"+fileName+"','"+type+"',0,'"+(date+" "+time)+"');";
-            myDatabaseWritable.execSQL(queryToFire);
+                myDatabaseWritable.execSQL(queryToFire);
 
+            Log.e("DBHelper_STATUSTYPE",queryToFire);
+        }
+        for(String eachUpdateQuery : loveUpdateMarkerQueries){
+            myDatabaseWritable.execSQL(eachUpdateQuery);
         }
     }
     public void deleteAllDataFromNotificationTableFromInternalDB(){
