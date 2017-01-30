@@ -69,7 +69,6 @@ public class Moods extends Fragment {
     }
     View rootView;
     Button btnRomantic,btnParty,btnOnTour,btnInLove,btnDance,btnSad,btnWorkOut,btnFriends,btnMissU,btnOldEra,btnCrazy,btnCalm;
-    ExpandableListView moodlist;
     RelativeLayout layout;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
@@ -170,7 +169,6 @@ public class Moods extends Fragment {
                 startParticularMood("in_love");
             }
         });
-
 
         return rootView;
     }

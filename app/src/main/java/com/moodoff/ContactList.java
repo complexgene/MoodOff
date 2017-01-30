@@ -143,7 +143,8 @@ public class ContactList extends AppCompatActivity {
                 if(name==null)
                     name=" ";
                 name = name.replaceAll("'", "\'");
-                //Log.i("Names", name);
+                //name = name.replaceAll(" ","_");
+                Log.e("Names", name);
                 if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
                     // Query phone here. Covered next
                     Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + id, null, null);

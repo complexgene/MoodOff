@@ -1,9 +1,9 @@
 package com.moodoff;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -20,8 +20,6 @@ import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,11 +50,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 import static android.app.Activity.RESULT_OK;
-import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -137,7 +134,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     int numberOfChances = 5;
     DBHelper dbOperations;
     StoreRetrieveDataInterface fileOperations = new StoreRetrieveDataImpl("UserData.txt");
-    LinearLayout gamePanel;
+    LinearLayout gamePanel,likeAndStoryTitle;
 
     public void init(){
         dbOperations = new DBHelper(getContext());
@@ -160,6 +157,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
         duration = (TextView) view.findViewById(R.id.duration);
         photoView = (ImageView) view.findViewById(R.id.photoView);
         gamePanel = (LinearLayout)view.findViewById(R.id.gamePanel);
+        likeAndStoryTitle = (LinearLayout)view.findViewById(R.id.likeAndStoryTitle);
         gamePanel.setVisibility(View.GONE);
         playPauseBtn.setOnClickListener(this);
         stopBtn.setOnClickListener(this);
@@ -182,7 +180,8 @@ public class GenericMood extends Moods implements View.OnClickListener{
         selectedLetters = (TextView)view.findViewById(R.id.selectedLetters);
         chosenLetter = (EditText)view.findViewById(R.id.guessedLetter);
         cartoon = (ImageView)view.findViewById(R.id.cartoon);
-        loveStory = (FloatingActionButton) view.findViewById(R.id.like_story);
+        //loveStory = (FloatingActionButton) view.findViewById(R.id.like_story);
+        gamerules = (FloatingActionButton) view.findViewById(R.id.gamerules);
     }
 
     public void showMenu(){
@@ -224,6 +223,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     public void showItemInMiddle(final int selectedOption){
         switch(selectedOption){
             case 1:{
+                likeAndStoryTitle.setVisibility(View.VISIBLE);
                 storyBodyTV.setVisibility(View.VISIBLE);
                 gamePanel.setVisibility(View.GONE);
                 photoView.setVisibility(View.GONE);
@@ -234,6 +234,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
 
             }
             case 2:{
+                likeAndStoryTitle.setVisibility(View.GONE);
                 gamePanel.setVisibility(View.GONE);
                 Intent intent = new Intent();
                 intent.setType("image/*");
@@ -242,6 +243,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 break;
             }
             case 3:{
+                likeAndStoryTitle.setVisibility(View.GONE);
                 gamePanel.setVisibility(View.GONE);
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/"+currentMood+"/");
@@ -258,6 +260,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             }
             case 4:{
                 gamePanel.setVisibility(View.GONE);
+                likeAndStoryTitle.setVisibility(View.GONE);
                 imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/moodoff/"+currentMood+"/"+getPictureName();
                 if(!(new File(imageFilePath).exists())){
                     Toast.makeText(getContext(), "Not yet taken any photo for this mood", Toast.LENGTH_SHORT).show();
@@ -267,6 +270,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                     photoView.setImageBitmap(bitmap);
                     photoView.setVisibility(View.VISIBLE);
                 }
+                break;
             }
             case 5: {
                 newGame.setOnClickListener(new View.OnClickListener() {
@@ -285,11 +289,12 @@ public class GenericMood extends Moods implements View.OnClickListener{
     }
 
     private void resetGameView(){
+        likeAndStoryTitle.setVisibility(View.VISIBLE);
         newGame.setEnabled(false);
         gamePanel.setVisibility(View.VISIBLE);
         photoView.setVisibility(View.GONE);
         storyBodyTV.setVisibility(View.GONE);
-        loveStory.setVisibility(View.INVISIBLE);
+        //loveStory.setVisibility(View.INVISIBLE);
         tvv.setText("Guess The Word");
         chosenLetter.setText("");
         chosenLetter.setEnabled(true);
@@ -300,13 +305,14 @@ public class GenericMood extends Moods implements View.OnClickListener{
     // Game Variables
 
     Button newGame,checkTheLetter;
-    FloatingActionButton loveStory;
+    FloatingActionButton loveStory, gamerules;
     TextView tvv,pointsEarned,selectedLetters;
     EditText chosenLetter;
     ImageView cartoon;
     // Finished Declaration
 
     private  void launchGame(){
+        final HashSet<Character> lettersPicked = new HashSet<>();
         numberOfChances=5;
         ArrayList<String> words = HangManWords.getAllWords();
         int randomNo = new Random().nextInt(words.size());
@@ -323,6 +329,15 @@ public class GenericMood extends Moods implements View.OnClickListener{
 
         chosenLetter.setFilters(new InputFilter[]{new InputFilter.AllCaps(),new InputFilter.LengthFilter(1)});
 
+        gamerules.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dialog dialog = new Dialog(getContext());
+                dialog.setContentView(R.layout.gamerules);
+                dialog.show();
+            }
+        });
+
         checkTheLetter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -330,67 +345,72 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 if(enteredLetter.equals("")) {
                     Messenger.print(getContext(), "Add some letter to try");
                 }
-                else
-                {
+                else {
                     char letterPressed = enteredLetter.charAt(0);
-                    selectedLetters.setText(selectedLetters.getText()+" "+letterPressed);
-                    Log.e("GM_LETTERFOUND",""+letterPressed);
-                    if(checkIfLetterIsInWordAndUpdateCartoon(selectedWord, letterPressed)){
-                        //char matchedLetter = s.toString().charAt(s.toString().length()-1);
-                        ArrayList<Integer> getPos = fillPlacesOfWord(selectedWord,letterPressed);
-                        Log.e("GM_POSEXPOSED",getPos.toString());
-                        //char[] wordToFill = selectedWord.toCharArray();
-                        for(Integer eachPosition : getPos){
-                            wordToFill[eachPosition+eachPosition+1] = letterPressed;
-                        }
-                        //points.setText(""+totalScore);
-                        txtView_selectedWord.setText(String.valueOf(wordToFill));
-                        int idx = -1;
-                        idx = txtView_selectedWord.getText().toString().indexOf("_");
-                        if(idx==-1){
-                            chosenLetter.setEnabled(false);
-                            totalScore+=(selectedWord.length()*3);
-                            points.setText(""+totalScore);
-                            UserDetails.setScore(totalScore);
-                            fileOperations.beginWriteTransaction();
-                            fileOperations.updateValueFor("score",String.valueOf(totalScore));
-                            fileOperations.endWriteTransaction();
-                            newGame.setEnabled(true);
-                        }
-
-                    }
-                    else{
-                        int pic1 = R.drawable.c1,pic2 = R.drawable.c2,
-                                pic3 = R.drawable.c3,pic4 = R.drawable.c4,
-                                pic5 = R.drawable.c5,pic6 = R.drawable.c6;
-                        Log.e("GM_FAILED",""+numberOfChances);
-                        switch (numberOfChances){
-                            case 5:{
-                                cartoon.setImageResource(pic2);
-                                break;
+                    if (lettersPicked.contains(letterPressed)) {
+                        Messenger.print(getContext(), "!!Letter already used!!");
+                        chosenLetter.setText("");
+                    } else {
+                        lettersPicked.add(letterPressed);
+                        selectedLetters.setText(selectedLetters.getText()+" "+letterPressed);
+                        Log.e("GM_LETTERFOUND",""+letterPressed);
+                        if(checkIfLetterIsInWordAndUpdateCartoon(selectedWord, letterPressed)){
+                            //char matchedLetter = s.toString().charAt(s.toString().length()-1);
+                            ArrayList<Integer> getPos = fillPlacesOfWord(selectedWord,letterPressed);
+                            Log.e("GM_POSEXPOSED",getPos.toString());
+                            //char[] wordToFill = selectedWord.toCharArray();
+                            for(Integer eachPosition : getPos){
+                                wordToFill[eachPosition+eachPosition+1] = letterPressed;
                             }
-                            case 4:{
-                                cartoon.setImageResource(pic3);
-                                break;
-                            }
-                            case 3:{
-                                cartoon.setImageResource(pic4);
-                                break;
-                            }
-                            case 2:{
-                                cartoon.setImageResource(pic5);
-                                break;
-                            }
-                            case 1:{
-                                cartoon.setImageResource(pic6);
-                                newGame.setEnabled(true);
+                            //points.setText(""+totalScore);
+                            txtView_selectedWord.setText(String.valueOf(wordToFill));
+                            int idx = -1;
+                            idx = txtView_selectedWord.getText().toString().indexOf("_");
+                            if(idx==-1){
                                 chosenLetter.setEnabled(false);
-                                break;
+                                totalScore+=(selectedWord.length()*3);
+                                points.setText(""+totalScore);
+                                UserDetails.setScore(totalScore);
+                                fileOperations.beginWriteTransaction();
+                                fileOperations.updateValueFor("score",String.valueOf(totalScore));
+                                fileOperations.endWriteTransaction();
+                                newGame.setEnabled(true);
                             }
+
                         }
-                        numberOfChances--;
+                        else{
+                            int pic1 = R.drawable.c1,pic2 = R.drawable.c2,
+                                    pic3 = R.drawable.c3,pic4 = R.drawable.c4,
+                                    pic5 = R.drawable.c5,pic6 = R.drawable.c6;
+                            Log.e("GM_FAILED",""+numberOfChances);
+                            switch (numberOfChances){
+                                case 5:{
+                                    cartoon.setImageResource(pic2);
+                                    break;
+                                }
+                                case 4:{
+                                    cartoon.setImageResource(pic3);
+                                    break;
+                                }
+                                case 3:{
+                                    cartoon.setImageResource(pic4);
+                                    break;
+                                }
+                                case 2:{
+                                    cartoon.setImageResource(pic5);
+                                    break;
+                                }
+                                case 1:{
+                                    cartoon.setImageResource(pic6);
+                                    newGame.setEnabled(true);
+                                    chosenLetter.setEnabled(false);
+                                    break;
+                                }
+                            }
+                            numberOfChances--;
+                        }
+                        chosenLetter.setText("");
                     }
-                    chosenLetter.setText("");
                 }
             }
         });
@@ -453,7 +473,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
             Log.e("GenericMood_SongCur",currentplayList.get(0));
             currentSong = songNameFromList(currentplayList, currentIndex);
             Log.e("GenericMood_SongCur",currentSong);
-            displaySongName(songName, "Tap play button to listen song");
+            displaySongName(songName, "Tap play...");
         }
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -475,7 +495,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                 String currentUser = UserDetails.getPhoneNumber();
                 char type = '1';
                 if(mp==null || !mp.isPlaying()){
-                    Toast.makeText(getActivity().getApplicationContext(),"Please play a song to like it.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(),"Please play a song to like it!!",Toast.LENGTH_SHORT).show();
                 }
                 else {
                     final String Url = serverURL+"/notifications/"+currentUser+"/"+currentSong+"/"+type;
@@ -579,9 +599,10 @@ public class GenericMood extends Moods implements View.OnClickListener{
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
                 String currentUser = UserDetails.getPhoneNumber();
-                char type = 'S';
+                char type = '1';
                 final String stredittext=data.getStringExtra("selectedContact");
-                final String Url = "notifications/"+currentUser+"/"+stredittext.split(" ")[1]+"/"+currentMood+"@"+currentSong+"/"+type;
+
+                final String Url = "notifications/"+currentUser+"/"+stredittext.substring(stredittext.lastIndexOf(" ")+1)+"/"+currentMood+"@"+currentSong+"/"+type;
 
                 new Thread(new Runnable() {
                     @Override
@@ -590,6 +611,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
                         try {
                             // Proide the URL fto which you would fire a post
                             URL url = new URL(serverURL+"/"+Url);
+                            Log.e("GM_DedicateURL",url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             urlConnection.setDoOutput(true);
                             int responseCode = urlConnection.getResponseCode();

@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -202,7 +204,10 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
     public static int oldCountOfNotifications = 0;
 
+    int colorOfLoveFloatingActionButton = Color.rgb(0,255,0);
+
     public void designNotPanel(final View view){
+        allReadContacts = ContactsManager.allReadContacts;
         Log.e("Not_Design","called..:"+currentPlayButtonId);
         changeDetected = false;
         mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
@@ -214,56 +219,72 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         ll.setOrientation(LinearLayout.VERTICAL);
         allNotifications = AppData.allNotifications;
         int difference = allNotifications.size() - oldCountOfNotifications;
-        Log.e("NotFrag","Updating notification view:"+difference);
+        Log.e("NotFrag","Updating notification view:"+difference+" "+allReadContacts.size());
         for (i = 0; i < allNotifications.size(); i++) {
             // Input Parsing
             String[] componentsInNotification = allNotifications.get(i).split(" ");
             final String fromUserNumber = componentsInNotification[0];
             String fromUserName = allReadContacts.get(fromUserNumber);
-            if(fromUserName == null){
-                if(fromUserNumber.equals(UserDetails.getPhoneNumber())){
+            Log.e("NotFrag",fromUserName+" is this");
+            if(fromUserNumber.equals(UserDetails.getPhoneNumber())){
                     fromUserName = "You";
-                }
-                else{
-                    fromUserName = fromUserNumber;
-                }
             }
+            else{
+                    if(fromUserName == null)
+                        fromUserName = fromUserNumber;
+            }
+
             final String date = componentsInNotification[2];
             final String time = componentsInNotification[3];
             final String type = componentsInNotification[4];
             Log.e("Not_fragTYPEEEMAN",type);
             final String toUserNumber = componentsInNotification[1];
             String toUserName = allReadContacts.get(toUserNumber);
-            if(toUserName == null){
-                if(toUserNumber.equals(UserDetails.getPhoneNumber())){
+            Log.e("NotFrag",toUserName+" is this2");
+
+            if(toUserNumber.equals(UserDetails.getPhoneNumber())){
                     toUserName = "You";
-                }
-                else{
-                    toUserName = toUserNumber;
-                }
             }
+            else{
+                    if(toUserName == null)
+                        toUserName = toUserNumber;
+            }
+
             final String songName = componentsInNotification[5];
 
+            Log.e("NOTEFRAGGG",fromUserName+" "+toUserName+" yaaaa ");
+
             // Each notification layout
+            boolean isCurrentUser = fromUserName.trim().equals("You");
+
             LinearLayout parent = new LinearLayout(view.getContext());
-            parent.setBackgroundResource(R.color.deep_orange);
-            parent.setGravity(Gravity.CENTER_VERTICAL);
-            parent.setGravity(Gravity.CENTER_HORIZONTAL);
+            //parent.setPadding(10,10,10,10);
             LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            layoutDetails.topMargin=15;
-            layoutDetails.leftMargin = 10;
-            layoutDetails.rightMargin = 10;
+            layoutDetails.weight=1;
+            //layoutDetails.topMargin=15;
+
+            if(isCurrentUser) {
+                parent.setBackgroundResource(R.drawable.eachnotificationfile);
+                layoutDetails.leftMargin = 120;
+                layoutDetails.rightMargin = 2;
+            }
+            else {
+                parent.setBackgroundResource(R.drawable.eachnotificationfileothers);
+                layoutDetails.leftMargin = 2;
+                layoutDetails.rightMargin = 120;
+            }
+
             parent.setLayoutParams(layoutDetails);
-            parent.setOrientation(LinearLayout.HORIZONTAL);
 
             // Love Button
-            final FloatingActionButton loveButton = new FloatingActionButton(view.getContext());
+            final ImageButton loveButton = new ImageButton(view.getContext());
+            loveButton.setBackgroundResource(0);
             final String fromNumberToSend = fromUserNumber;
             loveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if(fromUserNumber.equals(UserDetails.getPhoneNumber()))
-                        Messenger.print(getContext(),"You can't love your own dedicated songs!!");
+                        Messenger.print(getContext(),"You can't like your own dedicated songs!!");
                     else {
                         String urlToFire = fromUserNumber + "/" + toUserNumber + "/" + date + "_" + time + "/5";
                         //loadProfile(toUserNumber);
@@ -272,52 +293,85 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 }
             });
             if(type.equals("5")){
-                loveButton.setImageResource(R.drawable.love_s);
+                loveButton.setImageResource(R.drawable.like_s);
                 loveButton.setEnabled(false);
             }
-            else
-                loveButton.setImageResource(R.drawable.love_ns);
+            else {
+                if (fromUserNumber.equals(UserDetails.getPhoneNumber())) {
+                    loveButton.setVisibility(View.INVISIBLE);
+                }
+                loveButton.setImageResource(R.drawable.likenot_ns);
+            }
 
-            loveButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(21,214,191)));
-            loveButton.setSize(FloatingActionButton.SIZE_MINI);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.weight=1;
             layoutDetails.gravity=Gravity.CENTER_VERTICAL;
-            layoutDetails.leftMargin=20;
             loveButton.setLayoutParams(layoutDetails);
-            parent.addView(loveButton);
 
             // Text Notification and SeekBar
-            LinearLayout linearLayout = new LinearLayout(view.getContext());
-            linearLayout.setOrientation(LinearLayout.VERTICAL);
-            TextView allN = new TextView(view.getContext());
-            allN.setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
-            allN.setGravity(Gravity.TOP);
-            boolean isCurrentUser = fromUserName.trim().equals("You");
-            if(isCurrentUser) {
-                parent.setBackgroundResource(R.drawable.eachnotificationfile);
-            }
-            else {
-                parent.setBackgroundResource(R.drawable.registrationdatabox);
-            }
-            allN.setPadding(22,0,10,0);
-            allN.setTypeface(Typeface.DEFAULT_BOLD);
-            //allN.setBackgroundResource(R.color.light_yellow);
-            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            LinearLayout nameAndTimeAndSeekBar = new LinearLayout(view.getContext());
+            nameAndTimeAndSeekBar.setGravity(Gravity.CENTER);
+            nameAndTimeAndSeekBar.setOrientation(LinearLayout.VERTICAL);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
             layoutDetails.weight=1;
-            layoutDetails.width=textViewWidth;
-            layoutDetails.height=textViewHeight;
-            layoutDetails.topMargin = 15;
+            nameAndTimeAndSeekBar.setLayoutParams(layoutDetails);
+
+            LinearLayout nameAndTime = new LinearLayout(view.getContext());
+            nameAndTime.setOrientation(LinearLayout.VERTICAL);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            nameAndTime.setLayoutParams(layoutDetails);
+
+            TextView name = new TextView(view.getContext());
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.leftMargin = 20;
+            //layoutDetails.weight = 1;
+            name.setLayoutParams(layoutDetails);
+            name.setTextColor(Color.BLACK);
+            //Typeface font = Typeface.createFromAsset(getContext().getAssets(), "fonts/teen.ttf");
+            //name.setTypeface(Typeface.DEFAULT_BOLD..BOLD);
+            name.setTextSize(14);
+
+            String nameToDisplay = "",timeToDisplay="";
+
+            if(fromUserName.equals("You"))
+            {
+                nameToDisplay = toUserName;
+                timeToDisplay = time.substring(0,time.lastIndexOf(":"));
+            }
+                //textToDisplay = "[ "+date+" at "+time.substring(0,time.lastIndexOf(":"))+"]\n"+toUserName;
+            else {
+                nameToDisplay = fromUserName;
+                timeToDisplay = time.substring(0,time.lastIndexOf(":"));
+                //textToDisplay = "[ "+date+" at "+time.substring(0,time.lastIndexOf(":"))+"]\n"+fromUserName;
+            }
+            name.setText(nameToDisplay);
+
+            LinearLayout timeLayout = new LinearLayout(view.getContext());
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.rightMargin = 15;
-            layoutDetails.leftMargin = 15;
-            allN.setLayoutParams(layoutDetails);
-            allN.setTextColor(Color.BLACK);
-            //allN.setTypeface(Typeface.createFromAsset(view.getContext().getApplicationContext().getAssets(),"fonts/BLKCHCRY.ttf"));
-            allN.setTypeface(Typeface.SERIF);
-            String textToDisplay = "[ "+date+" at "+time.substring(0,time.lastIndexOf(":"))+"]\n"+fromUserName+" > "+toUserName;
-            allN.setText(textToDisplay);
-            linearLayout.addView(allN);
+            timeLayout.setLayoutParams(layoutDetails);
+            timeLayout.setGravity(Gravity.RIGHT);
+            TextView timeDone = new TextView(view.getContext());
+            timeDone.setTextColor(ColorStateList.valueOf(Color.rgb(103,102,103)));
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            timeDone.setLayoutParams(layoutDetails);
+            int timeOfDay = Integer.parseInt(timeToDisplay.split(":")[0]);
+            if(timeOfDay>12){
+                timeToDisplay = getProcessedDate(date)+" 0"+(timeOfDay-12)+":"+timeToDisplay.split(":")[1]+" PM";
+            }
+            else{
+                timeToDisplay = getProcessedDate(date)+" "+timeToDisplay+" AM";
+            }
+            timeDone.setTextSize(11);
+            timeDone.setText(timeToDisplay);
+            timeLayout.addView(timeDone);
+
+            nameAndTime.addView(name);
+            //nameAndTime.addView(timeLayout);
+
             final SeekBar seekBar = new SeekBar(view.getContext());
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.gravity = Gravity.CENTER;
+            layoutDetails.weight = 1;
             seekBar.setEnabled(false);
             seekBar.setId((i+1)*1000000);
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -333,13 +387,18 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 }
             });
-            linearLayout.addView(seekBar);
-            parent.addView(linearLayout);
+            seekBar.setLayoutParams(layoutDetails);
+
+            nameAndTimeAndSeekBar.addView(nameAndTime);
+            nameAndTime.addView(seekBar);
+            //nameAndTimeAndSeekBar.addView(nameAndTime);
+            nameAndTime.addView(timeLayout);
+            // Text notification and seekbar
 
             // Play button
             final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
-            //Log.e("NotFrag_songFile",songFileName);
-            final FloatingActionButton playFloatingButton = new FloatingActionButton(view.getContext());
+            final ImageButton playFloatingButton = new ImageButton(view.getContext());
+            playFloatingButton.setBackgroundResource(0);
             playFloatingButton.setId(i);
             playFloatingButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -347,20 +406,22 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     currentPlayButtonId = v.getId();
                     currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId)+1)*1000000);
                     currentSeekBar.setEnabled(true);
-                    //currentSeekBar.getProgressDrawable().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_IN));
                     playSong(playFloatingButton,v,currentSeekBar,songFileName);
 
                 }
             });
-            playFloatingButton.setImageResource(R.drawable.play);
-            playFloatingButton.setSize(FloatingActionButton.SIZE_MINI);
-            playFloatingButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
+            playFloatingButton.setImageResource(R.drawable.playdedicate);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.weight=1;
             layoutDetails.gravity = Gravity.CENTER_VERTICAL;
-            layoutDetails.rightMargin=20;
+            layoutDetails.topMargin = 10;
+            layoutDetails.bottomMargin = 10;
+            layoutDetails.rightMargin = 10;
             playFloatingButton.setLayoutParams(layoutDetails);
+
             parent.addView(playFloatingButton);
+            parent.addView(nameAndTimeAndSeekBar);
+            parent.addView(loveButton);
+
 
             ll.addView(parent);
         }
@@ -379,7 +440,13 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         }
     }
 
-    private void voteLove(String urlToFire, FloatingActionButton loveButton){
+    private String getProcessedDate(String date){
+        String[] months = {"Jan","Feb","Mar","Apr","may","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+        String[] YMD = date.split("-");
+        return YMD[2]+months[Integer.parseInt(YMD[1])-1]+"'"+YMD[0].substring(2);
+    }
+
+    private void voteLove(String urlToFire, ImageButton loveButton){
         ServerManager serverManager = new ServerManager();
         serverManager.voteLove(urlToFire,getActivity(),loveButton);
     }
@@ -398,23 +465,23 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         dialogView = mainInflater.inflate(R.layout.fragment_profile, mainContainer, false);
     }
 
-    public static FloatingActionButton playOrStopButton;
+    public static ImageButton playOrStopButton;
 
-    public void playSong(FloatingActionButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName){
+    public void playSong(ImageButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName){
         Log.e("Nota_Frag2", currentClickedButton.getId() + "");
         playOrStopButton = playButton;
         if(currentClickedButton.getId() != idOfTheLastPlayButtonClicked) {
             if (idOfTheLastPlayButtonClicked != -1) {
                 FloatingActionButton lastPlayedButton = (FloatingActionButton) view.findViewById(idOfTheLastPlayButtonClicked);
                 lastPlayedButton.setImageResource(R.drawable.play);
-                lastPlayedButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
+                lastPlayedButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(4,128,251)));
                 SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)*1000000);
                 lastSeekBar.setProgress(0);
                 lastSeekBar.setEnabled(false);
             }
             if(mp!=null)mp.reset();
-            playOrStopButton.setImageResource(R.drawable.stop);
-            playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
+            playOrStopButton.setImageResource(R.drawable.stopdedicate);
+            //playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             idOfTheLastPlayButtonClicked = currentClickedButton.getId();
             currentPlayButtonId = idOfTheLastPlayButtonClicked;
             oldCountOfNotifications = allNotifications.size();
@@ -427,8 +494,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     currentSeekBar.setProgress(0);
                     currentSeekBar.setEnabled(false);
                     mp.reset();
-                    playOrStopButton.setImageResource(R.drawable.play);
-                    playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
+                    playOrStopButton.setImageResource(R.drawable.playdedicate);
+//                    playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(4,128,251)));
                     ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
                     validateMediaPlayer.initialiseAndValidateMediaPlayer("notification","stop");
                 }
@@ -440,14 +507,14 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 validateMediaPlayer.initialiseAndValidateMediaPlayer("notification","play");
                 play(songFileName,currentPlayButtonId);
                 //mp.start();
-                playOrStopButton.setImageResource(R.drawable.stop);
-                playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
+                playOrStopButton.setImageResource(R.drawable.stopdedicate);
+  //              playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             }
         }
     }
 
     public void play(String songFileName,int currentPlayButtonId){
-        final FloatingActionButton currentPlayButton = (FloatingActionButton) view.findViewById(currentPlayButtonId);
+        final ImageButton currentPlayButton = (ImageButton) view.findViewById(currentPlayButtonId);
         releaseMediaPlayerObject(mp);
         mp = new MediaPlayer();
         String[] moodTypeAndSong = songFileName.split("@");
@@ -463,7 +530,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     currentSeekBar.setMax(0);
-                    currentPlayButton.setImageResource(R.drawable.play);
+                    currentPlayButton.setImageResource(R.drawable.playdedicate);
                 }
             });
         } catch (Exception ee) {

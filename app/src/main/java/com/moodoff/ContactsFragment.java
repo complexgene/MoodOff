@@ -30,11 +30,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.DBInternal;
+import com.moodoff.helper.Messenger;
 import com.moodoff.model.UserDetails;
 
 import org.w3c.dom.Text;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -115,28 +118,46 @@ public class ContactsFragment extends Fragment{
 
         addOwnProfileAndRefreshButton();
 
-        spinner = (ProgressBar)mainView.findViewById(R.id.refreshSpin);
+        //spinner = (ProgressBar)mainView.findViewById(R.id.refreshSpin);
         //DBInternal dbInternal = new DBInternal();
         allC = getOrStoreContactsTableData(0,allC);
-        populatePageWithContacts();
 
         return mainView;
     }
+    private View getVerticalLine(int width){
+        View v = new View(getContext());
+        v.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                width
+        ));
+        v.setBackgroundColor(Color.parseColor("#B3B3B3"));
+        return v;
+    }
+    LinearLayout vertically;
     private void addOwnProfileAndRefreshButton(){
-        LinearLayout refershAndProfile = (LinearLayout)mainView.findViewById(R.id.refreshAndUserProfile);
-        refershAndProfile.setGravity(Gravity.CENTER_VERTICAL);
-        LinearLayout.LayoutParams designDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        RelativeLayout refershAndProfile = (RelativeLayout)mainView.findViewById(R.id.allContactDisplay);
+
+        //View divide = new View(getContext());
+        vertically = new LinearLayout(getContext());
+        vertically.setOrientation(LinearLayout.VERTICAL);
+        vertically.addView(getVerticalLine(15));
+
+        LinearLayout refreshAndMyProfile = new LinearLayout(getContext());
+        LinearLayout.LayoutParams designDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        refreshAndMyProfile.setLayoutParams(designDetails);
+
+        designDetails = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         FloatingActionButton refreshContactButton = new FloatingActionButton(getContext());
         refreshContactButton.setImageResource(R.drawable.refresh_contacts);
         refreshContactButton.setBackgroundTintList(ColorStateList.valueOf(Color.YELLOW));
-        //refreshContactButton.setSize(FloatingActionButton.SIZE_MINI);
-        designDetails.leftMargin = 20;
-        designDetails.topMargin = 20;
-        designDetails.bottomMargin = 20;
+        refreshContactButton.setSize(FloatingActionButton.SIZE_MINI);
+        designDetails.gravity = Gravity.CENTER;
+        designDetails.leftMargin = 10;
+        designDetails.rightMargin = 10;
         refreshContactButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                spinner.setVisibility(View.VISIBLE);
+//                spinner.setVisibility(View.VISIBLE);
                 Toast.makeText(getContext(),"Reading your Contacts. Wait.",Toast.LENGTH_LONG).show();
                 new Thread(new Runnable() {
                     @Override
@@ -148,8 +169,8 @@ public class ContactsFragment extends Fragment{
                             @Override
                             public void run() {
                                 Toast.makeText(getContext(),"Contacts Reading Finished..",Toast.LENGTH_SHORT).show();
-                                spinner.setVisibility(View.INVISIBLE);
-                                populatePageWithContacts();
+//                                spinner.setVisibility(View.INVISIBLE);
+                                populatePageWithContacts(vertically);
                             }
                         });
                     }
@@ -160,12 +181,10 @@ public class ContactsFragment extends Fragment{
         Button myProfile = new Button(getContext());
         myProfile.setText("My Profile");
         myProfile.setBackgroundColor(Color.WHITE);
-        myProfile.setBackgroundResource(R.drawable.buttonborder_own_notification);
-        designDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        designDetails.leftMargin = 20;
-        designDetails.topMargin = 20;
-        designDetails.rightMargin = 20;
-        designDetails.bottomMargin = 20;
+        myProfile.setBackgroundResource(R.drawable.registrationdatabox);
+        designDetails = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        designDetails.rightMargin = 10;
+        designDetails.weight = 1;
         myProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -174,17 +193,55 @@ public class ContactsFragment extends Fragment{
         });
         myProfile.setLayoutParams(designDetails);
 
-        refershAndProfile.addView(refreshContactButton);
-        refershAndProfile.addView(myProfile);
+        refreshAndMyProfile.addView(refreshContactButton);
+        refreshAndMyProfile.addView(myProfile);
+
+        vertically.addView(refreshAndMyProfile);
+        vertically.addView(getVerticalLine(15));
+        refershAndProfile.addView(vertically);
+        populatePageWithContacts(vertically);
     }
-    public void populatePageWithContacts(){
-        RelativeLayout mainLayout = (RelativeLayout)mainView.findViewById(R.id.allContactDisplay);
-        ScrollView contactsScroll = (ScrollView)mainView.findViewById(R.id.contactsScroll);
+
+    public void populatePageWithContacts(LinearLayout layout){
+        ScrollView contactsScroll = new ScrollView(getContext());
         contactsScroll.removeAllViews();
         LinearLayout eachContact = new LinearLayout(ctx);
         eachContact.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         eachContact.setLayoutParams(layoutDetails);
+        allC = ContactsManager.allReadContacts;
+        ArrayList<String> validUsers = ContactsManager.friendsWhoUsesApp;
+        Log.e("CONTCCCCCTSSSS",allC.size()+" "+validUsers.size());
+        for(final String validCntct:validUsers){
+                LinearLayout eachContactLayout = new LinearLayout(getContext());
+                eachContactLayout.setBackgroundColor(Color.WHITE);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutDetails.topMargin = 20;
+                eachContactLayout.setLayoutParams(layoutDetails);
+                Button contactNameAndNumber = new Button(ctx);
+                contactNameAndNumber.setText(allC.get(validCntct) + "\n" + validCntct);
+                contactNameAndNumber.setTextColor(Color.WHITE);
+                contactNameAndNumber.setTextSize(16.0f);
+                contactNameAndNumber.setTypeface(Typeface.DEFAULT_BOLD);
+                contactNameAndNumber.setBackgroundColor(Color.rgb(86, 17, 62));
+                //contactNameAndNumber.setBackgroundResource(R.drawable.buttonborder);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutDetails.topMargin = 40;
+                layoutDetails.bottomMargin = 40;
+                layoutDetails.leftMargin = 25;
+                layoutDetails.rightMargin = 25;
+                contactNameAndNumber.setLayoutParams(layoutDetails);
+                contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        loadProfile(validCntct);
+                    }
+                });
+
+                eachContactLayout.addView(contactNameAndNumber);
+                eachContact.addView(eachContactLayout);
+            allC.remove(validCntct);
+        }
         int noOfContacts = allC.size();
         for(final String eachCntct:allC.keySet()){
             LinearLayout eachContactLayout = new LinearLayout(getContext());
@@ -208,15 +265,16 @@ public class ContactsFragment extends Fragment{
             contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    loadProfile(eachCntct);
+                    Messenger.print(getContext(),"Not yet using the app Moodoff");
+                    //loadProfile(eachCntct);
                 }
             });
-
 
             eachContactLayout.addView(contactNameAndNumber);
             eachContact.addView(eachContactLayout);
         }
         contactsScroll.addView(eachContact);
+        layout.addView(contactsScroll);
     }
     private void loadProfile(String contactNumber){
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -271,7 +329,7 @@ public class ContactsFragment extends Fragment{
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
                     Log.e("ContactsFragment_CntErr",eachContact);
-                    insertQuery = "INSERT INTO allcontacts(user_id,phone_no) values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
+                    insertQuery = "INSERT INTO allcontacts(phone_no,name) values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
                     Log.e("ContactsFragment_CntErr",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }

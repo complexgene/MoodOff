@@ -525,6 +525,8 @@ public class Profile extends Fragment {
         profileImage.setImageResource(getPicFor(profileDataParsed.get("genderpic")));
         new UserDetails();
         myTextStatus.setText(profileDataParsed.get("textStatus").replaceAll("_"," "));
+        Typeface font = AppData.getAppFont(getContext());
+        myTextStatus.setTypeface(font);
         myTextStatus.setTextSize(20);
         myAudioStatusSong=profileDataParsed.get("audioStatusURL");
         Messenger.print(getContext(),myAudioStatusSong);

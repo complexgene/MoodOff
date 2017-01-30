@@ -1,0 +1,48 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical"
+>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:textStyle="bold"
+        android:textSize="17dp"
+        android:text="[ Game Rules Hangman ]"
+        android:textColor="@color/white"
+        android:gravity="center_horizontal"
+        android:background="#68222b"
+        />
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="5dp"
+    android:text="\n1. You have to guess a word.\n
+2. The blanks represent each letter of the word.\n
+3. You can guess a letter from english alphabet.\n
+4. If that letter is in the word, the blank places gets filled with the letter.\n
+5. If not, your chances gets reduced.\n
+6. Wrong guess increase chances of the cartoon getting hanged.\n
+7. Save the cartoon from getting hanged.\n
+8. More you guess more points you get.\n"
+    android:textColor="@color/white"
+    android:background="#254c55"
+    android:textStyle="bold"
+    />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:textStyle="bold"
+        android:textSize="17dp"
+        android:text="!! All The Best !!"
+        android:textColor="@color/white"
+        android:gravity="center_horizontal"
+        android:background="#68222b"
+        />
+</LinearLayout>

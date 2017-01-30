@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.Image;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -23,6 +24,7 @@ import android.support.v4.view.PagerTitleStrip;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -93,6 +95,7 @@ public class ServerManager{
                     contactsToBeRemoved.removeAll(ContactsManager.allReadContactsFromDBServer);
                     contactNumbers.removeAll(contactsToBeRemoved);
                     Log.e("ServerManager_CNTCTAPP", contactNumbers.toString());
+                    Log.e("ServerManager_CNTCTAPP2", ContactsManager.allReadContacts.toString());
                     ContactsManager.friendsWhoUsesApp = contactNumbers;
 
                     Start.fetchContactsFromServerNotComplete = false;
@@ -168,7 +171,7 @@ public class ServerManager{
                     try {
                         bufferedReader.close();
                     } catch (Exception ee) {
-                        Log.e("Start_allmoodsReadErr", "BufferedReader couldn't be closed");
+                        Log.e("ServerManager_ReadErr1", "BufferedReader couldn't be closed");
                     }
                     urlConnection.disconnect();
                 }
@@ -258,7 +261,7 @@ public class ServerManager{
                     .setSmallIcon(R.drawable.btn_dedicate)
                     .setColor(001500)
                     .setContentTitle("MoodOff")
-                    .setContentText(UserDetails.getUserName()+ "!! "+currentNumberOfUnseenNotifications+" unread notifications!!");
+                    .setContentText(UserDetails.getUserName()+ "!! "+currentNumberOfUnseenNotifications+" unseen notifications!!");
 
         final Intent notificationIntent = new Intent(currActivity, Start.class);
 
@@ -317,7 +320,7 @@ public class ServerManager{
         }
         return true;
     }
-    public boolean voteLove(final String urlAPI, final Activity curActivity, final FloatingActionButton loveButton)
+    public boolean voteLove(final String urlAPI, final Activity curActivity, final ImageButton loveButton)
     {
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
@@ -336,7 +339,7 @@ public class ServerManager{
                             @Override
                             public void run() {
                                 Toast.makeText(curActivity.getApplicationContext(),"You loved a dedicate",Toast.LENGTH_SHORT).show();
-                                loveButton.setImageResource(R.drawable.love_s);
+                                loveButton.setImageResource(R.drawable.like_s);
                             }
                         });
                     }

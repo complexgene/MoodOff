@@ -136,6 +136,39 @@ public class DBHelper extends SQLiteOpenHelper {
             resultSet.moveToNext();
         }
     }
+    // Store and process APIs
+    public boolean setAPIIntoInternalDBToProcessLater(String API){
+        try{
+            myDatabaseWritable = getWritableDatabase();
+            String queryToFire = "insert into worktodo(api) values('"+API+"');";
+            myDatabaseWritable.execSQL(queryToFire);
+            Log.e("DBHelper_worktodo","Successfully inserted the API: "+API);
+            return true;
+        }
+        catch (Exception ee){
+            return false;
+        }
+
+    }
+    public boolean getAPIFromInternalDBAndProcess(){
+        try {
+            mydatabaseReadable = getReadableDatabase();
+            Cursor resultSet = mydatabaseReadable.rawQuery("Select * from worktodo", null);
+            resultSet.moveToFirst();
+            int idOfAPIToProcess = resultSet.getInt(0);
+            String APIToProcess = resultSet.getString(1);
+            myDatabaseWritable = getWritableDatabase();
+            //if(ServerManager returns true after firing the API)
+            //    myDatabaseWritable.execSQL("delete from rnotifications where id = " + idOfAPIToProcess);
+            Log.e("DBHelper_worktodo","API Done:"+APIToProcess);
+            return true;
+        }
+        catch (Exception ee){
+            return false;
+        }
+    }
+    // Store and Process APIs part ENDS
+
     public ArrayList<String> readNotificationsFromInternalDB() {
         ArrayList<String> allNotifications = new ArrayList<>();
         mydatabaseReadable = getReadableDatabase();

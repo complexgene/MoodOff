@@ -24,6 +24,7 @@ import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
@@ -201,7 +202,9 @@ public class Start extends AppCompatActivity {
 
         if (!checkNetworkAvailability()) {
             Toast.makeText(getApplicationContext(), "Sorry! You need Internet Connection", Toast.LENGTH_LONG).show();
+            spinner = (ProgressBar) findViewById(R.id.spinner);
             spinner.setVisibility(View.INVISIBLE);
+            Messenger.print(getApplicationContext(),"Start Internet Connection and restart the app!!");
 
         } else {
 
@@ -219,7 +222,9 @@ public class Start extends AppCompatActivity {
                 fetchContacts();
                 while (fetchContactsNotComplete) ;
                 fetchNotifications();
+                // Distinguishes who uses app and who don't
                 //fetchContactsFromServer();
+
                 Log.e("Start_FILEREADS","DONEEEEEEEEEEEEEEEEE");
                 try {
                     new Handler().postDelayed(new Runnable() {

@@ -16,7 +16,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="myPopupMenuTextAppearanceLarge" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large"/>
+    <style name="myPopupMenuTextAppearanceLarge" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large" />
 
     <!--<style name="popupMenuStyle" parent="@android:style/Widget.PopupMenu">
         <item name="android:popupBackground">@drawable/menu_bg</item>

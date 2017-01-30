@@ -1,5 +1,8 @@
 package com.moodoff.helper;
 
+import android.content.Context;
+import android.graphics.Typeface;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,6 +16,10 @@ public class AppData {
     public static int lovedDedicateOldCount = 0;
     public static int lovedDedicateNewCount = 0;
     public static ArrayList<String> allNotifications;
+
+    public static Typeface getAppFont(Context ctx){
+        return Typeface.createFromAsset(ctx.getAssets(), "fonts/BLKCHCRY.TTF");
+    }
 
     /*public static HashMap<String, ArrayList<String>> getAllMoodPlayList() {
         return allMoodPlayList;
