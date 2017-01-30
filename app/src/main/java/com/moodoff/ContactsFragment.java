@@ -140,10 +140,12 @@ public class ContactsFragment extends Fragment{
         //View divide = new View(getContext());
         vertically = new LinearLayout(getContext());
         vertically.setOrientation(LinearLayout.VERTICAL);
-        vertically.addView(getVerticalLine(15));
+        vertically.addView(getVerticalLine(5));
 
         LinearLayout refreshAndMyProfile = new LinearLayout(getContext());
         LinearLayout.LayoutParams designDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        designDetails.topMargin = 10;
+        designDetails.bottomMargin = 10;
         refreshAndMyProfile.setLayoutParams(designDetails);
 
         designDetails = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -180,8 +182,8 @@ public class ContactsFragment extends Fragment{
         refreshContactButton.setLayoutParams(designDetails);
         Button myProfile = new Button(getContext());
         myProfile.setText("My Profile");
-        myProfile.setBackgroundColor(Color.WHITE);
-        myProfile.setBackgroundResource(R.drawable.registrationdatabox);
+        //myProfile.setBackgroundColor(Color.WHITE);
+        myProfile.setBackgroundResource(R.drawable.profilecontactdesignown);
         designDetails = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         designDetails.rightMargin = 10;
         designDetails.weight = 1;
@@ -197,7 +199,7 @@ public class ContactsFragment extends Fragment{
         refreshAndMyProfile.addView(myProfile);
 
         vertically.addView(refreshAndMyProfile);
-        vertically.addView(getVerticalLine(15));
+        vertically.addView(getVerticalLine(5));
         refershAndProfile.addView(vertically);
         populatePageWithContacts(vertically);
     }
@@ -216,15 +218,11 @@ public class ContactsFragment extends Fragment{
                 LinearLayout eachContactLayout = new LinearLayout(getContext());
                 eachContactLayout.setBackgroundColor(Color.WHITE);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                layoutDetails.topMargin = 20;
+                //layoutDetails.topMargin = 20;
                 eachContactLayout.setLayoutParams(layoutDetails);
                 Button contactNameAndNumber = new Button(ctx);
                 contactNameAndNumber.setText(allC.get(validCntct) + "\n" + validCntct);
-                contactNameAndNumber.setTextColor(Color.WHITE);
-                contactNameAndNumber.setTextSize(16.0f);
-                contactNameAndNumber.setTypeface(Typeface.DEFAULT_BOLD);
-                contactNameAndNumber.setBackgroundColor(Color.rgb(86, 17, 62));
-                //contactNameAndNumber.setBackgroundResource(R.drawable.buttonborder);
+                contactNameAndNumber.setBackgroundResource(R.drawable.profilecontactdesign);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 layoutDetails.topMargin = 40;
                 layoutDetails.bottomMargin = 40;
@@ -251,11 +249,7 @@ public class ContactsFragment extends Fragment{
             eachContactLayout.setLayoutParams(layoutDetails);
             Button contactNameAndNumber = new Button(ctx);
             contactNameAndNumber.setText(allC.get(eachCntct)+"\n"+eachCntct);
-            contactNameAndNumber.setTextColor(Color.WHITE);
-            contactNameAndNumber.setTextSize(16.0f);
-            contactNameAndNumber.setTypeface(Typeface.DEFAULT_BOLD);
-            contactNameAndNumber.setBackgroundColor(Color.rgb(61,206,175));
-            //contactNameAndNumber.setBackgroundResource(R.drawable.buttonborder);
+            contactNameAndNumber.setBackgroundResource(R.drawable.profilecontactdesign);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.topMargin = 40;
             layoutDetails.bottomMargin = 40;
