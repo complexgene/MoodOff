@@ -101,8 +101,8 @@ public class Profile extends Fragment {
         myAudioStatusSong = new String();
         editAudioStatus = (ImageButton)view.findViewById(R.id.editAudioStatus);
         editTextStatus = (ImageButton)view.findViewById(R.id.editTextStatus);
-        seekBar = (SeekBar)view.findViewById(R.id.myAudioStatusProgressBar);
-        seekBar.setClickable(false);
+        seekBar_Profile = (SeekBar)view.findViewById(R.id.myAudioStatusProgressBar);
+        seekBar_Profile.setClickable(false);
         spinner = (ProgressBar) view.findViewById(R.id.profileProgressBar);
     }
 
@@ -124,7 +124,7 @@ public class Profile extends Fragment {
     public static MediaPlayer mediaPlayer = null;
     public static Boolean isSongPlaying = false;
     public static ProgressBar spinner;
-    public static SeekBar seekBar;
+    public static SeekBar seekBar_Profile;
     Handler seekHandler = new Handler();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -175,16 +175,16 @@ public class Profile extends Fragment {
                loveTheTextStatus(profileOfUser, textStatusLoveCount, getActivity());
             }
         });
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        seekBar_Profile.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                mediaPlayer.seekTo(seekBar.getProgress());
+            public void onStopTrackingTouch(SeekBar seekBar_Profile) {
+                mediaPlayer.seekTo(seekBar_Profile.getProgress());
             }
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+            public void onStartTrackingTouch(SeekBar seekBar_Profile) {
             }
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            public void onProgressChanged(SeekBar seekBar_Profile, int progress, boolean fromUser) {
             }
         });
 
@@ -200,8 +200,8 @@ public class Profile extends Fragment {
 
     public void seekUpdation() {
         if (mediaPlayer!=null) {
-            seekBar.setProgress(mediaPlayer.getCurrentPosition());
-            if(seekBar.getMax()!=0) {
+            if(seekBar_Profile.getMax()!=0) {
+                seekBar_Profile.setProgress(mediaPlayer.getCurrentPosition());
                 seekHandler.postDelayed(run, 10);
             }
         }
@@ -227,9 +227,9 @@ public class Profile extends Fragment {
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     showPlayStopButton("stop");
-                    seekBar.setClickable(true);
+                    seekBar_Profile.setClickable(true);
                     if(mediaPlayer!=null) {
-                        seekBar.setMax(mediaPlayer.getDuration());
+                        seekBar_Profile.setMax(mediaPlayer.getDuration());
                         seekUpdation();
                     }
                     ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
@@ -240,8 +240,8 @@ public class Profile extends Fragment {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     showPlayStopButton("play");
-                    seekBar.setMax(0);
-                    seekBar.setClickable(false);
+                    seekBar_Profile.setMax(0);
+                    seekBar_Profile.setClickable(false);
                 }
             });
         } else {
@@ -250,8 +250,8 @@ public class Profile extends Fragment {
             validateMediaPlayer.initialiseAndValidateMediaPlayer("profile","stop");
             showPlayStopButton("play");
             mediaPlayer.stop();
-            seekBar.setMax(0);
-            seekBar.setClickable(false);
+            seekBar_Profile.setMax(0);
+            seekBar_Profile.setClickable(false);
         }
     }
 
@@ -438,14 +438,14 @@ public class Profile extends Fragment {
                     //playSong(songURL);
                 }
             });
-            SeekBar seekBarForEachSong = new SeekBar(getContext());
+            SeekBar seekBar_ProfileForEachSong = new SeekBar(getContext());
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.rightMargin = 50;
-            seekBarForEachSong.setLayoutParams(layoutDetails);
+            seekBar_ProfileForEachSong.setLayoutParams(layoutDetails);
             allSongsRadio[i] = new RadioButton(getContext());
             rg.addView(allSongsRadio[i]);
             rg.addView(playButton);
-            rg.addView(seekBarForEachSong);
+            rg.addView(seekBar_ProfileForEachSong);
             }
             dialogContainer.addView(rg);
             okButton.setOnClickListener(new View.OnClickListener() {
@@ -570,8 +570,19 @@ public class Profile extends Fragment {
 
     @Override
     public void onDetach() {
+        releaseMediaPlayerObject(mediaPlayer);
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.e("Profile","Profile on Destroy");
+        if(mediaPlayer!=null) {
+            releaseMediaPlayerObject(mediaPlayer);
+            mediaPlayer = null;
+        }
     }
 
     /**

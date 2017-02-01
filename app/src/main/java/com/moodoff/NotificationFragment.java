@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -42,6 +43,7 @@ import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.UserDetails;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -145,7 +147,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
         }
         catch (Exception ei){
-            Log.e("NotificationFrag_Er2",ei.getMessage());
+            Log.e("NotificationFrag_Er2",ei.toString());
         }
 
         return view;
@@ -153,7 +155,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
     Activity act;
     int currentPlayButtonId = -1;
-    public static FloatingActionButton currentPlayingButton;
+    public static ImageButton currentPlayingButton;
     public static boolean changeDetected = false;
     private void showNotPanel(){
         act = (Activity)view.getContext();
@@ -311,7 +313,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             LinearLayout nameAndTimeAndSeekBar = new LinearLayout(view.getContext());
             nameAndTimeAndSeekBar.setGravity(Gravity.CENTER);
             nameAndTimeAndSeekBar.setOrientation(LinearLayout.VERTICAL);
-            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.weight=1;
             nameAndTimeAndSeekBar.setLayoutParams(layoutDetails);
 
@@ -326,6 +328,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             //layoutDetails.weight = 1;
             name.setLayoutParams(layoutDetails);
             name.setTextColor(Color.BLACK);
+            name.setGravity(Gravity.CENTER_HORIZONTAL);
             //Typeface font = Typeface.createFromAsset(getContext().getAssets(), "fonts/teen.ttf");
             //name.setTypeface(Typeface.DEFAULT_BOLD..BOLD);
             name.setTextSize(14);
@@ -373,7 +376,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             layoutDetails.gravity = Gravity.CENTER;
             layoutDetails.weight = 1;
             seekBar.setEnabled(false);
-            seekBar.setId((i+1)*1000000);
+            seekBar.setId((i+1)+1000000);
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
@@ -395,30 +398,42 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             nameAndTime.addView(timeLayout);
             // Text notification and seekbar
 
+            //Spinner
+            final ProgressBar notificationProgressBar = new ProgressBar(view.getContext());
+            notificationProgressBar.setId((i+1)+2000000);
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            layoutDetails.gravity = Gravity.CENTER;
+            layoutDetails.topMargin = 10;
+            layoutDetails.bottomMargin = 10;
+            layoutDetails.rightMargin = 10;
+            layoutDetails.leftMargin = 10;
+            notificationProgressBar.setLayoutParams(layoutDetails);
+            notificationProgressBar.setVisibility(View.GONE);
+
             // Play button
             final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
-            final ImageButton playFloatingButton = new ImageButton(view.getContext());
-            playFloatingButton.setBackgroundResource(0);
-            playFloatingButton.setId(i);
-            playFloatingButton.setOnClickListener(new View.OnClickListener() {
+            final ImageButton playImageButton = new ImageButton(view.getContext());
+            playImageButton.setBackgroundResource(0);
+            playImageButton.setId(i);
+            playImageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     currentPlayButtonId = v.getId();
-                    currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId)+1)*1000000);
-                    currentSeekBar.setEnabled(true);
-                    playSong(playFloatingButton,v,currentSeekBar,songFileName);
-
+                    currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId)+1)+1000000);
+                    currentNotificationSpinner = (ProgressBar) view.findViewById(((currentPlayButtonId)+1)+2000000);
+                    playSong(playImageButton,v,currentSeekBar,songFileName,currentNotificationSpinner);
                 }
             });
-            playFloatingButton.setImageResource(R.drawable.playdedicate);
+            playImageButton.setImageResource(R.drawable.playdedicate);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutDetails.gravity = Gravity.CENTER_VERTICAL;
             layoutDetails.topMargin = 10;
             layoutDetails.bottomMargin = 10;
             layoutDetails.rightMargin = 10;
-            playFloatingButton.setLayoutParams(layoutDetails);
+            playImageButton.setLayoutParams(layoutDetails);
 
-            parent.addView(playFloatingButton);
+            parent.addView(playImageButton);
+            parent.addView(notificationProgressBar);
             parent.addView(nameAndTimeAndSeekBar);
             parent.addView(loveButton);
 
@@ -429,13 +444,13 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         mainParentLayout.addView(mainParent);
         if(mp!=null && mp.isPlaying()){
             Log.e("Nota_Frag1","HERE "+currentSeekBar.getId()+" "+currentPlayButtonId+" "+difference);
-            currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId+difference)+1)*1000000);
+            currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId+difference)+1)+1000000);
             currentSeekBar.setMax(mp.getDuration());
             currentSeekBar.setEnabled(true);
             seekUpdation();
-            currentPlayingButton = (FloatingActionButton)view.findViewById(currentPlayButtonId+difference);
+            currentPlayingButton = (ImageButton)view.findViewById(currentPlayButtonId+difference);
             currentPlayingButton.setImageResource(R.drawable.stop);
-            currentPlayingButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
+            //currentPlayingButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             idOfTheLastPlayButtonClicked = currentPlayButtonId+difference;
         }
     }
@@ -466,22 +481,25 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     }
 
     public static ImageButton playOrStopButton;
+    public static ProgressBar currentNotificationSpinner;
 
-    public void playSong(ImageButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName){
+    public void playSong(ImageButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName, ProgressBar spinner){
         Log.e("Nota_Frag2", currentClickedButton.getId() + "");
         playOrStopButton = playButton;
+        currentNotificationSpinner = spinner;
+        Log.e("Notification_Visibility","I started the spinner");
+        playOrStopButton.setVisibility(View.GONE);
+        currentNotificationSpinner.setVisibility(View.VISIBLE);
         if(currentClickedButton.getId() != idOfTheLastPlayButtonClicked) {
             if (idOfTheLastPlayButtonClicked != -1) {
-                FloatingActionButton lastPlayedButton = (FloatingActionButton) view.findViewById(idOfTheLastPlayButtonClicked);
-                lastPlayedButton.setImageResource(R.drawable.play);
-                lastPlayedButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(4,128,251)));
-                SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)*1000000);
+                ImageButton lastPlayedButton = (ImageButton) view.findViewById(idOfTheLastPlayButtonClicked);
+                lastPlayedButton.setImageResource(R.drawable.playdedicate);
+                SeekBar lastSeekBar = (SeekBar) view.findViewById((idOfTheLastPlayButtonClicked+1)+1000000);
                 lastSeekBar.setProgress(0);
                 lastSeekBar.setEnabled(false);
             }
-            if(mp!=null)mp.reset();
+            //if(mp!=null)mp.reset();
             playOrStopButton.setImageResource(R.drawable.stopdedicate);
-            //playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             idOfTheLastPlayButtonClicked = currentClickedButton.getId();
             currentPlayButtonId = idOfTheLastPlayButtonClicked;
             oldCountOfNotifications = allNotifications.size();
@@ -495,9 +513,10 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     currentSeekBar.setEnabled(false);
                     mp.reset();
                     playOrStopButton.setImageResource(R.drawable.playdedicate);
-//                    playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(4,128,251)));
                     ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
                     validateMediaPlayer.initialiseAndValidateMediaPlayer("notification","stop");
+                    playOrStopButton.setVisibility(View.VISIBLE);
+                    currentNotificationSpinner.setVisibility(View.GONE);
                 }
             else {
                 currentSeekBar.setMax(mp.getDuration());
@@ -506,9 +525,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
                 validateMediaPlayer.initialiseAndValidateMediaPlayer("notification","play");
                 play(songFileName,currentPlayButtonId);
-                //mp.start();
                 playOrStopButton.setImageResource(R.drawable.stopdedicate);
-  //              playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             }
         }
     }
@@ -523,19 +540,38 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
             mp.setDataSource(url);
-            mp.prepare();
-            currentSeekBar.setMax(mp.getDuration());
-            seekUpdation();
-            mp.start();
+            mp.prepareAsync();
+            mp.setLooping(false);
+            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    if(mediaPlayer!=null) {
+                        currentSeekBar.setMax(mediaPlayer.getDuration());
+                        seekUpdation();
+                        Log.e("Notification_Visibility","I stopped the spinner");
+                        currentPlayButton.setVisibility(View.VISIBLE);
+                        currentNotificationSpinner.setVisibility(View.GONE);
+                        currentSeekBar.setEnabled(true);
+                    }
+                    mediaPlayer.start();
+                }
+            });
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     currentSeekBar.setMax(0);
                     currentPlayButton.setImageResource(R.drawable.playdedicate);
                 }
             });
-        } catch (Exception ee) {
-            Log.e("Not_Frag_Err", "abc" + ee.getMessage());
+        } catch (IllegalArgumentException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (IllegalStateException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (IOException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (Exception e) {toastError(e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
         }
+    }
+
+    /*Toast error message*/
+    public static void toastError(String error) {
+        //Toast.makeText(view.getContext(), "Oops! Somehing went wrong\n"+error.toString(), Toast.LENGTH_LONG).show();
+        Log.e("Notification_issue",error);
     }
 
     /*release and return the nullified mediaplayer object*/
@@ -581,14 +617,21 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     }
     @Override
     public void onDetach() {
-        if(mp!=null) {
-            mp.reset();
-            mp.release();
-            mp = null;
-        }
+        releaseMediaPlayerObject(mp);
         super.onDetach();
         mListener = null;
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.e("Notification","Notification on Destroy");
+        if(mp!=null) {
+            releaseMediaPlayerObject(mp);
+            mp = null;
+        }
+    }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
