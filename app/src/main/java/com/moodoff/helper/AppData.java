@@ -12,10 +12,12 @@ import java.util.HashMap;
 
 public class AppData {
     public static HashMap<String,ArrayList<String>> allMoodPlayList = new HashMap<>();
+    public static HashMap<String,HashMap<String,String>> allProfileData = new HashMap<>();
     public static int totalNoOfNot = 0;
     public static int lovedDedicateOldCount = 0;
     public static int lovedDedicateNewCount = 0;
     public static ArrayList<String> allNotifications;
+    public static int noOfFriendUsesTheApp = 0;
 
     public static Typeface getAppFont(Context ctx){
         return Typeface.createFromAsset(ctx.getAssets(), "fonts/BLKCHCRY.TTF");

@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.AllTabs;
+import com.moodoff.ContactsFragment;
 import com.moodoff.NotificationFragment;
 import com.moodoff.ParseNotificationData;
 import com.moodoff.R;
@@ -87,16 +88,20 @@ public class ServerManager{
                     Log.e("ServerManager_CNTCT_RD",response.toString());
                     ContactsManager.allReadContactsFromDBServer = ParseNotificationData.parseAllContacts(response.toString());
                     ArrayList<String> contactNumbers = new ArrayList<>(),contactsToBeRemoved = new ArrayList<>();
+                    for(String eachContactNo : ContactsManager.allReadContactsFromDBServer){
+                     if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(UserDetails.getPhoneNumber())){
+                         contactNumbers.add(eachContactNo);
+                     }
+                    }
                     for(String eachContact:ContactsManager.allReadContacts.keySet()) {
-                        //contactsInList.add(allC.get(eachContact) + " " + eachContact);
-                        contactNumbers.add(eachContact);
                         contactsToBeRemoved.add(eachContact);
                     }
-                    contactsToBeRemoved.removeAll(ContactsManager.allReadContactsFromDBServer);
-                    contactNumbers.removeAll(contactsToBeRemoved);
-                    Log.e("ServerManager_CNTCTAPP", contactNumbers.toString());
-                    Log.e("ServerManager_CNTCTAPP2", ContactsManager.allReadContacts.toString());
+                    contactsToBeRemoved.removeAll(contactNumbers);
+
+                    Log.e("ServerManager_USES", contactNumbers.toString());
+                    Log.e("ServerManager_DOESNTUSE", contactsToBeRemoved.toString());
                     ContactsManager.friendsWhoUsesApp = contactNumbers;
+                    ContactsManager.friendsWhoDoesntUseApp = contactsToBeRemoved;
 
                     Start.fetchContactsFromServerNotComplete = false;
                     } catch (Exception ee) {
@@ -178,7 +183,24 @@ public class ServerManager{
             }
         }).start();
     }
+    public void readAllProfileDataFromServerAndWriteToInternalDB(){
+        ArrayList<String> allContactsOfUser = ContactsManager.friendsWhoUsesApp;
+        Log.e("ServerManager_FWUA",allContactsOfUser.toString());
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        /*for(String eachUser : allContactsOfUser){
 
+                        }*/
+                    }
+                }).start();
+                //readAllProfileDataFromServerAndWriteToInternalDB();
+            }
+        },8000);
+    }
     public void readNotificationsFromServerAndWriteToInternalDB(){
         final String userMobileNumber = UserDetails.getPhoneNumber();
         final String serverURL = HttpGetPostInterface.serverURL;

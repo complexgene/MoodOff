@@ -42,7 +42,8 @@ public class Start extends AppCompatActivity {
     public static int switchToTab = 0;
     private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 100;
     private String serverURL = HttpGetPostInterface.serverURL;
-    public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true, fetchContactsFromServerNotComplete = true;
+    public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true,
+            fetchContactsFromServerNotComplete = true, allProfilesDataFetchNotComplete = true;
     ProgressBar spinner;
     TextView greet;
     SQLiteDatabase mydatabase;
@@ -116,28 +117,42 @@ public class Start extends AppCompatActivity {
         ContactsManager.allReadContacts = allReadContacts;
         //NotificationFragment.allReadContacts = allReadContacts;
     }
-
+    ServerManager serverManager = new ServerManager(this);
     private void fetchNotifications() {
                 try {
                     Log.e("Start_Notifications","Start loading notifications from DB");
                     ArrayList<String> allNotificationsFromDB = readNotificationsFromInternalDB();
-                    AppData.totalNoOfNot = allNotificationsFromDB.size();
-                    Log.e("Start_Notifictions","Fetched "+AppData.totalNoOfNot+" notifications..");
-                    ServerManager serverManager = new ServerManager(this);
-                    serverManager.readNotificationsFromServerAndWriteToInternalDB();
-                    //ArrayList<String> allYourNotification = new ArrayList<String>();
-                    NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
-                    Log.e("Start_NotB4",allNotificationsFromDB.toString());
-                    Log.e("Start_SIZE",allReadContacts.size()+"");
                     AppData.allNotifications = allNotificationsFromDB;
+                    AppData.totalNoOfNot = allNotificationsFromDB.size();
+                    NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
+                    Log.e("Start_Notifictions","Fetched "+AppData.totalNoOfNot+" notifications..");
+                    serverManager.readNotificationsFromServerAndWriteToInternalDB();
+                    Log.e("Start_NotB4",allNotificationsFromDB.toString());
                     notificationFetchNotComplete = false;
-                    Log.e("Start_Notif_Read", "Notification read complete..");
+                    Log.e("Start_Notif_Read", "Notification read complete and started auto script..");
                 } catch (Exception ee) {
                     Log.e("Start_Notif_ReadErr", ee.getMessage());
                     ee.printStackTrace();
                 }
     }
 
+    private void fetchAllProfilesData(){
+        try{
+            Log.e("Start_ProfileFetch","Start reading profile data for all friends..");
+            AppData.allProfileData = readAllProfilesDataFromInternalDB();
+            allProfilesDataFetchNotComplete = false;
+            serverManager.readAllProfileDataFromServerAndWriteToInternalDB();
+            Log.e("Start_ProfileFetch","End reading profile data for all friends..");
+        }
+        catch (Exception ee){
+            Log.e("Start_ProfileFetch_Err",ee.getMessage());
+            ee.printStackTrace();
+        }
+    }
+    private HashMap<String,HashMap<String,String>> readAllProfilesDataFromInternalDB(){
+        DBHelper dbOperations = new DBHelper(this);
+        return dbOperations.readAllProfilesDataFromInternalDB();
+    }
     private ArrayList<String> readNotificationsFromInternalDB(){
         DBHelper dbOperations = new DBHelper(this);
         return dbOperations.readNotificationsFromInternalDB();
@@ -157,7 +172,7 @@ public class Start extends AppCompatActivity {
             String songName = resultSet.getString(2);
             String artistName = resultSet.getString(3);
             String movieOrAlbumname = resultSet.getString(3);
-            Log.e("Start_MOOD",moodType+" "+songName);
+            //Log.e("Start_MOOD",moodType+" "+songName);
             if(allSongs.containsKey(moodType)){
                 allSongs.get(moodType).add(songName);
             }
@@ -223,7 +238,9 @@ public class Start extends AppCompatActivity {
                 while (fetchContactsNotComplete) ;
                 fetchNotifications();
                 // Distinguishes who uses app and who don't
-                //fetchContactsFromServer();
+                fetchContactsFromServer();
+
+                fetchAllProfilesData();
 
                 Log.e("Start_FILEREADS","DONEEEEEEEEEEEEEEEEE");
                 try {
@@ -232,7 +249,7 @@ public class Start extends AppCompatActivity {
                         public void run() {
                             final Intent mainIntent = new Intent(Start.this, AllTabs.class);
                             Log.e("Start_FILEREADS",notificationFetchNotComplete+" "+moodsAndSongsFetchNotComplete);
-                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete) ;
+                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete || allProfilesDataFetchNotComplete) ;
                             Log.e("Start_AllTabsLaunch", "AllTabs will be launched");
                             Start.this.startActivity(mainIntent);
                             Start.this.finish();

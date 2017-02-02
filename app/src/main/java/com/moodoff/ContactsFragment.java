@@ -3,6 +3,7 @@ package com.moodoff;
 import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -16,6 +17,7 @@ import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,6 +46,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
 
@@ -212,63 +215,133 @@ public class ContactsFragment extends Fragment{
         LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         eachContact.setLayoutParams(layoutDetails);
         allC = ContactsManager.allReadContacts;
-        ArrayList<String> validUsers = ContactsManager.friendsWhoUsesApp;
-        Log.e("CONTCCCCCTSSSS",allC.size()+" "+validUsers.size());
-        for(final String validCntct:validUsers){
+        ArrayList<String> friendWhoUsesApp = ContactsManager.friendsWhoUsesApp;
+        Log.e("CONTCCCCCTSSSS",allC.size()+" "+friendWhoUsesApp.size());
+
+        eachContact.addView(getVerticalLine(5));
+        LinearLayout titleAppUsers = new LinearLayout(getContext());
+        layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        layoutDetails.topMargin = 10;
+        layoutDetails.bottomMargin = 10;
+        layoutDetails.gravity = Gravity.CENTER;
+        titleAppUsers.setLayoutParams(layoutDetails);
+        titleAppUsers.setBackgroundResource(R.drawable.poster);
+        TextView tvv = new TextView(getContext());
+        tvv.setPadding(3,3,3,3);
+        tvv.setTextColor(Color.WHITE);
+        tvv.setText(" Friends Using App ");
+        titleAppUsers.addView(tvv);
+        eachContact.addView(titleAppUsers);
+
+        for(final String eachFriendContact : friendWhoUsesApp) {
+            String contactName = allC.get(eachFriendContact);
+            if (!isNotHavingAnyCharacter(contactName)) {
                 LinearLayout eachContactLayout = new LinearLayout(getContext());
                 eachContactLayout.setBackgroundColor(Color.WHITE);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 //layoutDetails.topMargin = 20;
                 eachContactLayout.setLayoutParams(layoutDetails);
                 Button contactNameAndNumber = new Button(ctx);
-                contactNameAndNumber.setText(allC.get(validCntct) + "\n" + validCntct);
-                contactNameAndNumber.setBackgroundResource(R.drawable.profilecontactdesign);
+                contactNameAndNumber.setText(allC.get(eachFriendContact) + "\n" + eachFriendContact);
+                contactNameAndNumber.setBackgroundResource(R.drawable.contactsusingappdesign);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                layoutDetails.topMargin = 40;
-                layoutDetails.bottomMargin = 40;
-                layoutDetails.leftMargin = 25;
-                layoutDetails.rightMargin = 25;
                 contactNameAndNumber.setLayoutParams(layoutDetails);
                 contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        loadProfile(validCntct);
+                        loadProfile(eachFriendContact);
                     }
                 });
 
                 eachContactLayout.addView(contactNameAndNumber);
                 eachContact.addView(eachContactLayout);
-            allC.remove(validCntct);
+                //allC.remove(validCntct);
+            }
         }
-        int noOfContacts = allC.size();
-        for(final String eachCntct:allC.keySet()){
-            LinearLayout eachContactLayout = new LinearLayout(getContext());
-            eachContactLayout.setBackgroundColor(Color.WHITE);
-            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.topMargin = 20;
-            eachContactLayout.setLayoutParams(layoutDetails);
-            Button contactNameAndNumber = new Button(ctx);
-            contactNameAndNumber.setText(allC.get(eachCntct)+"\n"+eachCntct);
-            contactNameAndNumber.setBackgroundResource(R.drawable.profilecontactdesign);
-            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.topMargin = 40;
-            layoutDetails.bottomMargin = 40;
-            layoutDetails.leftMargin = 25;
-            layoutDetails.rightMargin = 25;
-            contactNameAndNumber.setLayoutParams(layoutDetails);
-            contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Messenger.print(getContext(),"Not yet using the app Moodoff");
-                    //loadProfile(eachCntct);
-                }
-            });
 
-            eachContactLayout.addView(contactNameAndNumber);
-            eachContact.addView(eachContactLayout);
-        }
+        eachContact.addView(getVerticalLine(5));
+        LinearLayout titleNotAppUsers = new LinearLayout(getContext());
+        layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        layoutDetails.topMargin = 10;
+        layoutDetails.gravity = Gravity.CENTER;
+        titleNotAppUsers.setLayoutParams(layoutDetails);
+        titleNotAppUsers.setBackgroundResource(R.drawable.poster);
+        TextView tvv1 = new TextView(getContext());
+        tvv1.setPadding(3,3,3,3);
+        tvv1.setTextColor(Color.WHITE);
+        tvv1.setText(" Friends Not Using App ");
+        titleNotAppUsers.addView(tvv1);
+        eachContact.addView(titleNotAppUsers);
+        LinearLayout titleRequestUsers = new LinearLayout(getContext());
+        layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        layoutDetails.bottomMargin = 10;
+        layoutDetails.gravity = Gravity.CENTER;
+        titleRequestUsers.setLayoutParams(layoutDetails);
+        titleRequestUsers.setBackgroundResource(R.drawable.poster);
+        /*TextView tvv3 = new TextView(getContext());
+        tvv3.setPadding(3,3,3,3);
+        tvv3.setTextColor(Color.WHITE);
+        //tvv3.setText(" Click to send app request ");
+        titleRequestUsers.addView(tvv3);
+        */eachContact.addView(titleRequestUsers);
+        eachContact.addView(getVerticalLine(5));
+
+
+        for(final String eachCntct:ContactsManager.friendsWhoDoesntUseApp){
+            final String contactName = allC.get(eachCntct);
+            if(!isNotHavingAnyCharacter(contactName)){
+                LinearLayout eachContactLayout = new LinearLayout(getContext());
+                eachContactLayout.setBackgroundColor(Color.WHITE);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                eachContactLayout.setLayoutParams(layoutDetails);
+                Button contactNameAndNumber = new Button(ctx);
+                contactNameAndNumber.setText(contactName+"\nClick to send app install link");
+                contactNameAndNumber.setTransformationMethod(null);
+                contactNameAndNumber.setBackgroundResource(R.drawable.contactsnotusingappdesign);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                contactNameAndNumber.setLayoutParams(layoutDetails);
+                contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which){
+                                    case DialogInterface.BUTTON_POSITIVE:
+                                        Messenger.print(getContext(),"App Link Sent");
+                                        break;
+                                    case DialogInterface.BUTTON_NEGATIVE:
+                                        Messenger.print(getContext(),"App Link Not Sent");
+                                        break;
+                                }
+                            }
+                        };
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle("Confirm Sending App Link");
+                        Dialog d=builder.setMessage("Your friend "+contactName+" will receive an app link to install. Proceed?").setPositiveButton("Yes", dialogClickListener)
+                                .setNegativeButton("No", dialogClickListener).show();
+                        int dividerId = d.getContext().getResources().getIdentifier("android:id/alertTitle", null, null);
+                        View divider = d.findViewById(dividerId);
+                        builder.setView(divider);
+                        //loadProfile(eachCntct);
+                    }
+                });
+
+                eachContactLayout.addView(contactNameAndNumber);
+                eachContact.addView(eachContactLayout);
+            }
+            }
         contactsScroll.addView(eachContact);
         layout.addView(contactsScroll);
+    }
+    private static boolean isNotHavingAnyCharacter(String name){
+        for(int i=0;i<name.length();i++){
+            if(Character.isLetter(name.charAt(i))){
+                return false;
+            }
+        }
+        return true;
     }
     private void loadProfile(String contactNumber){
         FragmentTransaction transaction = getFragmentManager().beginTransaction();

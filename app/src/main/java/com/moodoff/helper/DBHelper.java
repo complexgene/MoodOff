@@ -13,6 +13,7 @@ import com.moodoff.model.UserDetails;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import static com.moodoff.Start.fetchContactsNotComplete;
@@ -168,7 +169,29 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
     // Store and Process APIs part ENDS
-
+    public HashMap<String,HashMap<String,String>> readAllProfilesDataFromInternalDB() {
+        HashMap<String,HashMap<String,String>> allProfilesData = new HashMap<>();
+        mydatabaseReadable = getReadableDatabase();
+        Cursor resultSet = mydatabaseReadable.rawQuery("Select * from all_profiles", null);
+        resultSet.moveToFirst();
+        while (!resultSet.isAfterLast()) {
+            HashMap<String,String> profileDataForEach = new HashMap<>();
+            final String phno = resultSet.getString(0);
+            final String name = resultSet.getString(1);
+            final String text_status = resultSet.getString(2);
+            final String audio_status = resultSet.getString(3);
+            final String text_status_likes = resultSet.getString(4);
+            final String audio_status_likes = resultSet.getString(5);
+            profileDataForEach.put("name",name);
+            profileDataForEach.put("text_status",text_status);
+            profileDataForEach.put("audio_Status",audio_status);
+            profileDataForEach.put("text_status_likes",text_status_likes);
+            profileDataForEach.put("audio_status_likes",audio_status_likes);
+            Log.e("DBHelper_ProfileDB",profileDataForEach.get(name));
+            allProfilesData.put(phno,profileDataForEach);
+        }
+        return allProfilesData;
+    }
     public ArrayList<String> readNotificationsFromInternalDB() {
         ArrayList<String> allNotifications = new ArrayList<>();
         mydatabaseReadable = getReadableDatabase();

@@ -61,8 +61,7 @@ public class ValidateMediaPlayer {
                                     Log.e("ValidateMP","notification-stop");
                                     notificationTab.mp.stop();
                                     if(notificationTab.playOrStopButton!=null){
-                                        notificationTab.playOrStopButton.setImageResource(R.drawable.play);
-                                        notificationTab.playOrStopButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(229,152,245)));
+                                        notificationTab.playOrStopButton.setImageResource(R.drawable.playdedicate);
                                     }
                                     if(notificationTab.currentSeekBar!=null){
                                         notificationTab.currentSeekBar.setMax(0);
@@ -79,8 +78,9 @@ public class ValidateMediaPlayer {
                                     profileTab.mediaPlayer.stop();
                                     profileTab.releaseMediaPlayerObject(profileTab.mediaPlayer);
                                     profileTab.showPlayStopButton("play");
-                                    profileTab.seekBar.setMax(0);
-                                    profileTab.seekBar.setClickable(false);
+                                    profileTab.seekBar_Profile.setMax(0);
+                                    profileTab.seekBar_Profile.setProgress(0);
+                                    profileTab.seekBar_Profile.setClickable(false);
                                 }
                             }
                             break;

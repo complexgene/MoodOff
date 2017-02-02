@@ -205,6 +205,17 @@ public class RegistrationActivity extends AppCompatActivity {
         playListColumns.put("movie_or_album_name","VARCHAR");
         dboperations.createTable("playlist",playListColumns);
         Log.e("RegistrationAct_TBL","playlist table created");
+
+        LinkedHashMap<String,String> allprofileColumns = new LinkedHashMap<>();
+        allprofileColumns.put("phno","VARCHAR");
+        allprofileColumns.put("name","VARCHAR");
+        allprofileColumns.put("text_status","VARCHAR");
+        allprofileColumns.put("audio_status","VARCHAR");
+        allprofileColumns.put("text_status_likes","INTEGER");
+        allprofileColumns.put("audio_status_likes","INTEGER");
+        dboperations.createTable("all_profiles",allprofileColumns);
+        Log.e("RegistrationAct_TBL","all_profiles table created");
+
     }
 
     public void setDate() {

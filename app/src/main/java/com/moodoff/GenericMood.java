@@ -1162,8 +1162,10 @@ public class GenericMood extends Moods implements View.OnClickListener{
 
     @Override
     public void onDetach() {
+        releaseMediaPlayerObject();
         super.onDetach();
         mListener = null;
+        playOrPauseParm=0;
     }
 
     @Override
@@ -1171,9 +1173,10 @@ public class GenericMood extends Moods implements View.OnClickListener{
         super.onDestroy();
         Log.e("GenericMood","GM on Destroy");
         if(mp!=null) {
-            mp.reset();
+            releaseMediaPlayerObject();
             mp = null;
         }
+        playOrPauseParm=0;
     }
 
 

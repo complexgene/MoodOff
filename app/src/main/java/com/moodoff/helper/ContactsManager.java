@@ -12,5 +12,6 @@ public class ContactsManager {
     public static LinkedHashMap<String,String> allReadContacts = new LinkedHashMap<>();
     public static ArrayList<String> allReadContactsFromDBServer = new ArrayList<>();
     public static ArrayList<String> friendsWhoUsesApp = new ArrayList<>();
+    public static ArrayList<String> friendsWhoDoesntUseApp = new ArrayList<>();
 
 }
