@@ -388,7 +388,7 @@ public class ContactsFragment extends Fragment{
                 Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts order by name", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
-                    allContactsPresent.put(resultSet.getString(0),resultSet.getString(1));
+                    allContactsPresent.put(resultSet.getString(0),resultSet.getString(1).replaceAll("'", "\'"));
                     resultSet.moveToNext();
                 }
             }
@@ -400,9 +400,12 @@ public class ContactsFragment extends Fragment{
                 mydatabase.execSQL(deleteQuery);
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
-                    Log.e("ContactsFragment_CntErr",eachContact);
-                    insertQuery = "INSERT INTO allcontacts(phone_no,name) values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
-                    Log.e("ContactsFragment_CntErr",insertQuery);
+                    Log.e("ContactsFragment_CErr1",eachContact);
+                    String name = allContacts.get(eachContact);
+                    name = name.replaceAll("'", "''");
+                    Log.e("ContactsFragment_CErr2",name);
+                    insertQuery = "INSERT INTO allcontacts(phone_no,name) values('"+eachContact+"','"+name+"');";
+                    Log.e("ContactsFragment_CErr3",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }
                 return null;
@@ -410,7 +413,7 @@ public class ContactsFragment extends Fragment{
             mydatabase.close();
 
         }catch (Exception ee){
-            Log.e("ContactsFragment_StrErr",ee.getMessage());
+            Log.e("ContactsFragment_Err2",ee.getMessage());
             ee.fillInStackTrace();
         }
         mydatabase.close();

@@ -214,7 +214,7 @@ public class ContactList extends AppCompatActivity {
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
                     //Log.e("ContactsFragment_CntErr",eachContact);
-                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
+                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact).replaceAll("'", "\'")+"');";
                     //Log.e("ContactsFragment_CntErr",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }
@@ -222,7 +222,7 @@ public class ContactList extends AppCompatActivity {
             }
             mydatabase.close();
         }catch (Exception ee){
-            Log.e("ContactsFragment_StrErr",ee.getMessage());
+            Log.e("ContactsList_StrErr",ee.getMessage());
             ee.fillInStackTrace();
         }
         mydatabase.close();

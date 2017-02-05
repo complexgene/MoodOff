@@ -75,12 +75,11 @@ public class ValidateMediaPlayer {
                             if(profileTab.mediaPlayer!=null){
                                 if(profileTab.mediaPlayer.isPlaying()){
                                     Log.e("ValidateMP","profile-stop");
-                                    profileTab.mediaPlayer.stop();
-                                    profileTab.releaseMediaPlayerObject(profileTab.mediaPlayer);
-                                    profileTab.showPlayStopButton("play");
-                                    profileTab.seekBar_Profile.setMax(0);
-                                    profileTab.seekBar_Profile.setProgress(0);
-                                    profileTab.seekBar_Profile.setClickable(false);
+                                    if(profileTab.ifSelectingAudioStatus == 0) {
+                                        profileTab.playAudioStatusSong(profileTab.myAudioStatusSong);
+                                    } else {
+                                        profileTab.playAudioStatusSelectionSong();
+                                    }
                                 }
                             }
                             break;

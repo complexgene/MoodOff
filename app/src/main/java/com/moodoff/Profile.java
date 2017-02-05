@@ -121,15 +121,14 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         editAudioStatus = (ImageButton)view.findViewById(R.id.editAudioStatus);
         editTextStatus = (ImageButton)view.findViewById(R.id.editTextStatus);
         seekBar_Profile = (SeekBar)view.findViewById(R.id.myAudioStatusProgressBar);
-        seekBar_Profile.setClickable(false);
+        seekBar_Profile.setEnabled(false);
         spinner = (ProgressBar) view.findViewById(R.id.profileProgressBar);
     }
 
-    View view,dialogView;
+    View view;
     ImageView profileImage;
     TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount;
     TextView txtViewCurrentMood,txtViewUserStatus, lastMoodListened;
-    String myAudioStatusSong;
     ImageButton editAudioStatus, editTextStatus;
     Button okButtonWidth,cancelButtonWidth,okButton,cancelButton, btnCurrentMoodPic;
     FloatingActionButton loveTextStatus, loveAudioStatus, editBasicInfo;
@@ -139,12 +138,16 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     LinearLayout dialogContainer;
     StoreRetrieveDataInterface fileOperations;
     String profileOfUser;
+    public static View dialogView;
     public static FloatingActionButton playAudioStatusButton;
     public static MediaPlayer mediaPlayer = null;
     public static Boolean isSongPlaying = false;
     public static ProgressBar spinner;
     public static SeekBar seekBar_Profile;
-    Handler seekHandler = new Handler();
+    public static Handler seekHandler = new Handler();
+    public static int ifSelectingAudioStatus = 0;
+    public static String myAudioStatusSong;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -175,6 +178,9 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         editAudioStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mediaPlayer != null) {
+                    playAudioStatusSong(myAudioStatusSong);
+                }
                 editStatus(1);
             }
         });
@@ -183,9 +189,9 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             @Override
             public void onClick(View v) {
                 Log.e("Profile_AudioSong",myAudioStatusSong.toString());
-                String myAudioStatusSongURL = HttpGetPostInterface.serverSongURL+myAudioStatusSong.replaceAll("@","/");
-                //Messenger.print(getContext(),myAudioStatusSongURL);
-                playAudioStatusSong(myAudioStatusSongURL);
+
+                Messenger.print(getContext(),myAudioStatusSong.toString());
+                playAudioStatusSong(myAudioStatusSong);
             }
         });
         loveTextStatus.setOnClickListener(new View.OnClickListener() {
@@ -197,7 +203,9 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         seekBar_Profile.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar_Profile) {
-                mediaPlayer.seekTo(seekBar_Profile.getProgress());
+                if (mediaPlayer!=null) {
+                    mediaPlayer.seekTo(seekBar_Profile.getProgress());
+                }
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar_Profile) {
@@ -210,14 +218,14 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         return view;
     }
 
-    Runnable run = new Runnable() {
+    public static Runnable run = new Runnable() {
         @Override
         public void run() {
             seekUpdation();
         }
     };
 
-    public void seekUpdation() {
+    public static void seekUpdation() {
         if (mediaPlayer!=null) {
             if(seekBar_Profile.getMax()!=0) {
                 seekBar_Profile.setProgress(mediaPlayer.getCurrentPosition());
@@ -226,9 +234,10 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         }
     }
 
-    private void playAudioStatusSong(String songURL){
+    public static void playAudioStatusSong(String myAudioStatusSongURL){
         // Write the code to play the song and handle the seekbar too
         showSpinner();
+        String songURL = HttpGetPostInterface.serverSongURL+myAudioStatusSongURL.replaceAll("@","/");
         releaseMediaPlayerObject(mediaPlayer);
         mediaPlayer = new MediaPlayer();
         Log.e("Profile_SongPlayURL",songURL.toString());
@@ -246,21 +255,22 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     showPlayStopButton("stop");
-                    seekBar_Profile.setClickable(true);
-                    if(mediaPlayer!=null) {
-                        seekBar_Profile.setMax(mediaPlayer.getDuration());
-                        seekUpdation();
-                    }
+                    ifSelectingAudioStatus = 0;
                     ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
                     validateMediaPlayer.initialiseAndValidateMediaPlayer("profile","play");
                     mediaPlayer.start();
+                    if(mediaPlayer!=null) {
+                        seekBar_Profile.setMax(mediaPlayer.getDuration());
+                        seekUpdation();
+                        seekBar_Profile.setEnabled(true);
+                    }
                 }
             });
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     showPlayStopButton("play");
                     seekBar_Profile.setMax(0);
-                    seekBar_Profile.setClickable(false);
+                    seekBar_Profile.setEnabled(false);
                 }
             });
         } else {
@@ -270,7 +280,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             showPlayStopButton("play");
             mediaPlayer.stop();
             seekBar_Profile.setMax(0);
-            seekBar_Profile.setClickable(false);
+            seekBar_Profile.setEnabled(false);
         }
     }
 
@@ -304,7 +314,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     }
 
     /*show spinner in place of play/pause button*/
-    public void showSpinner() {
+    public static void showSpinner() {
         try {
             playAudioStatusButton.setVisibility(Button.GONE);
             spinner.setVisibility(ProgressBar.VISIBLE);
@@ -443,49 +453,190 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             layoutDetails.leftMargin = 50;
             layoutDetails.bottomMargin = 15;
             playButtonAndSeekBar.setLayoutParams(layoutDetails);
+
+            //Spinner
+            final ProgressBar audioStatusSelectionProgressBar = new ProgressBar(view.getContext());
+            audioStatusSelectionProgressBar.setId((i+1)+2000000);
+            audioStatusSelectionProgressBar.setVisibility(View.GONE);
+
+            //Seekbar
+            SeekBar seekBar_ProfileForEachSong = new SeekBar(getContext());
+            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutDetails.rightMargin = 50;
+            seekBar_ProfileForEachSong.setEnabled(false);
+            seekBar_ProfileForEachSong.setLayoutParams(layoutDetails);
+            seekBar_ProfileForEachSong.setId((i+1)+1000000);
+            seekBar_ProfileForEachSong.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    if(mediaPlayer!=null)
+                        mediaPlayer.seekTo(seekBar.getProgress());
+                }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                }
+            });
+
             final FloatingActionButton playButton = new FloatingActionButton(getContext());
             playButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
             playButton.setImageResource(R.drawable.playdedicate);
             playButton.setSize(FloatingActionButton.SIZE_MINI);
-            playButton.setId(++playButtonId);
+            playButton.setId(playButtonId++);
             playButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String songURL = HttpGetPostInterface.serverSongURL+eachMood+"/"+eachSong;
-                    Messenger.print(getContext(),songURL);
+                    //Messenger.print(getContext(),songURL);
                     Log.e("ProfilePLAYBTN",songURL);
-                    //playSong(songURL);
+                    currentPlayOrStopButtonId = v.getId();
+                    currentView = v;
+                    songFileName = songURL;
+                    playAudioStatusSelectionSong();
                 }
             });
-            SeekBar seekBar_ProfileForEachSong = new SeekBar(getContext());
-            layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.rightMargin = 50;
-            seekBar_ProfileForEachSong.setLayoutParams(layoutDetails);
+
             allSongsRadio[i] = new RadioButton(getContext());
             rg.addView(allSongsRadio[i]);
             rg.addView(playButton);
+            rg.addView(audioStatusSelectionProgressBar);
             rg.addView(seekBar_ProfileForEachSong);
-            }
-            dialogContainer.addView(rg);
-            okButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String moodAndSong = allSongsInMap.get(rg.getCheckedRadioButtonId()-1);
-                    String songStorePattern = moodAndSong.replace(" : ","@");
-                    Messenger.print(getContext(),songStorePattern);
-                    if(writeTheStatusChangeToServerAndFile(1,songStorePattern)){
-                        myAudioStatusSong = songStorePattern;
-                        Messenger.print(getContext(),"Audio Status Updated..");
-                        fbDialogue.dismiss();
-                    }
+        }
+        dialogContainer.addView(rg);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String moodAndSong = allSongsInMap.get(rg.getCheckedRadioButtonId()-1);
+                String songStorePattern = moodAndSong.replace(" : ","@");
+                Messenger.print(getContext(),songStorePattern);
+                if(writeTheStatusChangeToServerAndFile(1,songStorePattern)){
+                    myAudioStatusSong = songStorePattern;
+                    Messenger.print(getContext(),"Audio Status Updated..");
+                    fbDialogue.dismiss();
                 }
-            });
-            cancelButton.setOnClickListener(new View.OnClickListener() {
+            }
+        });
+        cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 fbDialogue.dismiss();
+                if(mediaPlayer != null) {
+                    playAudioStatusSelectionSong();
+                }
             }
         });
+    }
+
+    public static FloatingActionButton currentAudioStatusSelectionPlayOrStopButton;
+    public static ProgressBar currentAudioStatusSelectionSpinner;
+    public static SeekBar currentAudioStatusSelectionSeekbar;
+    public static int currentPlayOrStopButtonId = -1, idOfTheLastPlayButtonClicked = -1;
+    public static View currentView, lastView;
+    public static String songFileName;
+    public static Handler seekHandlerForAudioStatusSelection = new Handler();
+
+    Runnable runAudioStatuSelection = new Runnable() {
+        @Override
+        public void run() {
+            seekUpdationForAudioStatusSelection();
+        }
+    };
+
+    public void seekUpdationForAudioStatusSelection() {
+        if (mediaPlayer!=null) {
+            if(currentAudioStatusSelectionSeekbar.getMax()!=0) {
+                currentAudioStatusSelectionSeekbar.setProgress(mediaPlayer.getCurrentPosition());
+                seekHandlerForAudioStatusSelection.postDelayed(runAudioStatuSelection, 10);
+            }
+        }
+    }
+
+    public static void playAudioStatusSelectionSong(){
+//        Log.e("Profile_SelectStatus", currentView.getId() + "");
+        currentAudioStatusSelectionPlayOrStopButton = (FloatingActionButton) currentView.findViewById(currentPlayOrStopButtonId);
+        currentAudioStatusSelectionSpinner = (ProgressBar) dialogView.findViewById((currentPlayOrStopButtonId+1)+2000000);
+        currentAudioStatusSelectionSeekbar = (SeekBar) dialogView.findViewById((currentPlayOrStopButtonId+1)+1000000);
+        Log.e("Profile_SelectStatus","I started the spinner");
+        currentAudioStatusSelectionPlayOrStopButton.setVisibility(View.GONE);
+        currentAudioStatusSelectionSpinner.setVisibility(View.VISIBLE);
+        if(currentPlayOrStopButtonId != idOfTheLastPlayButtonClicked) {
+            if (idOfTheLastPlayButtonClicked != -1) {
+                FloatingActionButton lastPlayedButton = (FloatingActionButton) lastView.findViewById(idOfTheLastPlayButtonClicked);
+                lastPlayedButton.setImageResource(R.drawable.playdedicate);
+                SeekBar lastSeekBar = (SeekBar) dialogView.findViewById((idOfTheLastPlayButtonClicked+1)+1000000);
+                lastSeekBar.setProgress(0);
+                lastSeekBar.setEnabled(false);
+            }
+            //if(mp!=null)mp.reset();
+            currentAudioStatusSelectionPlayOrStopButton.setImageResource(R.drawable.stopdedicate);
+            idOfTheLastPlayButtonClicked = currentPlayOrStopButtonId;
+            lastView = currentView;
+            ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+            validateMediaPlayer.initialiseAndValidateMediaPlayer("profile","play");
+            play(songFileName);
+        }
+        else {
+            if(mediaPlayer.isPlaying()){
+                currentAudioStatusSelectionSeekbar.setProgress(0);
+                currentAudioStatusSelectionSeekbar.setEnabled(false);
+                mediaPlayer.reset();
+                currentAudioStatusSelectionPlayOrStopButton.setImageResource(R.drawable.playdedicate);
+                ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+                validateMediaPlayer.initialiseAndValidateMediaPlayer("profile","stop");
+                currentAudioStatusSelectionPlayOrStopButton.setVisibility(View.VISIBLE);
+                currentAudioStatusSelectionSpinner.setVisibility(View.GONE);
+            }
+            else {
+                currentAudioStatusSelectionSeekbar.setMax(mediaPlayer.getDuration());
+                currentAudioStatusSelectionSeekbar.setEnabled(true);
+                seekUpdation();
+                ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
+                validateMediaPlayer.initialiseAndValidateMediaPlayer("profile","play");
+                play(songFileName);
+                currentAudioStatusSelectionPlayOrStopButton.setImageResource(R.drawable.stopdedicate);
+            }
+        }
+    }
+
+    public static void play(String songUrl){
+        releaseMediaPlayerObject(mediaPlayer);
+        mediaPlayer = new MediaPlayer();
+//        Log.e("Profile_SongFile",songFileName);
+//        String[] moodTypeAndSong = songFileName.split("@");
+//        String url = serverSongURL + moodTypeAndSong[0]+"/"+moodTypeAndSong[1];
+        Log.e("Profile_SelectStatusURL", songUrl.toString()+" sB id:"+currentAudioStatusSelectionSeekbar.getId());
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            mediaPlayer.setDataSource(songUrl);
+            mediaPlayer.prepareAsync();
+            mediaPlayer.setLooping(false);
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    if(mediaPlayer!=null) {
+                        currentAudioStatusSelectionSeekbar.setMax(mediaPlayer.getDuration());
+                        seekUpdation();
+                        Log.e("Profile_SelectStatus","I stopped the spinner");
+                        currentAudioStatusSelectionPlayOrStopButton.setVisibility(View.VISIBLE);
+                        currentAudioStatusSelectionSpinner.setVisibility(View.GONE);
+                        currentAudioStatusSelectionSeekbar.setEnabled(true);
+                    }
+                    ifSelectingAudioStatus = 1;
+                    mediaPlayer.start();
+                }
+            });
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    currentAudioStatusSelectionSeekbar.setMax(0);
+                    currentAudioStatusSelectionPlayOrStopButton.setImageResource(R.drawable.playdedicate);
+                }
+            });
+        } catch (IllegalArgumentException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mediaPlayer); e.printStackTrace();
+        } catch (IllegalStateException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mediaPlayer); e.printStackTrace();
+        } catch (IOException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mediaPlayer); e.printStackTrace();
+        } catch (Exception e) {toastError(e.getMessage()); releaseMediaPlayerObject(mediaPlayer); e.printStackTrace();
+        }
     }
 
     public static boolean profileDetailsNotRetrievedYet = true;
@@ -554,7 +705,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         //Messenger.print(getContext(),myAudioStatusSong);
         textStatusLoveCount.setText(profileDataParsed.get("textStatusLoveCount")+" people loved the status");
         audioStatusLoveCount.setText(profileDataParsed.get("audioStatusLoveCount")+" people loved the status");
-        Log.e("Profile____","gonna check live...");
+        Log.e("Profile____","gonna check live..."+currentMood);
         String mood = currentMood.split("_")[0].trim();
         boolean userIsNotLive = currentMood.split("_")[1].equals("0");
         Log.e("Profile__",currentMood);

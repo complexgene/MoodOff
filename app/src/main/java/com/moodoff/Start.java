@@ -308,7 +308,7 @@ public class Start extends AppCompatActivity {
                 Log.e("Start_TBLDetect",resultSet.getCount()+" no of rows..");
                 while (!resultSet.isAfterLast()) {
                     String phone_no = resultSet.getString(0);
-                    String name = resultSet.getString(1);
+                    String name = resultSet.getString(1).replaceAll("'","\'");
                     allContacts.put(phone_no,name);
                     resultSet.moveToNext();
                 }
@@ -320,7 +320,9 @@ public class Start extends AppCompatActivity {
                 Log.e("Start_TBLCRT","allcontacts table created..");
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
-                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact)+"');";
+                    String name = allContacts.get(eachContact);
+                    name = name.replaceAll("'", "''");
+                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+name+"');";
                     Log.e("Start_InsertQuery",insertQuery);
                     mydatabase.execSQL(insertQuery);
                 }
