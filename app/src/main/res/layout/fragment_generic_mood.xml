@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/storyAndPlayer"
-        android:background="#13f9f9"
+        android:background="#0b103a"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -305,7 +305,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="5dp"
                     android:id="@+id/tv_story"
-                    android:textColor="#000000"
+                    android:textColor="#FFFFFF"
                     android:textStyle="normal|italic"
                     android:fontFamily="serif"
                     android:textSize="15sp" />
@@ -399,12 +399,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/buttons"
-                android:background="#13f9f9"
+                android:background="#0b103a"
                 style="@style/Widget.AppCompat.SeekBar" />
             <LinearLayout
                 android:id="@+id/buttons"
                 android:orientation="horizontal"
-                android:background="#13f9f9"
+                android:background="@drawable/registrationdatabox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

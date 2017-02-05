@@ -34,6 +34,7 @@ import com.moodoff.AllTabs;
 import com.moodoff.ContactsFragment;
 import com.moodoff.NotificationFragment;
 import com.moodoff.ParseNotificationData;
+import com.moodoff.Profile;
 import com.moodoff.R;
 import com.moodoff.Start;
 import com.moodoff.model.UserDetails;
@@ -111,6 +112,114 @@ public class ServerManager{
             }
         }).start();
     }
+
+    // LIVE FEED FUNCTIONS
+    String liveMood = "";
+    public String getLiveMood(final String userNumber){
+        new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    Log.e("ServerManager_LiveMood","Getting the live mood for the user:"+userNumber);
+                    URL url = new URL(serverURL+ "/livefeed/" + userNumber );
+                    Log.e("ServerManager_LiveURL", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    InputStream is = urlConnection.getInputStream();
+                    isr = new InputStreamReader(is);
+                    int data = isr.read();
+                    final StringBuilder response = new StringBuilder("");
+                    while (data != -1) {
+                        response.append((char) data);
+                        data = isr.read();
+                    }
+                    Log.e("ServerManager_LiveMood", "Getting done for live mood for the user:"+userNumber+" res:"+response.toString());
+                    liveMood =  response.toString();
+                    Profile.currentMood = liveMood;
+                    Profile.profileDetailsNotRetrievedYet = false;
+                } catch (Exception ee) {
+                    Log.e("ServerManager_LIVE_Err1", ee.getMessage());
+                    ee.printStackTrace();
+                }
+            }
+        }).start();
+        return liveMood;
+    }
+    public void setLiveMood(final String userNumber, final String moodName){
+        new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    Log.e("ServerManager_LiveMood","Setting the live mood for the user:"+userNumber+" as:"+moodName);
+                    URL url = new URL(serverURL+ "/livefeed/" + userNumber +"/"+ moodName);
+                    Log.e("ServerManager_LiveURL", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setDoOutput(true);
+                    int responseCode = urlConnection.getResponseCode();
+                    if(responseCode!=200){
+                        throw new Exception("Live Mood couldn't be saved..");
+                    }
+                    Log.e("ServerManager_LiveMood", "Setting done for live mood for the user:"+userNumber);
+                } catch (Exception ee) {
+                    Log.e("ServerManager_LIVE_Err2", ee.getMessage());
+                    ee.printStackTrace();
+                }
+            }
+        }).start();
+    }
+    public String exitLiveMood(final String userNumber){
+        new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    Log.e("ServerManager_LiveMood","Exiting the live mood for the user:"+userNumber);
+                    URL url = new URL(serverURL+ "/livefeed/exit/" + userNumber );
+                    Log.e("ServerManager_LiveURL", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setDoOutput(true);
+                    int responseCode = urlConnection.getResponseCode();
+                    if(responseCode!=200){
+                        throw new Exception("Live Mood exit couldn't be done..");
+                    }
+                    Log.e("ServerManager_LiveMood", "Exiting done for live mood for the user:"+userNumber);
+                } catch (Exception ee) {
+                    Log.e("ServerManager_LIVE_Err1", ee.getMessage());
+                    ee.printStackTrace();
+                }
+            }
+        }).start();
+        return liveMood;
+    }
+    public void voteForLiveMood(final String userNumber, final int type){
+        new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    Log.e("ServerManager_LiveMood","Voting for live mood for the user:"+userNumber+" with type:"+type);
+                    URL url = new URL(serverURL+ "/livefeed/vote/" + userNumber +"/"+ type);
+                    Log.e("ServerManager_LiveURL", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setDoOutput(true);
+                    int responseCode = urlConnection.getResponseCode();
+                    if(responseCode!=200){
+                        throw new Exception("Vote for Live Mood couldn't be done..");
+                    }
+                    Log.e("ServerManager_LiveMood", "Voting done for live mood for the user:"+userNumber);
+                } catch (Exception ee) {
+                    Log.e("ServerManager_LIVE_Err3", ee.getMessage());
+                    ee.printStackTrace();
+                }
+            }
+        }).start();
+    }
+    // LIVE FEED FUNCTIONS COMPLETE
 
     public void readPlayListFromServer(final Context curContext, final String todaysDate){
         new Thread(new Runnable() {

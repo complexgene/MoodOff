@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.DBInternal;
 
 import java.util.ArrayList;
@@ -101,8 +102,8 @@ public class ContactList extends AppCompatActivity {
                 getOrStoreContactsTableData(1,allC);
             }
             ArrayList<String> contactsInList = new ArrayList<>();
-            for(String eachContact:allC.keySet()){
-                contactsInList.add(allC.get(eachContact)+" "+eachContact);
+            for(String eachContact: ContactsManager.friendsWhoUsesApp){
+                contactsInList.add(allC.get(eachContact)+"\n"+eachContact);
             }
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.displaycontactsfordedicate, contactsInList);
             lstNames.setAdapter(adapter);

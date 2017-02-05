@@ -64,7 +64,19 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link GenericMood#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GenericMood extends Moods implements View.OnClickListener{
+public class GenericMood extends Moods implements View.OnClickListener,AudioManager.OnAudioFocusChangeListener{
+
+    private AudioManager mAudioManager;
+    @Override
+    public void onAudioFocusChange(int i) {
+        if(i<=0){
+            mp.pause();
+        }
+        else{
+            mp.start();
+        }
+    }
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -104,6 +116,8 @@ public class GenericMood extends Moods implements View.OnClickListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -582,7 +596,7 @@ public class GenericMood extends Moods implements View.OnClickListener{
     }
 
     public void navigateContacts(View v){
-        if(mp==null || !mp.isPlaying()){
+        if(mp==null){
             Toast.makeText(getActivity().getApplicationContext(),"You have to play a song to dedicate.",Toast.LENGTH_SHORT).show();
         }
         else {
@@ -1171,6 +1185,9 @@ public class GenericMood extends Moods implements View.OnClickListener{
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mAudioManager.abandonAudioFocus(this);
+        ServerManager serverManager = new ServerManager();
+        serverManager.exitLiveMood(UserDetails.getPhoneNumber());
         Log.e("GenericMood","GM on Destroy");
         if(mp!=null) {
             releaseMediaPlayerObject();

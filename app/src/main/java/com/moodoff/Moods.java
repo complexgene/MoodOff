@@ -20,6 +20,8 @@ import android.widget.Toast;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.Messenger;
+import com.moodoff.helper.ServerManager;
+import com.moodoff.model.UserDetails;
 
 
 /**
@@ -174,6 +176,8 @@ public class Moods extends Fragment {
     }
 
     private void startParticularMood(String moodType){
+        ServerManager serverManager = new ServerManager();
+        serverManager.setLiveMood(UserDetails.getPhoneNumber(),moodType);
         if(AppData.allMoodPlayList.containsKey(moodType)) {
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             Fragment newFragment = GenericMood.newInstance(moodType, "b");

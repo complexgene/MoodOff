@@ -56,7 +56,18 @@ import java.util.HashMap;
  * Use the {@link NotificationFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NotificationFragment extends Fragment implements ViewPager.OnPageChangeListener{
+public class NotificationFragment extends Fragment implements ViewPager.OnPageChangeListener,AudioManager.OnAudioFocusChangeListener{
+    @Override
+    public void onAudioFocusChange(int i) {
+        if(i<=0){
+            mp.pause();
+        }
+        else{
+            mp.start();
+        }
+    }
+
+    private AudioManager mAudioManager;
     StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("Userdata.txt");
     @Override
     public void onPageSelected(int position) {
@@ -110,6 +121,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -547,7 +560,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     if(mediaPlayer!=null) {
                         currentSeekBar.setMax(mediaPlayer.getDuration());
                         seekUpdation();
-                        Log.e("Notification_Visibility","I stopped the spinner");
                         currentPlayButton.setVisibility(View.VISIBLE);
                         currentNotificationSpinner.setVisibility(View.GONE);
                         currentSeekBar.setEnabled(true);
@@ -625,6 +637,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mAudioManager.abandonAudioFocus(this);
         Log.e("Notification","Notification on Destroy");
         if(mp!=null) {
             releaseMediaPlayerObject(mp);

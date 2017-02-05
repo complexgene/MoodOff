@@ -97,6 +97,9 @@ public class Profile extends Fragment {
         loveTextStatus = (FloatingActionButton)view.findViewById(R.id.loveTextStatus);
         loveAudioStatus = (FloatingActionButton)view.findViewById(R.id.loveAudioStatus);
         txtViewCurrentMood = (TextView)view.findViewById(R.id.txtView_currentMood);
+        txtViewUserStatus = (TextView)view.findViewById(R.id.userStatus);
+        lastMoodListened = (TextView)view.findViewById(R.id.lastMoodListened);
+        btnCurrentMoodPic = (Button)view.findViewById(R.id.btn_currentMood);
         editBasicInfo = (FloatingActionButton)view.findViewById(R.id.editBasicInfo);
         myAudioStatusSong = new String();
         editAudioStatus = (ImageButton)view.findViewById(R.id.editAudioStatus);
@@ -109,10 +112,10 @@ public class Profile extends Fragment {
     View view,dialogView;
     ImageView profileImage;
     TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount;
-    TextView txtViewCurrentMood;
+    TextView txtViewCurrentMood,txtViewUserStatus, lastMoodListened;
     String myAudioStatusSong;
     ImageButton editAudioStatus, editTextStatus;
-    Button okButtonWidth,cancelButtonWidth,okButton,cancelButton;
+    Button okButtonWidth,cancelButtonWidth,okButton,cancelButton, btnCurrentMoodPic;
     FloatingActionButton loveTextStatus, loveAudioStatus, editBasicInfo;
     int screenHeight, screenWidth;
     ViewGroup mainContainer;
@@ -165,7 +168,7 @@ public class Profile extends Fragment {
             public void onClick(View v) {
                 Log.e("Profile_AudioSong",myAudioStatusSong.toString());
                 String myAudioStatusSongURL = HttpGetPostInterface.serverSongURL+myAudioStatusSong.replaceAll("@","/");
-                Messenger.print(getContext(),myAudioStatusSongURL);
+                //Messenger.print(getContext(),myAudioStatusSongURL);
                 playAudioStatusSong(myAudioStatusSongURL);
             }
         });
@@ -426,7 +429,7 @@ public class Profile extends Fragment {
             playButtonAndSeekBar.setLayoutParams(layoutDetails);
             final FloatingActionButton playButton = new FloatingActionButton(getContext());
             playButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-            playButton.setImageResource(R.drawable.play);
+            playButton.setImageResource(R.drawable.playdedicate);
             playButton.setSize(FloatingActionButton.SIZE_MINI);
             playButton.setId(++playButtonId);
             playButton.setOnClickListener(new View.OnClickListener() {
@@ -469,8 +472,9 @@ public class Profile extends Fragment {
         });
     }
 
-    boolean profileDetailsNotRetrievedYet = true;
+    public static boolean profileDetailsNotRetrievedYet = true;
     HashMap<String,String> profileDataParsed = new HashMap<>();
+    public static String currentMood = "Not Live";
     private void setUserProfileData(final String userPhoneNumber){
         final String serverURL = HttpGetPostInterface.serverURL;
         new Thread(new Runnable() {
@@ -493,7 +497,9 @@ public class Profile extends Fragment {
                     Log.e("Profile_Data", response.toString());
                     profileDataParsed = ParseNotificationData.parseAndGetProfileData(response.toString());
                     Log.e("Profile_parsedHM",profileDataParsed.get("name")+" "+profileDataParsed.get("genderpic"));
-                    profileDetailsNotRetrievedYet = false;
+                    ServerManager serverManager = new ServerManager();
+                    serverManager.getLiveMood(UserDetails.getPhoneNumber());
+                    while(profileDetailsNotRetrievedYet);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -529,9 +535,44 @@ public class Profile extends Fragment {
         myTextStatus.setTypeface(font);
         myTextStatus.setTextSize(20);
         myAudioStatusSong=profileDataParsed.get("audioStatusURL");
-        Messenger.print(getContext(),myAudioStatusSong);
+        //Messenger.print(getContext(),myAudioStatusSong);
         textStatusLoveCount.setText(profileDataParsed.get("textStatusLoveCount")+" people loved the status");
         audioStatusLoveCount.setText(profileDataParsed.get("audioStatusLoveCount")+" people loved the status");
+        Log.e("Profile____","gonna check live...");
+        String mood = currentMood.split("_")[0].trim();
+        boolean userIsNotLive = currentMood.split("_")[1].equals("0");
+        Log.e("Profile__",currentMood);
+        String userStatusText="";int userStatusColor=0;
+       if(userIsNotLive){
+           userStatusText = "[Offline]:";
+           userStatusColor = Color.rgb(255,0,0);
+           lastMoodListened.setText("Last Mood Listened..");
+       }
+        else{
+           userStatusText = "[Live]:";
+           userStatusColor = Color.rgb(0,255,0);
+           lastMoodListened.setText("Listening To Mood..");
+       }
+        txtViewUserStatus.setTextColor(userStatusColor);
+        txtViewUserStatus.setText(userStatusText);
+        btnCurrentMoodPic.setBackgroundResource(getResImage(mood));
+        txtViewCurrentMood.setText(Character.toUpperCase(mood.charAt(0))+mood.substring(1));
+        profileDetailsNotRetrievedYet = true;
+    }
+    private int getResImage(String currentMood){
+        switch(currentMood){
+            case "crazy":{return R.drawable.mood_crazy;}
+            case "on_tour":{return R.drawable.mood_ontour;}
+            case "old_era":{return R.drawable.mood_oldera;}
+            case "party":{return R.drawable.mood_party;}
+            case "workout":{return R.drawable.mood_workout;}
+            case "friends":{return R.drawable.mood_friends;}
+            case "romantic":{return R.drawable.mood_romantic1;}
+            case "dance":{return R.drawable.mood_dance;}
+            case "sad":{return R.drawable.mood_sad;}
+            case "missu":{return R.drawable.mood_missu;}
+        }
+        return 0;
     }
 
     private void getAndSetScreenSizes(){
@@ -570,6 +611,7 @@ public class Profile extends Fragment {
 
     @Override
     public void onDetach() {
+        Log.e("Profile_GM","On detach");
         releaseMediaPlayerObject(mediaPlayer);
         super.onDetach();
         mListener = null;
@@ -578,6 +620,8 @@ public class Profile extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //ServerManager serverManager = new ServerManager();
+        //serverManager.exitLiveMood(UserDetails.getPhoneNumber());
         Log.e("Profile","Profile on Destroy");
         if(mediaPlayer!=null) {
             releaseMediaPlayerObject(mediaPlayer);

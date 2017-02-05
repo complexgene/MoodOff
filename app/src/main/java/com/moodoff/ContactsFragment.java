@@ -175,7 +175,9 @@ public class ContactsFragment extends Fragment{
                             public void run() {
                                 Toast.makeText(getContext(),"Contacts Reading Finished..",Toast.LENGTH_SHORT).show();
 //                                spinner.setVisibility(View.INVISIBLE);
-                                populatePageWithContacts(vertically);
+                                vertically.removeAllViews();
+                                vertically.addView(getVerticalLine(5));
+                                addOwnProfileAndRefreshButton();
                             }
                         });
                     }
