@@ -59,11 +59,12 @@ import java.util.HashMap;
 public class NotificationFragment extends Fragment implements ViewPager.OnPageChangeListener,AudioManager.OnAudioFocusChangeListener{
     @Override
     public void onAudioFocusChange(int i) {
-        if(i<=0){
-            mp.pause();
-        }
-        else{
-            mp.start();
+        if(mp!=null && mp.isPlaying()) {
+            if (i <= 0) {
+                mp.pause();
+            } else {
+                mp.start();
+            }
         }
     }
 
@@ -629,20 +630,24 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     }
     @Override
     public void onDetach() {
-        releaseMediaPlayerObject(mp);
+        if(AllTabs.mViewPager.getCurrentItem() == 1) {
+            releaseMediaPlayerObject(mp);
+            mListener = null;
+        }
         super.onDetach();
-        mListener = null;
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        mAudioManager.abandonAudioFocus(this);
-        Log.e("Notification","Notification on Destroy");
-        if(mp!=null) {
-            releaseMediaPlayerObject(mp);
-            mp = null;
+        if(AllTabs.mViewPager.getCurrentItem() == 1) {
+            mAudioManager.abandonAudioFocus(this);
+            Log.e("Notification", "Notification on Destroy");
+            if (mp != null) {
+                releaseMediaPlayerObject(mp);
+                mp = null;
+            }
         }
+        super.onDestroy();
     }
 
     public interface OnFragmentInteractionListener {

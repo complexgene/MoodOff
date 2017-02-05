@@ -69,11 +69,12 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     private AudioManager mAudioManager;
     @Override
     public void onAudioFocusChange(int i) {
-        if(i<=0){
-            mp.pause();
-        }
-        else{
-            mp.start();
+        if(mp!=null && mp.isPlaying()) {
+            if (i <= 0) {
+                mp.pause();
+            } else {
+                mp.start();
+            }
         }
     }
 
@@ -1174,26 +1175,33 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         }
     }
 
+
+
     @Override
     public void onDetach() {
-        releaseMediaPlayerObject();
+        if(AllTabs.mViewPager.getCurrentItem()==0) {
+            Log.e("GenericMood", "GM on Detach");
+            releaseMediaPlayerObject();
+            ServerManager serverManager = new ServerManager();
+            serverManager.exitLiveMood(UserDetails.getPhoneNumber());
+            mListener = null;
+            playOrPauseParm = 0;
+        }
         super.onDetach();
-        mListener = null;
-        playOrPauseParm=0;
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        mAudioManager.abandonAudioFocus(this);
-        ServerManager serverManager = new ServerManager();
-        serverManager.exitLiveMood(UserDetails.getPhoneNumber());
-        Log.e("GenericMood","GM on Destroy");
-        if(mp!=null) {
-            releaseMediaPlayerObject();
-            mp = null;
+        if(AllTabs.mViewPager.getCurrentItem()==0) {
+            mAudioManager.abandonAudioFocus(this);
+            Log.e("GenericMood", "GM on Destroy");
+            if (mp != null) {
+                releaseMediaPlayerObject();
+                mp = null;
+            }
+            playOrPauseParm = 0;
         }
-        playOrPauseParm=0;
+        super.onDestroy();
     }
 
 

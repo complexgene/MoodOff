@@ -59,6 +59,7 @@ import static android.content.Context.MODE_PRIVATE;
  * create an instance of this fragment.
  */
 public class ContactsFragment extends Fragment{
+    public static boolean openedAProfile = false;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -195,6 +196,7 @@ public class ContactsFragment extends Fragment{
         myProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                openedAProfile = true;
                 loadProfile(UserDetails.getPhoneNumber());
             }
         });
@@ -251,6 +253,7 @@ public class ContactsFragment extends Fragment{
                 contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        openedAProfile = true;
                         loadProfile(eachFriendContact);
                     }
                 });
@@ -432,8 +435,9 @@ public class ContactsFragment extends Fragment{
     }
     @Override
     public void onDetach() {
-        super.onDetach();
+        Log.e("ContactsFragment","ContactsFragment onDetach");
         mListener = null;
+        super.onDetach();
     }
     /**
      * This interface must be implemented by activities that contain this

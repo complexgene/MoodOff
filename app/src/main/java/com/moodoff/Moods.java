@@ -176,6 +176,10 @@ public class Moods extends Fragment {
     }
 
     private void startParticularMood(String moodType){
+        if(ContactsFragment.openedAProfile){
+            Log.e("MOODS",super.getId()+"");
+            ContactsFragment.openedAProfile = false;
+        }
         ServerManager serverManager = new ServerManager();
         serverManager.setLiveMood(UserDetails.getPhoneNumber(),moodType);
         if(AppData.allMoodPlayList.containsKey(moodType)) {

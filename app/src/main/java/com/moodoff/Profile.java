@@ -51,7 +51,21 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Profile extends Fragment {
+public class Profile extends Fragment implements AudioManager.OnAudioFocusChangeListener{
+
+    private AudioManager mAudioManager;
+
+    @Override
+    public void onAudioFocusChange(int i) {
+        if(mediaPlayer!=null && mediaPlayer.isPlaying()) {
+            if (i <= 0) {
+                mediaPlayer.pause();
+            } else {
+                mediaPlayer.start();
+            }
+        }
+    }
+
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -77,6 +91,8 @@ public class Profile extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -611,22 +627,27 @@ public class Profile extends Fragment {
 
     @Override
     public void onDetach() {
-        Log.e("Profile_GM","On detach");
-        releaseMediaPlayerObject(mediaPlayer);
+        if(AllTabs.mViewPager.getCurrentItem()==2) {
+            ContactsFragment.openedAProfile = false;
+            Log.e("Profile_GM", "On detach");
+            releaseMediaPlayerObject(mediaPlayer);
+            mListener = null;
+        }
         super.onDetach();
-        mListener = null;
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        //ServerManager serverManager = new ServerManager();
-        //serverManager.exitLiveMood(UserDetails.getPhoneNumber());
-        Log.e("Profile","Profile on Destroy");
-        if(mediaPlayer!=null) {
-            releaseMediaPlayerObject(mediaPlayer);
-            mediaPlayer = null;
+        if(AllTabs.mViewPager.getCurrentItem()==2) {
+            ContactsFragment.openedAProfile = false;
+            mAudioManager.abandonAudioFocus(this);
+            Log.e("Profile", "Profile on Destroy");
+            if (mediaPlayer != null) {
+                releaseMediaPlayerObject(mediaPlayer);
+                mediaPlayer = null;
+            }
         }
+        super.onDestroy();
     }
 
     /**
