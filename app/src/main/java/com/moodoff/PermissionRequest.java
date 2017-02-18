@@ -22,6 +22,8 @@ public class PermissionRequest extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permission_request);
         Log.e("ABC","abc");
+        //Intent ii = new Intent(this,Start.class);
+        //startActivity(ii);
         askForPermissions();
     }
 

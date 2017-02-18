@@ -56,18 +56,10 @@ public class DBHelper extends SQLiteOpenHelper {
     }
     public void createTable(String tableName,LinkedHashMap<String,String> columnNameAndDataType){
         SQLiteDatabase mydatabase = getWritableDatabase();
-        String query = "CREATE TABLE IF NOT EXISTS "+tableName+"(";
-        for(String columns : columnNameAndDataType.keySet()) {
-            query=query+(columns+" "+columnNameAndDataType.get(columns)+",");
-        }
-        // To avoid the last COMMA
-        query=query.substring(0,query.length()-1)+");";
-        Log.e("DBHelper_createQuery",query+" "+columnNameAndDataType.size());
-        mydatabase.execSQL(query);
         if(tableName.equals("allcontacts")){
-            SQLiteDatabase dbW = getWritableDatabase();
-            dbW.execSQL("drop table if exists allcontacts;");
-            Log.e("DBHelper_allcntct_TBL","For allcontacts table we need to populate data here..");
+            //SQLiteDatabase dbW = getWritableDatabase();
+            mydatabase.execSQL("drop table if exists allcontacts;");
+            Log.e("DBHelper_allcntct_TBL","For allcontacts table we will be populating data here itself..");
 
             new Thread(new Runnable() {
                 @Override
@@ -76,6 +68,16 @@ public class DBHelper extends SQLiteOpenHelper {
                     getOrStoreContactsTableData(1, allReadContacts);
                 }
             }).start();
+        }
+        else{
+            String query = "CREATE TABLE IF NOT EXISTS "+tableName+"(";
+            for(String columns : columnNameAndDataType.keySet()) {
+                query=query+(columns+" "+columnNameAndDataType.get(columns)+",");
+            }
+            // To avoid the last COMMA
+            query=query.substring(0,query.length()-1)+");";
+            Log.e("DBHelper_createQuery",query+" "+columnNameAndDataType.size());
+            mydatabase.execSQL(query);
         }
     }
     public boolean todoWorkEntry(String API){
@@ -243,6 +245,18 @@ public class DBHelper extends SQLiteOpenHelper {
         myDatabaseWritable = getWritableDatabase();
         myDatabaseWritable.execSQL("delete from rnotifications");
     }
+
+    public void changeStatusOfUsersInContactsTable(ArrayList<String> allUsers){
+        Log.e("DBHelper_StatusChngQury","Initiating status change of few users..");
+        SQLiteDatabase writer = getWritableDatabase();
+        for(String phNo : allUsers){
+            String updateQuery = "update allcontacts set status=1 where phone_no='"+phNo+"'";
+            Log.e("DBHelper_StatusChngQury",updateQuery);
+            writer.execSQL(updateQuery);
+        }
+        Log.e("DBHelper_StatusChngQury","Status change of few users done..");
+    }
+
     public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, LinkedHashMap<String,String> allContacts){
         SQLiteDatabase mydatabaseR = getReadableDatabase(),mydatabaseW = getWritableDatabase();
         try {
@@ -261,17 +275,16 @@ public class DBHelper extends SQLiteOpenHelper {
             }
             // First time contact table create or REFRESH done.
             else{
-                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(phone_no VARCHAR,name VARCHAR);";
+                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(phone_no VARCHAR,name VARCHAR, status INTEGER);";
                 mydatabaseW.execSQL(createQuery);
-                Log.e("Start_TBLCRT","allcontacts table created..");
+                Log.e("DBHelper_TBLCRT",createQuery+"\nallcontacts table created..");
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
                     mydatabaseW = getWritableDatabase();
-                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact).replaceAll("'","''")+"');";
+                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+allContacts.get(eachContact).replaceAll("'","''")+"',0);";
                     Log.e("DBHelper_INSRT",insertQuery);
                     mydatabaseW.execSQL(insertQuery);
                 }
-
             }
         }catch (Exception ee){
             Log.e("DBHelper_Err",ee.getMessage());

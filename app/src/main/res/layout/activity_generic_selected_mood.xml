@@ -179,7 +179,7 @@
                     android:layout_height="wrap_content"
 
                     android:gravity="center"
-                    android:background="@color/notification_me"
+                    android:background="@color/appcolor"
                     >
                     <LinearLayout
                         android:layout_width="wrap_content"

@@ -24,7 +24,7 @@
     <item
         android:id="@+id/storybg"
         android:orderInCategory="100"
-        android:title="Show Story"
+        android:title="New Story"
         app:showAsAction="never" />
     <item
         android:id="@+id/playGame"

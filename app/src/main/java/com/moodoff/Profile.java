@@ -15,6 +15,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -58,7 +60,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     @Override
     public void onAudioFocusChange(int i) {
         if(mediaPlayer!=null && mediaPlayer.isPlaying()) {
-            if (i <= 0) {
+            if (i <= 0 && AllTabs.mViewPager.getCurrentItem()==2) {
                 mediaPlayer.pause();
             } else {
                 mediaPlayer.start();
@@ -109,17 +111,18 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         myTextStatus = (TextView)view.findViewById(R.id.myTextStatus);
         textStatusLoveCount = (TextView)view.findViewById(R.id.textStatusLoveCount);
         audioStatusLoveCount = (TextView)view.findViewById(R.id.audioStatusLoveCount);
-        playAudioStatusButton = (FloatingActionButton)view.findViewById(R.id.playAudioStatus);
-        loveTextStatus = (FloatingActionButton)view.findViewById(R.id.loveTextStatus);
-        loveAudioStatus = (FloatingActionButton)view.findViewById(R.id.loveAudioStatus);
+        playAudioStatusButton = (ImageButton)view.findViewById(R.id.playAudioStatus);
+        loveTextStatus = (ImageButton)view.findViewById(R.id.loveTextStatus);
+        loveAudioStatus = (ImageButton)view.findViewById(R.id.loveAudioStatus);
         txtViewCurrentMood = (TextView)view.findViewById(R.id.txtView_currentMood);
         txtViewUserStatus = (TextView)view.findViewById(R.id.userStatus);
         lastMoodListened = (TextView)view.findViewById(R.id.lastMoodListened);
         btnCurrentMoodPic = (Button)view.findViewById(R.id.btn_currentMood);
-        editBasicInfo = (FloatingActionButton)view.findViewById(R.id.editBasicInfo);
+        editBasicInfo = (ImageButton)view.findViewById(R.id.editBasicInfo);
         myAudioStatusSong = new String();
         editAudioStatus = (ImageButton)view.findViewById(R.id.editAudioStatus);
         editTextStatus = (ImageButton)view.findViewById(R.id.editTextStatus);
+        backbutton = (ImageButton)view.findViewById(R.id.backbutton);
         seekBar_Profile = (SeekBar)view.findViewById(R.id.myAudioStatusProgressBar);
         seekBar_Profile.setEnabled(false);
         spinner = (ProgressBar) view.findViewById(R.id.profileProgressBar);
@@ -129,9 +132,9 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     ImageView profileImage;
     TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount;
     TextView txtViewCurrentMood,txtViewUserStatus, lastMoodListened;
-    ImageButton editAudioStatus, editTextStatus;
-    Button okButtonWidth,cancelButtonWidth,okButton,cancelButton, btnCurrentMoodPic;
-    FloatingActionButton loveTextStatus, loveAudioStatus, editBasicInfo;
+    ImageButton editAudioStatus, editTextStatus,okButton,cancelButton,okButtonWidth,cancelButtonWidth;
+    Button  btnCurrentMoodPic;
+    ImageButton loveTextStatus, loveAudioStatus, editBasicInfo, backbutton;
     int screenHeight, screenWidth;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
@@ -139,7 +142,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     StoreRetrieveDataInterface fileOperations;
     String profileOfUser;
     public static View dialogView;
-    public static FloatingActionButton playAudioStatusButton;
+    public static ImageButton playAudioStatusButton;
     public static MediaPlayer mediaPlayer = null;
     public static Boolean isSongPlaying = false;
     public static ProgressBar spinner;
@@ -169,6 +172,12 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
 
         setUserProfileData(profileOfUser);
 
+        backbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getFragmentManager().popBackStackImmediate();
+            }
+        });
         editTextStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -333,23 +342,23 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     }
 
     private void editStatus(int textOrAudioStatus){
+
         final Dialog fbDialogue = new Dialog(view.getContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         fbDialogue.getWindow().setBackgroundDrawable(new ColorDrawable(Color.argb(100, 0, 0, 0)));
 
         dialogView = mainInflater.inflate(R.layout.fragment_selectsong, mainContainer, false);
         dialogContainer = (LinearLayout)dialogView.findViewById(R.id.eachRingToneSong);
         statusChangeTitle = (TextView)dialogView.findViewById(R.id.statusChangeTitle);
-        okButton = (Button)dialogView.findViewById(R.id.songselectok);
-        cancelButton = (Button)dialogView.findViewById(R.id.songselectcancel);
-
+        okButton = (ImageButton)dialogView.findViewById(R.id.songselectok);
+        cancelButton = (ImageButton)dialogView.findViewById(R.id.songselectcancel);
         if(textOrAudioStatus==0){
             editUserTextStatus(fbDialogue);
         }
         else{
             editUserAudioStatus(fbDialogue);
         }
-        getAndSetScreenSizes();
-        setWidthOfButtonAcrossScreen();
+        //getAndSetScreenSizes();
+        //setWidthOfButtonAcrossScreen();
         fbDialogue.setContentView(dialogView);
         fbDialogue.setCancelable(true);
         fbDialogue.show();
@@ -367,7 +376,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                 String oldStatus = myTextStatus.getText().toString();
                 String newStatus = tv.getText().toString();
                 if(oldStatus.equals(newStatus)){
-                    Toast.makeText(getContext(),"Same as previous status",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),"Looks like nothing's changed..!!",Toast.LENGTH_SHORT).show();
                 }
                 else{
                     if(writeTheStatusChangeToServerAndFile(0,tv.getText().toString())){
@@ -417,14 +426,17 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     ArrayList<String> allSongsInMap = new ArrayList<>();
     private void editUserAudioStatus(final Dialog fbDialogue){
         int playButtonId = 0;
-        statusChangeTitle.setText("Edit your Audio Status");
+        statusChangeTitle.setText("Change Audio Status");
         dialogContainer.removeAllViews();
         HashMap<String,ArrayList<String>> allSongs = AppData.allMoodPlayList;
         final RadioGroup rg = new RadioGroup(getContext());
 
         for(final String eachMood : allSongs.keySet()) {
+            int i=0;
             for(String eachSong : allSongs.get(eachMood)) {
+                if(i++<5)
                 allSongsInMap.add(eachMood+" : "+eachSong);
+                else break;
             }
         }
         RadioButton[] allSongsRadio = new RadioButton[allSongsInMap.size()];
@@ -434,24 +446,30 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             final String eachSong = allSongsInMap.get(i).split(" : ")[1];
             rg.setOrientation(LinearLayout.VERTICAL);
             LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.topMargin = 25;
+            layoutDetails.leftMargin = 20;
+            layoutDetails.rightMargin = 20;
             rg.setLayoutParams(layoutDetails);
-            rg.setBackgroundColor(Color.RED);
+            rg.setBackgroundResource(R.drawable.songnamedisplaypanel);
             rg.setGravity(Gravity.CENTER_VERTICAL);
+
+            rg.addView(getHorizontalLine(1));
+
+            allSongsRadio[i] = new RadioButton(getContext());
+            rg.addView(allSongsRadio[i]);
             TextView songName = new TextView(dialogView.getContext());
-            songName.setText(eachSong.replaceAll("\\.mp3",""));
+            songName.setPadding(50,0,0,0);
+            songName.setText(eachSong.replaceAll("\\.mp3","").replaceAll("_"," "));
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.topMargin = 15;
-            songName.setGravity(Gravity.CENTER_HORIZONTAL);
+            layoutDetails.leftMargin = 40;
             songName.setTypeface(Typeface.DEFAULT_BOLD);
             songName.setLayoutParams(layoutDetails);
             rg.addView(songName);
 
             LinearLayout playButtonAndSeekBar = new LinearLayout(getContext());
-            playButtonAndSeekBar.setGravity(Gravity.CENTER_VERTICAL);
+            playButtonAndSeekBar.setGravity(Gravity.CENTER);
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.leftMargin = 50;
-            layoutDetails.bottomMargin = 15;
+            layoutDetails.leftMargin = 20;
+            layoutDetails.rightMargin = 20;
             playButtonAndSeekBar.setLayoutParams(layoutDetails);
 
             //Spinner
@@ -459,10 +477,26 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             audioStatusSelectionProgressBar.setId((i+1)+2000000);
             audioStatusSelectionProgressBar.setVisibility(View.GONE);
 
+            //PlayButton
+            final ImageButton playButton = new ImageButton(getContext());
+            playButton.setImageResource(R.drawable.playdedicate);
+            playButton.setBackgroundResource(0);
+            playButton.setId(playButtonId++);
+            playButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String songURL = HttpGetPostInterface.serverSongURL+eachMood+"/"+eachSong;
+                    //Messenger.print(getContext(),songURL);
+                    Log.e("ProfilePLAYBTN",songURL);
+                    currentPlayOrStopButtonId = v.getId();
+                    currentView = v;
+                    songFileName = songURL;
+                    playAudioStatusSelectionSong();
+                }
+            });
             //Seekbar
             SeekBar seekBar_ProfileForEachSong = new SeekBar(getContext());
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutDetails.rightMargin = 50;
             seekBar_ProfileForEachSong.setEnabled(false);
             seekBar_ProfileForEachSong.setLayoutParams(layoutDetails);
             seekBar_ProfileForEachSong.setId((i+1)+1000000);
@@ -479,30 +513,11 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 }
             });
+            playButtonAndSeekBar.addView(playButton);
+            playButtonAndSeekBar.addView(audioStatusSelectionProgressBar);
+            playButtonAndSeekBar.addView(seekBar_ProfileForEachSong);
 
-            final FloatingActionButton playButton = new FloatingActionButton(getContext());
-            playButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-            playButton.setImageResource(R.drawable.playdedicate);
-            playButton.setSize(FloatingActionButton.SIZE_MINI);
-            playButton.setId(playButtonId++);
-            playButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String songURL = HttpGetPostInterface.serverSongURL+eachMood+"/"+eachSong;
-                    //Messenger.print(getContext(),songURL);
-                    Log.e("ProfilePLAYBTN",songURL);
-                    currentPlayOrStopButtonId = v.getId();
-                    currentView = v;
-                    songFileName = songURL;
-                    playAudioStatusSelectionSong();
-                }
-            });
-
-            allSongsRadio[i] = new RadioButton(getContext());
-            rg.addView(allSongsRadio[i]);
-            rg.addView(playButton);
-            rg.addView(audioStatusSelectionProgressBar);
-            rg.addView(seekBar_ProfileForEachSong);
+            rg.addView(playButtonAndSeekBar);
         }
         dialogContainer.addView(rg);
         okButton.setOnClickListener(new View.OnClickListener() {
@@ -529,7 +544,17 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         });
     }
 
-    public static FloatingActionButton currentAudioStatusSelectionPlayOrStopButton;
+    private View getHorizontalLine(int width){
+        View v = new View(getContext());
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, width);
+        layoutParams.leftMargin = 50;
+        layoutParams.rightMargin = 50;
+        v.setLayoutParams(layoutParams);
+        v.setBackgroundColor(Color.parseColor("#B3B3B3"));
+        return v;
+    }
+
+    public static ImageButton currentAudioStatusSelectionPlayOrStopButton;
     public static ProgressBar currentAudioStatusSelectionSpinner;
     public static SeekBar currentAudioStatusSelectionSeekbar;
     public static int currentPlayOrStopButtonId = -1, idOfTheLastPlayButtonClicked = -1;
@@ -555,7 +580,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
 
     public static void playAudioStatusSelectionSong(){
 //        Log.e("Profile_SelectStatus", currentView.getId() + "");
-        currentAudioStatusSelectionPlayOrStopButton = (FloatingActionButton) currentView.findViewById(currentPlayOrStopButtonId);
+        currentAudioStatusSelectionPlayOrStopButton = (ImageButton) currentView.findViewById(currentPlayOrStopButtonId);
         currentAudioStatusSelectionSpinner = (ProgressBar) dialogView.findViewById((currentPlayOrStopButtonId+1)+2000000);
         currentAudioStatusSelectionSeekbar = (SeekBar) dialogView.findViewById((currentPlayOrStopButtonId+1)+1000000);
         Log.e("Profile_SelectStatus","I started the spinner");
@@ -563,7 +588,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         currentAudioStatusSelectionSpinner.setVisibility(View.VISIBLE);
         if(currentPlayOrStopButtonId != idOfTheLastPlayButtonClicked) {
             if (idOfTheLastPlayButtonClicked != -1) {
-                FloatingActionButton lastPlayedButton = (FloatingActionButton) lastView.findViewById(idOfTheLastPlayButtonClicked);
+                ImageButton lastPlayedButton = (ImageButton) lastView.findViewById(idOfTheLastPlayButtonClicked);
                 lastPlayedButton.setImageResource(R.drawable.playdedicate);
                 SeekBar lastSeekBar = (SeekBar) dialogView.findViewById((idOfTheLastPlayButtonClicked+1)+1000000);
                 lastSeekBar.setProgress(0);
@@ -665,7 +690,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                     profileDataParsed = ParseNotificationData.parseAndGetProfileData(response.toString());
                     Log.e("Profile_parsedHM",profileDataParsed.get("name")+" "+profileDataParsed.get("genderpic"));
                     ServerManager serverManager = new ServerManager();
-                    serverManager.getLiveMood(UserDetails.getPhoneNumber());
+                    serverManager.getLiveMood(userPhoneNumber);
                     while(profileDetailsNotRetrievedYet);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -691,16 +716,13 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         String email = profileDataParsed.get("email");
         if(email.length()>17){email=email.substring(0,15)+"...";}
         String dob = profileDataParsed.get("dob");
-        myName.setText(name);
+        myName.setText(name.replaceAll("_"," "));
         myPhNo.setText(phNo);
         //myEmail.setText(email);
         //myDob.setText(dob);
         profileImage.setImageResource(getPicFor(profileDataParsed.get("genderpic")));
         new UserDetails();
         myTextStatus.setText(profileDataParsed.get("textStatus").replaceAll("_"," "));
-        Typeface font = AppData.getAppFont(getContext());
-        myTextStatus.setTypeface(font);
-        myTextStatus.setTextSize(20);
         myAudioStatusSong=profileDataParsed.get("audioStatusURL");
         //Messenger.print(getContext(),myAudioStatusSong);
         textStatusLoveCount.setText(profileDataParsed.get("textStatusLoveCount")+" people loved the status");
@@ -751,11 +773,11 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     }
 
     public void setWidthOfButtonAcrossScreen(){
-        okButtonWidth = (Button)dialogView.findViewById(R.id.songselectok);
-        cancelButtonWidth = (Button)dialogView.findViewById(R.id.songselectcancel);
+        /*okButtonWidth = (ImageButton)dialogView.findViewById(R.id.songselectok);
+        cancelButtonWidth = (ImageButton)dialogView.findViewById(R.id.songselectcancel);
         okButtonWidth.setWidth((int)Math.floor(0.5*screenWidth));
         cancelButtonWidth.setWidth((int)Math.floor(0.5*screenWidth));
-
+*/
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -778,9 +800,9 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
 
     @Override
     public void onDetach() {
+        Log.e("Profile_onDetach", "OnDetach");
         if(AllTabs.mViewPager.getCurrentItem()==2) {
             ContactsFragment.openedAProfile = false;
-            Log.e("Profile_GM", "On detach");
             releaseMediaPlayerObject(mediaPlayer);
             mListener = null;
         }
@@ -788,11 +810,17 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     }
 
     @Override
+    public void onDestroyView() {
+        Log.e("Profile_onDestroyView","onDestroyView");
+        super.onDestroyView();
+    }
+
+    @Override
     public void onDestroy() {
+        Log.e("Profile_onDestroy","onDestroy");
         if(AllTabs.mViewPager.getCurrentItem()==2) {
             ContactsFragment.openedAProfile = false;
             mAudioManager.abandonAudioFocus(this);
-            Log.e("Profile", "Profile on Destroy");
             if (mediaPlayer != null) {
                 releaseMediaPlayerObject(mediaPlayer);
                 mediaPlayer = null;
@@ -801,16 +829,6 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         super.onDestroy();
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

@@ -13,6 +13,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -26,6 +27,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RemoteViews;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +49,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import static com.moodoff.helper.HttpGetPostInterface.serverURL;
 
@@ -67,50 +70,69 @@ public class ServerManager{
     }
 
     public void fetchContactsFromServer() {
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
-            BufferedReader bufferedReader = null;
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Log.e("ServerManager_CNTCT_RD","Start reading contacts from Server");
-                    URL url = new URL(serverURL + "/users/all");
-                    Log.e("ServerManager_ReadURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    InputStream is = urlConnection.getInputStream();
-                    isr = new InputStreamReader(is);
-                    int data = isr.read();
-                    final StringBuilder response = new StringBuilder("");
-                    while (data != -1) {
-                        response.append((char) data);
-                        data = isr.read();
-                    }
-                    Log.e("ServerManager_CNTCT_RD",response.toString());
-                    ContactsManager.allReadContactsFromDBServer = ParseNotificationData.parseAllContacts(response.toString());
-                    ArrayList<String> contactNumbers = new ArrayList<>(),contactsToBeRemoved = new ArrayList<>();
-                    for(String eachContactNo : ContactsManager.allReadContactsFromDBServer){
-                     if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(UserDetails.getPhoneNumber())){
-                         contactNumbers.add(eachContactNo);
-                     }
-                    }
-                    for(String eachContact:ContactsManager.allReadContacts.keySet()) {
-                        contactsToBeRemoved.add(eachContact);
-                    }
-                    contactsToBeRemoved.removeAll(contactNumbers);
+                new Thread(new Runnable() {
+                    HttpURLConnection urlConnection = null;
+                    InputStreamReader isr = null;
+                    @Override
+                    public void run() {
+                        try {
+                            Log.e("ServerMan_AppUsers","Start reading Users from Server every 13 secs");
+                            URL url = new URL(serverURL + "/users/all");
+                            Log.e("ServerMan_AppUsers_URL", url.toString());
+                            urlConnection = (HttpURLConnection) url.openConnection();
+                            InputStream is = urlConnection.getInputStream();
+                            isr = new InputStreamReader(is);
+                            int data = isr.read();
+                            final StringBuilder response = new StringBuilder("");
+                            while (data != -1) {
+                                response.append((char) data);
+                                data = isr.read();
+                            }
+                            // Reading all the registered Users
+                            ContactsManager.allReadContactsFromDBServer = ParseNotificationData.parseAllContacts(response.toString());
+                            ArrayList<String> contactNumbers = new ArrayList<>(),contactsToBeRemoved = new ArrayList<>();
+                            //Iterate through each of them
+                            for(String eachContactNo : ContactsManager.allReadContactsFromDBServer){
+                                // If the person is in my contact list and if its not my own number
+                                if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(UserDetails.getPhoneNumber())){
+                                    contactNumbers.add(eachContactNo);
+                                }
+                            }
+                            int currentCountOfAppUsersInMyContacts = contactNumbers.size();
+                            if(currentCountOfAppUsersInMyContacts>ContactsManager.countFriendsUsingApp){
+                                Log.e("ServerMan_AppUsers","Got some new app users\nUpdate the data containers\n Refresh the contacts display view..");
+                                for(String eachno : contactNumbers){
+                                    if(!ContactsManager.friendsWhoUsesApp.contains(eachno)){
+                                        ContactsManager.friendsWhoUsesApp.add(eachno);
+                                        ContactsManager.friendsWhoDoesntUseApp.remove(eachno);
+                                        Log.e("ServerMan_AppUsers_New","Added to users and deleted from non-users");
+                                        Log.e("ServerMan_AppUsers_New",ContactsManager.friendsWhoUsesApp.toString());
+                                    }
+                                }
+                                // Update the container counts now as based on counts only the above is triggered
+                                ContactsManager.countFriendsUsingApp = ContactsManager.friendsWhoUsesApp.size();
+                                ContactsManager.countFriendsNotUsingApp = ContactsManager.friendsWhoDoesntUseApp.size();
+                                // change the status to 1 for these new users
+                                DBHelper dbHelper = new DBHelper(context);
+                                dbHelper.changeStatusOfUsersInContactsTable(contactNumbers);
+                                // update the contactsFragment list
+                                ContactsFragment.updateViewCalled = true;
+                               // Notify users that some new friends joined
 
-                    Log.e("ServerManager_USES", contactNumbers.toString());
-                    Log.e("ServerManager_DOESNTUSE", contactsToBeRemoved.toString());
-                    ContactsManager.friendsWhoUsesApp = contactNumbers;
-                    ContactsManager.friendsWhoDoesntUseApp = contactsToBeRemoved;
-
-                    Start.fetchContactsFromServerNotComplete = false;
-                    } catch (Exception ee) {
-                    Log.e("ServerManager_Not_Err0", ee.getMessage());
-                    ee.printStackTrace();
-                }
+                            }
+                            Start.fetchContactsFromServerNotComplete = false;
+                        } catch (Exception ee) {
+                            Log.e("ServerManager_Not_Err0", ee.getMessage());
+                            ee.printStackTrace();
+                        }
+                    }
+                }).start();
+                fetchContactsFromServer();
             }
-        }).start();
+        },13000);
     }
 
     // LIVE FEED FUNCTIONS
@@ -361,7 +383,6 @@ public class ServerManager{
                             else{
                                 //Log.e("ServerManager_allNot","No new Notifications..");
                             }
-
                             //Log.e("ServerManager_Not_Read", "Notification read complete from server");
                         } catch (Exception ee) {
                             Log.e("ServerManager_Not_Err1", ee.getMessage());
@@ -387,14 +408,18 @@ public class ServerManager{
         // Read Complete
 
         final Activity currActivity = (Activity)context;
+        String notificationTextSingularPlural="notification";
+        if(currentNumberOfUnseenNotifications>1)notificationTextSingularPlural="notifications";
         final NotificationCompat.Builder builder =
             new NotificationCompat.Builder(currActivity)
                     .setSmallIcon(R.drawable.btn_dedicate)
                     .setColor(001500)
                     .setContentTitle("MoodOff")
-                    .setContentText(UserDetails.getUserName()+ "!! "+currentNumberOfUnseenNotifications+" unseen notifications!!");
+                    .setWhen(System.currentTimeMillis())
+                    .setTicker(UserDetails.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" new "+notificationTextSingularPlural+"!!")
+                    .setContentText(UserDetails.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" unseen "+notificationTextSingularPlural+"!!");
 
-        final Intent notificationIntent = new Intent(currActivity, Start.class);
+        final Intent notificationIntent = new Intent(currActivity, AllTabs.class);
 
         if(currActivity==null){
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -543,7 +568,7 @@ public class ServerManager{
         },0);
     }
 
-    private String getStoryName(String moodType){return "story1.txt";}
+    private String getStoryName(String moodType){return "story"+new Random().nextInt(14)+".txt";}
 
     public void loadStory(final String currentMood, final Activity curActivity, final TextView storyTitleTV, final TextView storyBodyTV, final ProgressBar storyLoadSpinner){
         new Handler().postDelayed(new Runnable() {
@@ -555,7 +580,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/" + currentMood + "/" + getStoryName(currentMood));
+                            URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/allstories/" + getStoryName(currentMood));
                             Log.e("GenericMood_Story_url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mainLyt"
-    android:background="@color/colorAccent"
+    android:background="@color/appcolor"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
     <LinearLayout
@@ -14,13 +14,12 @@
             android:id="@+id/statusChangeTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="Select the Song"
-            android:typeface="normal"
-            android:textSize="24sp"
-            android:textStyle="normal|bold"
-            android:fontFamily="serif"
-            android:textColor="?attr/colorAccent" />
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:text="Change Audio Status"
+            android:background="@drawable/greenbuttonseparatorpanel" />
 
     </LinearLayout>
     <ScrollView
@@ -28,42 +27,41 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/selectsongtitle"
+        android:background="@color/appcolor_backup1"
         >
         <LinearLayout
             android:id="@+id/eachRingToneSong"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <!--<TextView
-                android:id="@+id/song1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="abcde"
-                />-->
         </LinearLayout>
     </ScrollView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:gravity="bottom"
-        android:background="@color/light_yellow"
+        android:orientation="horizontal"
         >
-        <Button
+        <ImageButton
+            android:layout_weight="1"
             android:id="@+id/songselectok"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/buttonborder"
-            android:text="OK"
-            android:textColor="@color/black" />
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:src="@drawable/img_tick"
+            android:background="@drawable/greenbuttonseparatorpanel"
+            />
 
-        <Button
+        <ImageButton
+            android:layout_weight="1"
             android:id="@+id/songselectcancel"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Cancel"
-            android:textColor="@color/black"
-            android:background="@drawable/buttonborder"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:src="@drawable/img_cancel"
+            android:background="@drawable/greenbuttonseparatorpanel"
             />
     </LinearLayout>
 

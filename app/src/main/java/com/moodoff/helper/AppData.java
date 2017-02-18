@@ -18,15 +18,11 @@ public class AppData {
     public static int lovedDedicateNewCount = 0;
     public static ArrayList<String> allNotifications;
     public static int noOfFriendUsesTheApp = 0;
+    public static String backPressedFragement="";
+    public static int noOfTimesBackPressed=0;
 
     public static Typeface getAppFont(Context ctx){
         return Typeface.createFromAsset(ctx.getAssets(), "fonts/BLKCHCRY.TTF");
     }
 
-    /*public static HashMap<String, ArrayList<String>> getAllMoodPlayList() {
-        return allMoodPlayList;
-    }
-    public static void setAllMoodPlayList(HashMap<String, ArrayList<String>> allMoodPlayList) {
-        PlaylistSongs.allMoodPlayList = allMoodPlayList;
-    }*/
 }

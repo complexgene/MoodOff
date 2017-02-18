@@ -13,6 +13,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -32,6 +34,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.Messenger;
@@ -44,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import static android.app.Activity.RESULT_OK;
@@ -122,62 +126,77 @@ public class ContactsFragment extends Fragment{
 
         addOwnProfileAndRefreshButton();
 
+        monitorViewChange();
+
         //spinner = (ProgressBar)mainView.findViewById(R.id.refreshSpin);
         //DBInternal dbInternal = new DBInternal();
-        allC = getOrStoreContactsTableData(0,allC);
+        allC = ContactsManager.allReadContacts;
+
 
         return mainView;
     }
+
+    public static boolean updateViewCalled = false;
+    private void monitorViewChange(){
+        Log.e("Contacts_viewChange","Monitor is running to detect a view change");
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(updateViewCalled){
+                            updateViewCalled = false;
+                            Log.e("Contacts_viewChange","View change detected..");
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    addOwnProfileAndRefreshButton();
+                                }
+                            });
+                        }
+                     }
+                }).start();
+                monitorViewChange();
+            }
+        },5000);
+    }
+
+    private View getHorizontalLine(int width){
+        View v = new View(getContext());
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, width);
+        layoutParams.leftMargin = 50;
+        layoutParams.rightMargin = 50;
+        v.setLayoutParams(layoutParams);
+        v.setBackgroundColor(Color.parseColor("#B3B3B3"));
+        return v;
+    }
     private View getVerticalLine(int width){
         View v = new View(getContext());
-        v.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                width
+        v.setLayoutParams(new LinearLayout.LayoutParams(width,
+                LinearLayout.LayoutParams.MATCH_PARENT
         ));
         v.setBackgroundColor(Color.parseColor("#B3B3B3"));
         return v;
     }
-    LinearLayout vertically;
+
     private void addOwnProfileAndRefreshButton(){
-        RelativeLayout refershAndProfile = (RelativeLayout)mainView.findViewById(R.id.allContactDisplay);
-
-        //View divide = new View(getContext());
-        vertically = new LinearLayout(getContext());
-        vertically.setOrientation(LinearLayout.VERTICAL);
-        vertically.addView(getVerticalLine(5));
-
-        LinearLayout refreshAndMyProfile = new LinearLayout(getContext());
-        LinearLayout.LayoutParams designDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        designDetails.topMargin = 10;
-        designDetails.bottomMargin = 10;
-        refreshAndMyProfile.setLayoutParams(designDetails);
-
-        designDetails = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        FloatingActionButton refreshContactButton = new FloatingActionButton(getContext());
+        ImageButton refreshContactButton = (ImageButton) mainView.findViewById(R.id.btn_refreshContact);
         refreshContactButton.setImageResource(R.drawable.refresh_contacts);
-        refreshContactButton.setBackgroundTintList(ColorStateList.valueOf(Color.YELLOW));
-        refreshContactButton.setSize(FloatingActionButton.SIZE_MINI);
-        designDetails.gravity = Gravity.CENTER;
-        designDetails.leftMargin = 10;
-        designDetails.rightMargin = 10;
         refreshContactButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                spinner.setVisibility(View.VISIBLE);
                 Toast.makeText(getContext(),"Reading your Contacts. Wait.",Toast.LENGTH_LONG).show();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         allC = ContactList.getContactNames(ctx.getContentResolver());
-                        getOrStoreContactsTableData(1,allC);
+                        getOrStoreContactsTableData(allC);
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Toast.makeText(getContext(),"Contacts Reading Finished..",Toast.LENGTH_SHORT).show();
-//                                spinner.setVisibility(View.INVISIBLE);
-                                vertically.removeAllViews();
-                                vertically.addView(getVerticalLine(5));
                                 addOwnProfileAndRefreshButton();
                             }
                         });
@@ -185,14 +204,7 @@ public class ContactsFragment extends Fragment{
                 }).start();
             }
         });
-        refreshContactButton.setLayoutParams(designDetails);
-        Button myProfile = new Button(getContext());
-        myProfile.setText("My Profile");
-        //myProfile.setBackgroundColor(Color.WHITE);
-        myProfile.setBackgroundResource(R.drawable.profilecontactdesignown);
-        designDetails = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        designDetails.rightMargin = 10;
-        designDetails.weight = 1;
+        Button myProfile = (Button)mainView.findViewById(R.id.ownProfile);//new Button(getContext());
         myProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -200,74 +212,112 @@ public class ContactsFragment extends Fragment{
                 loadProfile(UserDetails.getPhoneNumber());
             }
         });
-        myProfile.setLayoutParams(designDetails);
 
-        refreshAndMyProfile.addView(refreshContactButton);
-        refreshAndMyProfile.addView(myProfile);
-
-        vertically.addView(refreshAndMyProfile);
-        vertically.addView(getVerticalLine(5));
-        refershAndProfile.addView(vertically);
-        populatePageWithContacts(vertically);
-    }
-
-    public void populatePageWithContacts(LinearLayout layout){
-        ScrollView contactsScroll = new ScrollView(getContext());
+        // Populating all contacts who uses app and who doesn't
+        ScrollView contactsScroll = (ScrollView)mainView.findViewById(R.id.allContacts);
         contactsScroll.removeAllViews();
         LinearLayout eachContact = new LinearLayout(ctx);
         eachContact.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         eachContact.setLayoutParams(layoutDetails);
         allC = ContactsManager.allReadContacts;
         ArrayList<String> friendWhoUsesApp = ContactsManager.friendsWhoUsesApp;
         Log.e("CONTCCCCCTSSSS",allC.size()+" "+friendWhoUsesApp.size());
 
-        eachContact.addView(getVerticalLine(5));
+        eachContact.addView(getHorizontalLine(1));
         LinearLayout titleAppUsers = new LinearLayout(getContext());
-        layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleAppUsers.setGravity(Gravity.CENTER);
+        layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         layoutDetails.topMargin = 10;
         layoutDetails.bottomMargin = 10;
-        layoutDetails.gravity = Gravity.CENTER;
+        layoutDetails.leftMargin = 20;
+        layoutDetails.rightMargin = 20;
         titleAppUsers.setLayoutParams(layoutDetails);
         titleAppUsers.setBackgroundResource(R.drawable.poster);
         TextView tvv = new TextView(getContext());
+        tvv.setGravity(Gravity.CENTER);
         tvv.setPadding(3,3,3,3);
         tvv.setTextColor(Color.WHITE);
         tvv.setText(" Friends Using App ");
         titleAppUsers.addView(tvv);
         eachContact.addView(titleAppUsers);
-
         for(final String eachFriendContact : friendWhoUsesApp) {
             String contactName = allC.get(eachFriendContact);
-            if (!isNotHavingAnyCharacter(contactName)) {
+            if (contactName!=null && !isNotHavingAnyCharacter(contactName)) {
                 LinearLayout eachContactLayout = new LinearLayout(getContext());
+                eachContactLayout.setOrientation(LinearLayout.VERTICAL);
                 eachContactLayout.setBackgroundColor(Color.WHITE);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                //layoutDetails.topMargin = 20;
                 eachContactLayout.setLayoutParams(layoutDetails);
-                Button contactNameAndNumber = new Button(ctx);
-                contactNameAndNumber.setText(allC.get(eachFriendContact) + "\n" + eachFriendContact);
-                contactNameAndNumber.setBackgroundResource(R.drawable.contactsusingappdesign);
+
+                eachContactLayout.addView(getHorizontalLine(1));
+                //eachContactLayout.setPadding(0,20,0,20);
+                TextView name = new TextView(ctx);
+                name.setPadding(0,20,0,0);
+                name.setTextColor(Color.BLACK);
+                name.setTypeface(Typeface.DEFAULT_BOLD);
+                name.setGravity(Gravity.CENTER);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                contactNameAndNumber.setLayoutParams(layoutDetails);
-                contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
+                name.setAllCaps(false);
+                name.setText(allC.get(eachFriendContact));
+                //name.setBackgroundResource(R.drawable.contactsusingappdesign);
+                name.setLayoutParams(layoutDetails);
+                eachContactLayout.addView(name);
+
+                boolean userIsLive = (new Random().nextInt(2)==1)?true:false;
+
+                LinearLayout moodStatusAndMood = new LinearLayout(getContext());
+                moodStatusAndMood.setGravity(Gravity.CENTER);
+                moodStatusAndMood.setOrientation(LinearLayout.HORIZONTAL);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                moodStatusAndMood.setLayoutParams(layoutDetails);
+
+                TextView moodStatus = new TextView(ctx);
+                moodStatus.setGravity(Gravity.CENTER);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                moodStatus.setAllCaps(false);
+                if(userIsLive){
+                    moodStatus.setTextColor(Color.GREEN);
+                    moodStatus.setTypeface(Typeface.DEFAULT_BOLD);
+                    moodStatus.setText("Live on");
+                }
+                else{
+                    moodStatus.setTextColor(Color.RED);
+                    moodStatus.setTypeface(Typeface.DEFAULT_BOLD);
+                    moodStatus.setText("Last Listened");
+                }
+                //moodStatus.setBackgroundResource(R.drawable.contactsusingappdesign);
+                moodStatus.setLayoutParams(layoutDetails);
+                moodStatusAndMood.addView(moodStatus);
+
+                TextView moodName = new TextView(ctx);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                moodName.setAllCaps(false);
+                moodName.setText(" : Party");
+               // moodName.setBackgroundResource(R.drawable.contactsusingappdesign);
+                moodName.setLayoutParams(layoutDetails);
+                moodStatusAndMood.addView(moodName);
+                moodStatusAndMood.setPadding(0,0,0,20);
+                eachContactLayout.addView(moodStatusAndMood);
+                eachContactLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         openedAProfile = true;
                         loadProfile(eachFriendContact);
                     }
                 });
-
-                eachContactLayout.addView(contactNameAndNumber);
                 eachContact.addView(eachContactLayout);
-                //allC.remove(validCntct);
             }
         }
 
-        eachContact.addView(getVerticalLine(5));
+        eachContact.addView(getHorizontalLine(2));
         LinearLayout titleNotAppUsers = new LinearLayout(getContext());
-        layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleNotAppUsers.setGravity(Gravity.CENTER);
+        layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         layoutDetails.topMargin = 10;
+        layoutDetails.bottomMargin = 10;
+        layoutDetails.leftMargin = 20;
+        layoutDetails.rightMargin = 20;
         layoutDetails.gravity = Gravity.CENTER;
         titleNotAppUsers.setLayoutParams(layoutDetails);
         titleNotAppUsers.setBackgroundResource(R.drawable.poster);
@@ -277,35 +327,39 @@ public class ContactsFragment extends Fragment{
         tvv1.setText(" Friends Not Using App ");
         titleNotAppUsers.addView(tvv1);
         eachContact.addView(titleNotAppUsers);
-        LinearLayout titleRequestUsers = new LinearLayout(getContext());
-        layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        layoutDetails.bottomMargin = 10;
-        layoutDetails.gravity = Gravity.CENTER;
-        titleRequestUsers.setLayoutParams(layoutDetails);
-        titleRequestUsers.setBackgroundResource(R.drawable.poster);
-        /*TextView tvv3 = new TextView(getContext());
-        tvv3.setPadding(3,3,3,3);
-        tvv3.setTextColor(Color.WHITE);
-        //tvv3.setText(" Click to send app request ");
-        titleRequestUsers.addView(tvv3);
-        */eachContact.addView(titleRequestUsers);
-        eachContact.addView(getVerticalLine(5));
-
-
         for(final String eachCntct:ContactsManager.friendsWhoDoesntUseApp){
             final String contactName = allC.get(eachCntct);
-            if(!isNotHavingAnyCharacter(contactName)){
+            if(contactName!=null && !isNotHavingAnyCharacter(contactName)){
+                eachContact.addView(getHorizontalLine(1));
                 LinearLayout eachContactLayout = new LinearLayout(getContext());
-                eachContactLayout.setBackgroundColor(Color.WHITE);
+                eachContactLayout.setBackgroundResource(R.drawable.contactsnotusingappdesign);
+                eachContactLayout.setGravity(Gravity.CENTER);
+                eachContactLayout.setPadding(20,20,20,20);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutDetails.weight = 1;
+                layoutDetails.topMargin = 10;
+                layoutDetails.bottomMargin = 10;
+                layoutDetails.leftMargin = 20;
+                layoutDetails.rightMargin = 20;
                 eachContactLayout.setLayoutParams(layoutDetails);
-                Button contactNameAndNumber = new Button(ctx);
-                contactNameAndNumber.setText(contactName+"\nClick to send app install link");
-                contactNameAndNumber.setTransformationMethod(null);
-                contactNameAndNumber.setBackgroundResource(R.drawable.contactsnotusingappdesign);
+                TextView personName = new TextView(getContext());
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                contactNameAndNumber.setLayoutParams(layoutDetails);
-                contactNameAndNumber.setOnClickListener(new View.OnClickListener() {
+                personName.setLayoutParams(layoutDetails);
+                layoutDetails.weight=1;
+                personName.setGravity(Gravity.CENTER);
+                personName.setTypeface(Typeface.DEFAULT_BOLD);
+                personName.setText(contactName);
+                TextView sendInvite = new TextView(ctx);
+                sendInvite.setAllCaps(false);
+                sendInvite.setPadding(10,10,10,10);
+                sendInvite.setText("Send Invite");
+                sendInvite.setTextColor(Color.WHITE);
+                sendInvite.setTransformationMethod( null);
+                sendInvite.setBackgroundResource(R.drawable.invitebuttonlayout);
+                layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutDetails.rightMargin = 10;
+                sendInvite.setLayoutParams(layoutDetails);
+                sendInvite.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -332,13 +386,12 @@ public class ContactsFragment extends Fragment{
                         //loadProfile(eachCntct);
                     }
                 });
-
-                eachContactLayout.addView(contactNameAndNumber);
+                eachContactLayout.addView(personName);
+                eachContactLayout.addView(sendInvite);
                 eachContact.addView(eachContactLayout);
             }
             }
         contactsScroll.addView(eachContact);
-        layout.addView(contactsScroll);
     }
     private static boolean isNotHavingAnyCharacter(String name){
         for(int i=0;i<name.length();i++){
@@ -357,61 +410,40 @@ public class ContactsFragment extends Fragment{
         transaction.addToBackStack(null);
         transaction.commitAllowingStateLoss();
     }
-    public boolean checkIfATableExists(String tableName){
-        mydatabase = ctx.openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
-        try {
-            Cursor allTables = mydatabase.rawQuery("SELECT name from sqlite_master WHERE type='table' and name='"+tableName+"'", null);
-            if(allTables.getCount()==1) {
-                Log.e("ContactsFragment_chkTbl",tableName+" exists");
-                mydatabase.close();
-                return true;
-            }
-            else{
-                Log.e("ContactsFragment_chkTbl",tableName+" doesn't exist");
-                mydatabase.close();
-                return false;
-            }
-        }
-        catch(Exception ee){
-            Log.e("ContactsFragment_chkEr",ee.getMessage());
-        }
-        mydatabase.close();
-        return false;
-    }
-    public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
+    public LinkedHashMap<String,String> getOrStoreContactsTableData(HashMap<String,String> allContacts){
         LinkedHashMap<String,String> allContactsPresent = new LinkedHashMap<>();
         mydatabase = getActivity().openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
-            // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
-            if(status == 0){
-                //READ and RETURN data
-                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts order by name", null);
+                HashMap<String,String> detailsWithStatus1 = new HashMap<>();
+                Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts", null);
                 resultSet.moveToFirst();
                 while (!resultSet.isAfterLast()) {
-                    allContactsPresent.put(resultSet.getString(0),resultSet.getString(1).replaceAll("'", "\'"));
+                    if(resultSet.getInt(2)==1){
+                        Log.e("ContactsFrag_GotOne","No:"+resultSet.getString(1));
+                        detailsWithStatus1.put(resultSet.getString(0),"1");
+                    }
                     resultSet.moveToNext();
                 }
-            }
-            // First time conatct table create or REFRESH done.
-            else{
-                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(user_id VARCHAR,phone_no VARCHAR);";
+
+                String dropQuery = "DROP TABLE allcontacts;";
+                mydatabase.execSQL(dropQuery);
+                Log.e("ContactsFragment_DROP","allconatcts table dropped..");
+                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(phone_no VARCHAR,name VARCHAR,status INTEGER);";
                 mydatabase.execSQL(createQuery);
-                String deleteQuery = "DELETE FROM allcontacts;";
-                mydatabase.execSQL(deleteQuery);
+                Log.e("ContactsFragment_CREATE","allconatcts table created..");
                 String insertQuery = "";
                 for(String eachContact:allContacts.keySet()){
-                    Log.e("ContactsFragment_CErr1",eachContact);
                     String name = allContacts.get(eachContact);
                     name = name.replaceAll("'", "''");
-                    Log.e("ContactsFragment_CErr2",name);
-                    insertQuery = "INSERT INTO allcontacts(phone_no,name) values('"+eachContact+"','"+name+"');";
-                    Log.e("ContactsFragment_CErr3",insertQuery);
+                    if(detailsWithStatus1.containsKey(eachContact)) {
+                        insertQuery = "INSERT INTO allcontacts(phone_no,name,status) values('" + eachContact + "','" + name + "',1);";
+                        Log.e("ContactsFragment_Query3",insertQuery);
+                    }
+                    else
+                        insertQuery = "INSERT INTO allcontacts(phone_no,name,status) values('"+eachContact+"','"+name+"',0);";
                     mydatabase.execSQL(insertQuery);
                 }
-                return null;
-            }
             mydatabase.close();
-
         }catch (Exception ee){
             Log.e("ContactsFragment_Err2",ee.getMessage());
             ee.fillInStackTrace();
@@ -442,16 +474,6 @@ public class ContactsFragment extends Fragment{
         mListener = null;
         super.onDetach();
     }
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

@@ -11,5 +11,14 @@
     <color name="deep_orange">#ee0b16</color>
     <color name="little_deep_orange">#FF5733</color>
     <color name="notification_you">#cd63df</color>
-    <color name="notification_me">#3dceaf</color>
+    <color name="appcolor_backup2">#ffddfc</color>
+    <color name="appcolor_backup1">#3dceaf</color>
+    <color name="appcolor">#e0e0e0</color>
+    <color name="story_color">#626263</color>
+    <color name="story_bg">#f2f2b8</color>
+    <color name="seekbar_bg">#51525b</color>
+    <color name="gm_mp_bg1">#e74c3c</color>
+    <color name="gm_mp_bg">#51525b</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

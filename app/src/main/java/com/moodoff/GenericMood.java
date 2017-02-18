@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -45,6 +46,7 @@ import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.UserDetails;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -70,7 +72,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     @Override
     public void onAudioFocusChange(int i) {
         if(mp!=null && mp.isPlaying()) {
-            if (i <= 0) {
+            if (i <= 0 && AllTabs.mViewPager.getCurrentItem() == 0) {
                 mp.pause();
             } else {
                 mp.start();
@@ -115,6 +117,11 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
@@ -136,17 +143,17 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     //Buttons
     Button stopBtn, nextBtn, prevBtn, repBtn, shuffleBtn;
     public static Button playPauseBtn;
-    FloatingActionButton dedicateButton,playListButton, menuButton;
+    ImageButton dedicateButton,playListButton, menuButton;
     ProgressBar storyLoadSpinner;
     public static ProgressBar spinner;
     SeekBar seekBar;
     TextView songName = null, storyTitleTV, storyBodyTV, duration;
     Handler seekHandler = new Handler();
     ArrayList<String> currentplayList = null;
-    String currentSong = "", currentMood = "", playListFilePath = "";
+    static String currentSong = "", currentMood = "", playListFilePath = "";
     public static int playOrPauseParm = 0, isPlayOrPauseFromGM = 0;
     int currentIndex = 0, repParm = 0, timeElapsedOrTimeLeft = 0;
-    int numberOfChances = 5;
+    int numberOfChances = 8;
     DBHelper dbOperations;
     StoreRetrieveDataInterface fileOperations = new StoreRetrieveDataImpl("UserData.txt");
     LinearLayout gamePanel,likeAndStoryTitle;
@@ -162,10 +169,10 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         prevBtn = (Button) view.findViewById(R.id.prevButton);
         repBtn = (Button) view.findViewById(R.id.repeatButton);
         shuffleBtn = (Button) view.findViewById(R.id.shuffleButton);
-        dedicateButton = (FloatingActionButton) view.findViewById(R.id.btn_dedicate);
-        playListButton = (FloatingActionButton)view.findViewById(R.id.btn_playlist);
+        dedicateButton = (ImageButton) view.findViewById(R.id.btn_dedicate);
+        playListButton = (ImageButton)view.findViewById(R.id.btn_playlist);
         //changeMoodButton = (FloatingActionButton) view.findViewById(R.id.btn_changemood);
-        menuButton = (FloatingActionButton)view.findViewById(R.id.btn_menu);
+        menuButton = (ImageButton)view.findViewById(R.id.btn_menu);
         spinner = (ProgressBar) view.findViewById(R.id.progressBar);
         storyLoadSpinner = (ProgressBar) view.findViewById(R.id.load_story_spinner);
         seekBar = (SeekBar) view.findViewById(R.id.seekBar);
@@ -196,7 +203,23 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         chosenLetter = (EditText)view.findViewById(R.id.guessedLetter);
         cartoon = (ImageView)view.findViewById(R.id.cartoon);
         //loveStory = (FloatingActionButton) view.findViewById(R.id.like_story);
-        gamerules = (FloatingActionButton) view.findViewById(R.id.gamerules);
+        gamerules = (ImageButton) view.findViewById(R.id.gamerules);
+    }
+
+    public void addLastOptionAccessedToFile(String optionSelected){
+        try {
+            fileOperations.beginWriteTransaction();
+            String key = "lastOption_" + currentMood;
+            if (fileOperations.getValueFor(key) == null) {
+                fileOperations.createNewData(key, optionSelected);
+            } else {
+                fileOperations.updateValueFor(key, optionSelected);
+                Log.e("GenericMood_Change","last selected option has been changed to:"+optionSelected);
+            }
+            fileOperations.endWriteTransaction();
+        }catch(Exception ee){
+            Log.e("GenericMood_Err12","Error:"+ee.getMessage());
+        }
     }
 
     public void showMenu(){
@@ -208,13 +231,16 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 String selectedOption = item.getTitle().toString();
                 if(selectedOption.equalsIgnoreCase("Play Game")){
                     showItemInMiddle(5);
+                    addLastOptionAccessedToFile("5");
                 }
-                else if(selectedOption.equalsIgnoreCase("Show Story")){
+                else if(selectedOption.equalsIgnoreCase("New Story")){
                     showItemInMiddle(1);
+                    addLastOptionAccessedToFile("1");
                 }
                 else {
                     if (selectedOption.equalsIgnoreCase("Choose From gallery")) {
                         showItemInMiddle(2);
+                        addLastOptionAccessedToFile("4");
                     } else {
                         if (selectedOption.equalsIgnoreCase("Capture using Camera")) {
                             showItemInMiddle(3);
@@ -222,6 +248,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                         else {
                             if (selectedOption.equalsIgnoreCase("Show last Image")) {
                                 showItemInMiddle(4);
+                                addLastOptionAccessedToFile("4");
                             }
                         }
                     }
@@ -246,7 +273,6 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 ServerManager serverManager = new ServerManager();
                 serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
                 break;
-
             }
             case 2:{
                 likeAndStoryTitle.setVisibility(View.GONE);
@@ -288,6 +314,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 break;
             }
             case 5: {
+                Log.e("GenericMood","GamePanel started..");
                 newGame.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -295,22 +322,23 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                         launchGame();
                     }
                 });
-
                 resetGameView();
                 launchGame();
-
             }
         }
     }
 
     private void resetGameView(){
-        likeAndStoryTitle.setVisibility(View.VISIBLE);
+        likeAndStoryTitle.setVisibility(View.GONE);
         newGame.setEnabled(false);
         gamePanel.setVisibility(View.VISIBLE);
         photoView.setVisibility(View.GONE);
         storyBodyTV.setVisibility(View.GONE);
         //loveStory.setVisibility(View.INVISIBLE);
+        /*tvv = (TextView)view.findViewById(R.id.tv_storytitle);
         tvv.setText("Guess The Word");
+        */
+        //tvv.setVisibility(View.GONE);
         chosenLetter.setText("");
         chosenLetter.setEnabled(true);
         selectedLetters.setText("");
@@ -320,7 +348,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     // Game Variables
 
     Button newGame,checkTheLetter;
-    FloatingActionButton loveStory, gamerules;
+    ImageButton  gamerules;
     TextView tvv,pointsEarned,selectedLetters;
     EditText chosenLetter;
     ImageView cartoon;
@@ -334,7 +362,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         final String selectedWord = words.get(randomNo);
         Log.e("GM_SELECTEDWORD",selectedWord);
         pointsEarned.setText(""+totalScore); // Get the points from DB
-        cartoon.setImageResource(R.drawable.c1);
+        cartoon.setImageResource(R.drawable.hangman_1);
         StringBuilder sb = new StringBuilder("");
         for(int i=0;i<selectedWord.length();i++){
             sb.append(" _");
@@ -394,29 +422,38 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
 
                         }
                         else{
-                            int pic1 = R.drawable.c1,pic2 = R.drawable.c2,
-                                    pic3 = R.drawable.c3,pic4 = R.drawable.c4,
-                                    pic5 = R.drawable.c5,pic6 = R.drawable.c6;
+                            int pic1 = R.drawable.hangman_1,pic2 = R.drawable.hangman_2,
+                                    pic3 = R.drawable.hangman_3,pic4 = R.drawable.hangman_4,
+                                    pic5 = R.drawable.hangman_5,pic6 = R.drawable.hangman_6,
+                                    pic7 = R.drawable.hangman_7, pic8 = R.drawable.hangman_8;
                             Log.e("GM_FAILED",""+numberOfChances);
                             switch (numberOfChances){
-                                case 5:{
+                                case 7:{
                                     cartoon.setImageResource(pic2);
                                     break;
                                 }
-                                case 4:{
+                                case 6:{
                                     cartoon.setImageResource(pic3);
                                     break;
                                 }
-                                case 3:{
+                                case 5:{
                                     cartoon.setImageResource(pic4);
                                     break;
                                 }
-                                case 2:{
+                                case 4:{
                                     cartoon.setImageResource(pic5);
                                     break;
                                 }
-                                case 1:{
+                                case 3:{
                                     cartoon.setImageResource(pic6);
+                                    break;
+                                }
+                                case 2:{
+                                    cartoon.setImageResource(pic7);
+                                    break;
+                                }
+                                case 1:{
+                                    cartoon.setImageResource(pic8);
                                     newGame.setEnabled(true);
                                     chosenLetter.setEnabled(false);
                                     break;
@@ -466,6 +503,12 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         //view.setBackgroundColor(Color.WHITE);
 
         init();
+        fileOperations.beginReadTransaction();
+        String optionLastSelectedByUser = fileOperations.getValueFor("lastOption_" + currentMood);
+        fileOperations.endReadTransaction();
+        if(optionLastSelectedByUser==null)optionLastSelectedByUser="1";
+        Log.e("GenericMood_LastOption",""+optionLastSelectedByUser);
+        showItemInMiddle(Integer.parseInt(optionLastSelectedByUser));
         //Toast.makeText(getContext(),"You selected mood: "+(char)(mParam1.charAt(0)-32)+mParam1.substring(1),Toast.LENGTH_LONG).show();
 
         menuButton.setOnClickListener(new View.OnClickListener() {
@@ -503,14 +546,14 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
             }
         });
 
-        final FloatingActionButton loveButton = (FloatingActionButton)view.findViewById(R.id.btn_love);
+        final ImageButton loveButton = (ImageButton)view.findViewById(R.id.btn_love);
         loveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String currentUser = UserDetails.getPhoneNumber();
                 char type = '1';
                 if(mp==null || !mp.isPlaying()){
-                    Toast.makeText(getActivity().getApplicationContext(),"Please play a song to like it!!",Toast.LENGTH_SHORT).show();
+                    Messenger.printCenter(getContext(),"Please play a song to like it!!");
                 }
                 else {
                     final String Url = serverURL+"/notifications/"+currentUser+"/"+currentSong+"/"+type;
@@ -598,7 +641,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
 
     public void navigateContacts(View v){
         if(mp==null){
-            Toast.makeText(getActivity().getApplicationContext(),"You have to play a song to dedicate.",Toast.LENGTH_SHORT).show();
+            Messenger.printCenter(getContext(),"You have to play a song to dedicate.");
         }
         else {
             Log.e("GenericMood","willstart");
@@ -607,7 +650,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         }
     }
 
-    static String getPictureName(){return "mogambo.jpg";}
+    static String getPictureName(){return "wallimage.jpg";}
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -616,8 +659,8 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 String currentUser = UserDetails.getPhoneNumber();
                 char type = '1';
                 final String stredittext=data.getStringExtra("selectedContact");
-
-                final String Url = "notifications/"+currentUser+"/"+stredittext.substring(stredittext.lastIndexOf(" ")+1)+"/"+currentMood+"@"+currentSong+"/"+type;
+                Log.e("GM_selectedmood",stredittext+" ["+currentMood+" ["+currentSong);
+                final String Url = "notifications/"+currentUser+"/"+stredittext.split("\\n")[1]+"/"+currentMood+"@"+currentSong+"/"+type;
 
                 new Thread(new Runnable() {
                     @Override
@@ -634,7 +677,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(getActivity().getApplicationContext(),"Dedicated to "+stredittext,Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getActivity().getApplicationContext(),"Dedicated to "+stredittext.split("\\n")[0],Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             }
@@ -662,11 +705,11 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
                 imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/moodoff/"+currentMood+"/"+getPictureName();
-                Log.e("Geeeeeeneeerd",imageFilePath.toString());
+                Log.e("GenericMood_Photo",imageFilePath.toString());
                 bitmap = BitmapFactory.decodeFile(imageFilePath);
                 photoView.setImageBitmap(bitmap);
                 photoView.setVisibility(View.VISIBLE);
-                Log.e("Geeeeeeneeerd","GGGGGGGGGGGGGGGGMMMMMMM");
+                addLastOptionAccessedToFile("4");
             }
         }
         if (requestCode == 2)
@@ -677,7 +720,16 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 {
                     try
                     {
+                        imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/moodoff/"+currentMood+"/"+getPictureName();
+                        File pictureDirectory = new File(Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff/"+currentMood+"/");
+                        pictureDirectory.mkdirs();
+                        String pictureName = getPictureName();
+                        File imageFile = new File(pictureDirectory,pictureName);
+                        // Directory creation complete
+                        FileOutputStream fos = new FileOutputStream(imageFile);
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), data.getData());
+                        bitmap.compress(Bitmap.CompressFormat.PNG,90,fos);
+                        fos.close();
                         photoView.setImageBitmap(bitmap);
                         photoView.setVisibility(View.VISIBLE);
                         photoView.setAdjustViewBounds(true);
@@ -1179,8 +1231,8 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
 
     @Override
     public void onDetach() {
+        Log.e("GenericMood", "GM on Detach");
         if(AllTabs.mViewPager.getCurrentItem()==0) {
-            Log.e("GenericMood", "GM on Detach");
             releaseMediaPlayerObject();
             ServerManager serverManager = new ServerManager();
             serverManager.exitLiveMood(UserDetails.getPhoneNumber());
@@ -1192,16 +1244,19 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
 
     @Override
     public void onDestroy() {
-        if(AllTabs.mViewPager.getCurrentItem()==0) {
-            mAudioManager.abandonAudioFocus(this);
-            Log.e("GenericMood", "GM on Destroy");
-            if (mp != null) {
-                releaseMediaPlayerObject();
-                mp = null;
+        try {
+            if (AllTabs.mViewPager.getCurrentItem() == 0) {
+                Log.e("GenericMood", "GM on Destroy");
+                mAudioManager.abandonAudioFocus(this);
+                if (mp != null) {
+                    releaseMediaPlayerObject();
+                    mp = null;
+                }
+                playOrPauseParm = 0;
+                super.onDestroy();
             }
-            playOrPauseParm = 0;
-        }
-        super.onDestroy();
+        }catch (Exception ee){}
+
     }
 
 

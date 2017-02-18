@@ -20,8 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.helper.DBHelper;
+import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
+import com.moodoff.model.UserDetails;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -165,11 +167,6 @@ public class RegistrationActivity extends AppCompatActivity {
     private void createAllNecessaryTablesForAppOperation(){
         DBHelper dboperations = new DBHelper(getApplicationContext());
         dbOperations.dropAllTables();
-        LinkedHashMap<String,String> contactsColumns = new LinkedHashMap<>();
-        contactsColumns.put("phone_no","VARCHAR");
-        contactsColumns.put("name","VARCHAR");
-        dboperations.createTable("allcontacts",contactsColumns);
-        Log.e("RegistrationAct_TBL","allcontacts table created.");
 
         LinkedHashMap<String,String> worktodoColumns = new LinkedHashMap<>();
         worktodoColumns.put("id","INTEGER PRIMARY KEY AUTOINCREMENT");
@@ -215,6 +212,13 @@ public class RegistrationActivity extends AppCompatActivity {
         allprofileColumns.put("audio_status_likes","INTEGER");
         dboperations.createTable("all_profiles",allprofileColumns);
         Log.e("RegistrationAct_TBL","all_profiles table created");
+
+        // createTable implementation for allcontacts is different as we are fetching data in table creation here.
+        LinkedHashMap<String,String> contactsColumns = new LinkedHashMap<>();
+        contactsColumns.put("phone_no","VARCHAR");
+        contactsColumns.put("name","VARCHAR");
+        contactsColumns.put("status","INTEGER");
+        dboperations.createTable("allcontacts",contactsColumns);
 
     }
 
@@ -352,6 +356,8 @@ public class RegistrationActivity extends AppCompatActivity {
             rd.createNewData("score","0");
             rd.createNewData("numberOfOldNotifications","0");
             rd.endWriteTransaction();
+            ServerManager serverManager = new ServerManager();
+            serverManager.setLiveMood(UserDetails.getPhoneNumber(),"sad");
             return true;
         } catch (IOException e) {
             error.setText("Couldn't save the file.");

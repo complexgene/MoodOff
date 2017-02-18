@@ -1,11 +1,44 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/allContactDisplay"
     android:orientation="vertical"
-    android:background="#580730"
     tools:context="com.moodoff.ContactsFragment">
+    <LinearLayout
+        android:id="@+id/refreshAndMyProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginLeft="2dp"
+        android:layout_weight="1">
+        <ImageButton
+            android:id="@+id/btn_refreshContact"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:src="@drawable/refresh_contacts"
+            android:background="@drawable/refreshcontactbuttonlayout"
+            />
+        <Button
+            android:id="@+id/ownProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/myprofilebuttondesign"
+            android:text="My Profile"
+            android:textAllCaps="false"
+            />
+    </LinearLayout>
+    <ScrollView
+        android:id="@+id/allContacts"
+        android:layout_below="@id/refreshAndMyProfile"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </ScrollView>
 
 </RelativeLayout>

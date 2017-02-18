@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,7 +75,7 @@ public class SelectsongFragment extends Fragment {
     }
 
     View view;
-    Button okButtonWidth,cancelButtonWidth;
+    ImageButton okButtonWidth,cancelButtonWidth;
     int screenHeight, screenWidth;
 
 
@@ -84,9 +85,9 @@ public class SelectsongFragment extends Fragment {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_selectsong, container, false);
 
-        getAndSetScreenSizes();
-        setWidthOfButtonAcrossScreen();
-        retrieveAndShowSongs();
+        //getAndSetScreenSizes();
+        //setWidthOfButtonAcrossScreen();
+        //retrieveAndShowSongs();
         return view;
 
     }
@@ -132,13 +133,13 @@ public class SelectsongFragment extends Fragment {
         screenWidth = size.x;
         screenHeight = size.y;
     }
-    public void setWidthOfButtonAcrossScreen(){
-        okButtonWidth = (Button)view.findViewById(R.id.songselectok);
-        cancelButtonWidth = (Button)view.findViewById(R.id.songselectcancel);
+    /*public void setWidthOfButtonAcrossScreen(){
+        okButtonWidth = (ImageButton)view.findViewById(R.id.songselectok);
+        cancelButtonWidth = (ImageButton)view.findViewById(R.id.songselectcancel);
         okButtonWidth.setWidth((int)Math.floor(0.5*screenWidth));
         cancelButtonWidth.setWidth((int)Math.floor(0.5*screenWidth));
 
-    }
+    }*/
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

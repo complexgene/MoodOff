@@ -40,7 +40,7 @@ import java.util.LinkedHashMap;
 
 public class Start extends AppCompatActivity {
     public static int switchToTab = 0;
-    private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 100;
+    //private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 100;
     private String serverURL = HttpGetPostInterface.serverURL;
     public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true,
             fetchContactsFromServerNotComplete = true, allProfilesDataFetchNotComplete = true;
@@ -74,6 +74,7 @@ public class Start extends AppCompatActivity {
                 return true;
             }
             else {
+                Log.e("Start_USERAPPrnc","User first time..");
                 Intent ii = new Intent(this, RegistrationActivity.class);
                 ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
@@ -99,23 +100,12 @@ public class Start extends AppCompatActivity {
     }
 
     private void fetchContacts() {
-        if (!checkIfATableExists("allcontacts")) {
-            Log.e("Start_cntctsTAB", "Not present");
-            allReadContacts = ContactList.getContactNames(getContentResolver());
+        Log.e("Start_contactsFetch","Came to fetch contacts..");
+            getContactsTableData(allReadContacts);
+            Log.e("Start_conatctsFetch",allReadContacts.size()+" total contacts fetched..");
             fetchContactsNotComplete = false;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    getOrStoreContactsTableData(1, allReadContacts);
-                }
-            }).start();
-        } else {
-            Log.e("Start_cntctsTAB", "Present");
-            allReadContacts = getOrStoreContactsTableData(0,allReadContacts);
-            fetchContactsNotComplete = false;
-        }
-        ContactsManager.allReadContacts = allReadContacts;
         //NotificationFragment.allReadContacts = allReadContacts;
+        Log.e("Start_contactsFetch","Contacts fetching done..");
     }
     ServerManager serverManager = new ServerManager(this);
     private void fetchNotifications() {
@@ -166,7 +156,7 @@ public class Start extends AppCompatActivity {
         // File downloaded
         HashMap<String,ArrayList<String>> allSongs = new HashMap<>();
         resultSet.moveToFirst();
-        Log.e("Start_TBLDetect",resultSet.getCount()+" no of rows..");
+        Log.e("Start_PlaylistFileCNT",resultSet.getCount()+" no of rows..");
         while (!resultSet.isAfterLast()) {
             String moodType = resultSet.getString(1);
             String songName = resultSet.getString(2);
@@ -202,19 +192,53 @@ public class Start extends AppCompatActivity {
             Start.moodsAndSongsFetchNotComplete = false;
         }
     }
+    private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 100;
+    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 20;
+    private boolean askForPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Log.e("Start_Permission","Asking Permission...");
+            int contactsPermission = checkSelfPermission(Manifest.permission.READ_CONTACTS);
+            int extStoragePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int cameraPermission = checkSelfPermission(Manifest.permission.CAMERA);
+            if(cameraPermission != PackageManager.PERMISSION_GRANTED && contactsPermission != PackageManager.PERMISSION_GRANTED && extStoragePermission != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{Manifest.permission.CAMERA,Manifest.permission.READ_CONTACTS,Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+            }
+            else{
+                Log.e("Start_Permission","Already Granted...");
+                startWork();
+            }
+            return true;
+        }
+        else {
+            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
+                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+            }
+        }
+        return false;
+    }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_start);
+    private void resetAllDataContainers(){
+        Log.e("Start_DataSetRESET","Resetting of all data conatiners started..");
+        if(AppData.allMoodPlayList!=null)
+            AppData.allMoodPlayList.clear();
+        if(AppData.allNotifications!=null)
+            AppData.allNotifications.clear();
+        if(AppData.allProfileData!=null)
+            AppData.allProfileData.clear();
+            ContactsManager.countFriendsUsingApp=0;
+            ContactsManager.countFriendsNotUsingApp = 0;
+        if(ContactsManager.allReadContacts!=null)
+            ContactsManager.allReadContacts.clear();
+        if(ContactsManager.friendsWhoUsesApp!=null)
+            ContactsManager.friendsWhoUsesApp.clear();
+        if(ContactsManager.friendsWhoDoesntUseApp!=null)
+            ContactsManager.friendsWhoDoesntUseApp.clear();
+        Log.e("Start_DataSetRESET","Resetting of all data conatiners done..");
+    }
 
-        /*ViewPager viewPager = (ViewPager) AllTabs.mViewPager.findViewById(R.id.container);
-        viewPager.setCurrentItem(switchToTab);*/
-        //if(switchToTab)
-
-        //askForPermissions();
-        //while(permissionNotDone);
-
+    private void startWork(){
         if (!checkNetworkAvailability()) {
             Toast.makeText(getApplicationContext(), "Sorry! You need Internet Connection", Toast.LENGTH_LONG).show();
             spinner = (ProgressBar) findViewById(R.id.spinner);
@@ -222,12 +246,11 @@ public class Start extends AppCompatActivity {
             Messenger.print(getApplicationContext(),"Start Internet Connection and restart the app!!");
 
         } else {
-
             if (populateUserData()) {
+                resetAllDataContainers();
                 spinner = (ProgressBar) findViewById(R.id.spinner);
                 spinner.setVisibility(ProgressBar.VISIBLE);
                 Log.e("Start_populateUSrData", "User data populated");
-
                 //Log.e("Start_Bots", "Bots started");
                 //startAutoBots();
                 fetchMoodsAndPlayListFiles();
@@ -262,8 +285,53 @@ public class Start extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                    /*Intent ii = new Intent(this,Start.class);
+                    ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
+                    finish(); // destroy current activity..
+                    startActivity(ii);*/
+                    startWork();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"Sorry!! The app needs all permissions to go ahead!!",Toast.LENGTH_LONG).show();
+                }
+            /*case MY_PERMISSIONS_REQUEST_READ_CONTACTS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
+                    Intent ii = new Intent(this,Start.class);
+                    ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
+                    finish(); // destroy current activity..
+                    startActivity(ii);
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"Sorry!! The app needs all permissions to go ahead!!",Toast.LENGTH_LONG).show();
+                }*/
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_start);
+
+        /*ViewPager viewPager = (ViewPager) AllTabs.mViewPager.findViewById(R.id.container);
+        viewPager.setCurrentItem(switchToTab);*/
+        //if(switchToTab)
+
+        askForPermissions();
+        //while(permissionNotDone);
+
+
+    }
+
     private void fetchContactsFromServer(){
-        ServerManager serverManager = new ServerManager();
+        ServerManager serverManager = new ServerManager(this);
         serverManager.fetchContactsFromServer();
     }
 
@@ -297,37 +365,37 @@ public class Start extends AppCompatActivity {
         return false;
     }
 
-    public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, LinkedHashMap<String,String> allContacts){
+    public LinkedHashMap<String,String> getContactsTableData(LinkedHashMap<String,String> allContacts){
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
-            // status = 0 is for READ and RETURN as it means TABLE ALREADY EXISTS
-            if(status == 0){
-                //READ and RETURN data
+            Log.e("Start_CONTACTS_DATAB4",ContactsManager.friendsWhoUsesApp+" \n"+ContactsManager.friendsWhoDoesntUseApp);
+                int countOfNonAppUsers = 0, countOfAppUsers = 0;
                 Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts order by name", null);
                 resultSet.moveToFirst();
-                Log.e("Start_TBLDetect",resultSet.getCount()+" no of rows..");
                 while (!resultSet.isAfterLast()) {
                     String phone_no = resultSet.getString(0);
                     String name = resultSet.getString(1).replaceAll("'","\'");
-                    allContacts.put(phone_no,name);
+                    int appUsingStatus = resultSet.getInt(2);
+                    if (appUsingStatus == 1){
+                        countOfAppUsers++;
+                        if(!phone_no.equals(UserDetails.getPhoneNumber()))
+                            ContactsManager.friendsWhoUsesApp.add(phone_no);
+                    }
+                    else{
+                            countOfNonAppUsers++;
+                            ContactsManager.friendsWhoDoesntUseApp.add(phone_no);
+                    }
+                    ContactsManager.allReadContacts.put(phone_no,name);
+                    //allContacts.put(phone_no,name);
                     resultSet.moveToNext();
+                    //ContactsManager.allReadContacts = allReadContacts;
                 }
-            }
-            // First time conatct table create or REFRESH done.
-            else{
-                String createQuery = "CREATE TABLE IF NOT EXISTS allcontacts(phone_no VARCHAR,name VARCHAR);";
-                mydatabase.execSQL(createQuery);
-                Log.e("Start_TBLCRT","allcontacts table created..");
-                String insertQuery = "";
-                for(String eachContact:allContacts.keySet()){
-                    String name = allContacts.get(eachContact);
-                    name = name.replaceAll("'", "''");
-                    insertQuery = "INSERT INTO allcontacts values('"+eachContact+"','"+name+"');";
-                    Log.e("Start_InsertQuery",insertQuery);
-                    mydatabase.execSQL(insertQuery);
-                }
+                allReadContacts = ContactsManager.allReadContacts;
+                ContactsManager.countFriendsUsingApp = countOfAppUsers;
+                ContactsManager.countFriendsNotUsingApp = countOfNonAppUsers;
+                Log.e("Start_CONTACTS_DATAA4",ContactsManager.friendsWhoUsesApp+" \n"+ContactsManager.friendsWhoDoesntUseApp);
+                Log.e("Start_COUNTS_USERS","[Using:"+ContactsManager.countFriendsUsingApp+"] [NotUsing:"+ContactsManager.countFriendsNotUsingApp+"]");
                 mydatabase.close();
-            }
         }catch (Exception ee){
             Log.e("StartFragment_TBLErr",ee.getMessage());
             ee.fillInStackTrace();

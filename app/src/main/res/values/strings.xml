@@ -14,4 +14,8 @@
         visit us today." mom said as she tried to hide her smile. "who?" I asked suspiciously. "I told you about the boy Mr.Mehra
         recommended, To avoid family drama it was best to say no at the moment.
 </string>
+
+    <string name="title_activity_edit_audio_status">EditAudioStatus</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

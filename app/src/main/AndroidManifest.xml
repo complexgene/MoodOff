@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.moodoff">
+    package="com.moodoff"
+>
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -18,11 +19,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".PermissionRequest"
+            android:name=".Start"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -42,7 +42,7 @@
             android:name=".ContactList"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Start"
+            android:name=".PermissionRequest"
             android:screenOrientation="portrait" />
     </application>
 

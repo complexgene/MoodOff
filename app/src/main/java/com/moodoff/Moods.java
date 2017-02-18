@@ -1,11 +1,14 @@
 package com.moodoff;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -22,6 +25,8 @@ import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.model.UserDetails;
+
+import java.lang.reflect.Field;
 
 
 /**
@@ -74,11 +79,18 @@ public class Moods extends Fragment {
     RelativeLayout layout;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
+    static boolean notitifcationClicked = false;
+    static String moodToEnter="";
+    static FragmentManager fm;
+    static Fragment fragment;
+    static Activity activity;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mainContainer = container;
         mainInflater = inflater;
+        fm = getFragmentManager();
+        activity = getActivity();
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_moods, container,
                 false);
@@ -97,41 +109,43 @@ public class Moods extends Fragment {
         btnInLove = (Button)rootView.findViewById(R.id.btn_inlove);
 
         showAllButtons();
+        if(notitifcationClicked)
+            cameFromNotification();
 
         btnOnTour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("on_tour");
+                startParticularMood("on_tour",1);
             }
         });
         btnParty.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("party");
+                startParticularMood("party",1);
             }
         });
         btnRomantic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("romantic");
+                startParticularMood("romantic",1);
             }
         });
         btnSad.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("sad");
+                startParticularMood("sad",1);
             }
         });
         btnOldEra.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("old_era");
+                startParticularMood("old_era",1);
             }
         });
         btnWorkOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("work_out");
+                startParticularMood("work_out",1);
             }
         });
         btnDance.setOnClickListener(new View.OnClickListener() {
@@ -144,38 +158,46 @@ public class Moods extends Fragment {
         btnCalm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("calm");
+                startParticularMood("calm",1);
             }
         });
         btnCrazy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("crazy");
+                startParticularMood("crazy",1);
             }
         });
         btnFriends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("friends");
+                startParticularMood("friends",1);
             }
         });
         btnMissU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("missu");
+                startParticularMood("missu",1);
             }
         });
         btnInLove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startParticularMood("in_love");
+                startParticularMood("in_love",1);
             }
         });
 
         return rootView;
     }
 
-    private void startParticularMood(String moodType){
+    private void cameFromNotification(){
+       startParticularMood(moodToEnter,0);
+    }
+
+
+    private void startParticularMood(String moodType, int status){
+        /*if(status == 0)fm=AllTabs.moodsFragmentManager;
+        else */
+        fm=getFragmentManager();
         if(ContactsFragment.openedAProfile){
             Log.e("MOODS",super.getId()+"");
             ContactsFragment.openedAProfile = false;
@@ -183,8 +205,8 @@ public class Moods extends Fragment {
         ServerManager serverManager = new ServerManager();
         serverManager.setLiveMood(UserDetails.getPhoneNumber(),moodType);
         if(AppData.allMoodPlayList.containsKey(moodType)) {
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            Fragment newFragment = GenericMood.newInstance(moodType, "b");
+            FragmentTransaction transaction = fm.beginTransaction();
+            Fragment newFragment=GenericMood.newInstance(moodType, "b");
             // Replace whatever is in the fragment_container view with this fragment,
             // and add the transaction to the back stack if needed
             transaction.replace(R.id.allmoods, newFragment);
@@ -252,8 +274,12 @@ public class Moods extends Fragment {
 
     @Override
     public void onDetach() {
-        super.onDetach();
-        mListener = null;
+        try {
+                super.onDetach();
+                mListener = null;
+
+        }catch (Exception ee){}
+
     }
 
     /**

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
@@ -60,7 +61,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     @Override
     public void onAudioFocusChange(int i) {
         if(mp!=null && mp.isPlaying()) {
-            if (i <= 0) {
+            if (i <= 0 && AllTabs.mViewPager.getCurrentItem()==1) {
                 mp.pause();
             } else {
                 mp.start();
@@ -191,8 +192,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 }).start();
                 showNotPanel();
             }
-        },2000);
-
+        },4000);
     }
 
     public static SeekBar currentSeekBar;
@@ -215,7 +215,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             }
         } catch(Exception e) {
         }
-
     }
 
     public static int oldCountOfNotifications = 0;
@@ -249,7 +248,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     if(fromUserName == null)
                         fromUserName = fromUserNumber;
             }
-
             final String date = componentsInNotification[2];
             final String time = componentsInNotification[3];
             final String type = componentsInNotification[4];
@@ -343,6 +341,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             name.setLayoutParams(layoutDetails);
             name.setTextColor(Color.BLACK);
             name.setGravity(Gravity.CENTER_HORIZONTAL);
+            name.setTypeface(Typeface.DEFAULT_BOLD);
             //Typeface font = Typeface.createFromAsset(getContext().getAssets(), "fonts/teen.ttf");
             //name.setTypeface(Typeface.DEFAULT_BOLD..BOLD);
             name.setTextSize(14);
@@ -435,6 +434,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     currentPlayButtonId = v.getId();
                     currentSeekBar = (SeekBar) view.findViewById(((currentPlayButtonId)+1)+1000000);
                     currentNotificationSpinner = (ProgressBar) view.findViewById(((currentPlayButtonId)+1)+2000000);
+                    currentNotificationSpinner.getIndeterminateDrawable().setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
                     playSong(playImageButton,v,currentSeekBar,songFileName,currentNotificationSpinner);
                 }
             });
@@ -630,6 +630,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     }
     @Override
     public void onDetach() {
+        Log.e("Notification_onDetach", "Notification on Detach");
         if(AllTabs.mViewPager.getCurrentItem() == 1) {
             releaseMediaPlayerObject(mp);
             mListener = null;
@@ -639,9 +640,9 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
     @Override
     public void onDestroy() {
+        Log.e("Notification_onDestroy", "Notification on Destroy");
         if(AllTabs.mViewPager.getCurrentItem() == 1) {
             mAudioManager.abandonAudioFocus(this);
-            Log.e("Notification", "Notification on Destroy");
             if (mp != null) {
                 releaseMediaPlayerObject(mp);
                 mp = null;

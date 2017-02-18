@@ -1,10 +1,21 @@
 package com.moodoff;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.Fragment;
@@ -18,7 +29,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RemoteViews;
 import android.widget.TabHost;
+import android.widget.TextView;
+
+import com.moodoff.helper.AppData;
+import com.moodoff.helper.Messenger;
+import com.moodoff.helper.ServerManager;
+import com.moodoff.model.UserDetails;
 
 import java.util.ArrayList;
 
@@ -207,12 +225,64 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
     }
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        Log.e("Start","BACK Pressed..");
+        try {
+            Log.e("AllTabs_onBackPressed", "onBackPressed:"+AppData.noOfTimesBackPressed);
+            if ((AppData.noOfTimesBackPressed == 1&&mViewPager.getCurrentItem()!=1) || (AppData.noOfTimesBackPressed==0 && mViewPager.getCurrentItem() == 1)) {
+                Messenger.print(getApplicationContext(), "Press Back again to Exit");
+                if(mViewPager.getCurrentItem()==1)AppData.noOfTimesBackPressed=2;
+            }
+            else{
+                super.onBackPressed();
+            }
+        }catch (Exception ee){return;}
     }
 
     @Override
     protected void onDestroy() {
+        Log.e("AllTabs_onDestroy","onDestroy");
         super.onDestroy();
+        /*if(AppData.noOfTimesBackPressed==1 && mViewPager.getCurrentItem()==1){
+            new ServerManager().exitLiveMood(UserDetails.getPhoneNumber());
+            GenericMood.releaseMediaPlayerObject();
+            NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
+            Profile.releaseMediaPlayerObject(Profile.mediaPlayer);
+        }
+        else*/
+        if(AppData.noOfTimesBackPressed==2){
+            new ServerManager().exitLiveMood(UserDetails.getPhoneNumber());
+            GenericMood.releaseMediaPlayerObject();
+            NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
+            Profile.releaseMediaPlayerObject(Profile.mediaPlayer);
+            /*AppData.noOfTimesBackPressed=0;
+            String currentPlayingSong = GenericMood.currentSong;
+            if(currentPlayingSong != null) {
+                manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                remoteViewBig = new RemoteViews(getPackageName(), R.layout.statusbar_expanded);
+                remoteViewSmall = new RemoteViews(getPackageName(), R.layout.statusbar_minimized);
+                remoteViewBig.setImageViewResource(R.id.albumimage,R.drawable.man);
+                remoteViewSmall.setImageViewResource(R.id.albumimage,R.drawable.man);
+                currentPlayingSong = currentPlayingSong.replaceAll("_"," ").replace(".mp3","");
+                remoteViewBig.setTextViewText(R.id.songname,"Mood: "+Character.toUpperCase(GenericMood.currentMood.charAt(0))+GenericMood.currentMood.substring(1));
+                remoteViewBig.setTextViewText(R.id.songdetails,currentPlayingSong+" - Arijit Singh");
+                remoteViewSmall.setTextViewText(R.id.songname,currentPlayingSong);
+                remoteViewSmall.setTextViewText(R.id.songdetails,currentPlayingSong+" - Arijit Singh");
+                builder = new NotificationCompat.Builder(this);
+                builder
+                        .setSmallIcon(R.drawable.btn_dedicate)
+                        .setAutoCancel(true)
+                        .setContentTitle(currentPlayingSong)
+                        .setContentText(currentPlayingSong+" - Arijit Singh")
+                        .setContent(remoteViewSmall)
+                        .setCustomBigContentView(remoteViewBig)
+                        .setColor(Color.rgb(255, 0, 0));
+                manager.notify(0, builder.build());
+            }*/
+        }
+
     }
+    private NotificationCompat.Builder builder;
+    private NotificationManager manager;
+    private int notification_Id;
+    private RemoteViews remoteViewBig,remoteViewSmall;
+
 }

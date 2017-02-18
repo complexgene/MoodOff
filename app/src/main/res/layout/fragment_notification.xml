@@ -3,7 +3,7 @@
     android:id="@+id/containsallN"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#580730"
+    android:background="@color/appcolor"
     tools:context="com.moodoff.NotificationFragment">
 
 

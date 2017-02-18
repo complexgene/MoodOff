@@ -13,5 +13,7 @@ public class ContactsManager {
     public static ArrayList<String> allReadContactsFromDBServer = new ArrayList<>();
     public static ArrayList<String> friendsWhoUsesApp = new ArrayList<>();
     public static ArrayList<String> friendsWhoDoesntUseApp = new ArrayList<>();
+    public static int countFriendsUsingApp = 0;
+    public static int countFriendsNotUsingApp = 0;
 
 }
