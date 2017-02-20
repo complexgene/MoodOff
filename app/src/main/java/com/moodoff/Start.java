@@ -214,6 +214,7 @@ public class Start extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
                         MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                return true;
             }
         }
         return false;
@@ -324,7 +325,7 @@ public class Start extends AppCompatActivity {
         viewPager.setCurrentItem(switchToTab);*/
         //if(switchToTab)
 
-        askForPermissions();
+        if(askForPermissions())startWork();
         //while(permissionNotDone);
 
 

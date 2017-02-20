@@ -1,8 +1,10 @@
 package com.moodoff;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -187,8 +189,10 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         editAudioStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mediaPlayer != null) {
-                    playAudioStatusSong(myAudioStatusSong);
+                if(mediaPlayer != null ) {
+                    if (isSongPlaying == true) {
+                        playAudioStatusSong(myAudioStatusSong);
+                    }
                 }
                 editStatus(1);
             }
@@ -287,9 +291,11 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             ValidateMediaPlayer validateMediaPlayer = ValidateMediaPlayer.getValidateMediaPlayerInstance();
             validateMediaPlayer.initialiseAndValidateMediaPlayer("profile","stop");
             showPlayStopButton("play");
-            mediaPlayer.stop();
-            seekBar_Profile.setMax(0);
-            seekBar_Profile.setEnabled(false);
+            if (mediaPlayer!=null) {
+                mediaPlayer.stop();
+                seekBar_Profile.setMax(0);
+                seekBar_Profile.setEnabled(false);
+            }
         }
     }
 
@@ -362,6 +368,17 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         fbDialogue.setContentView(dialogView);
         fbDialogue.setCancelable(true);
         fbDialogue.show();
+
+        fbDialogue.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if(mediaPlayer != null) {
+                    if(mediaPlayer.isPlaying()) {
+                        playAudioStatusSelectionSong();
+                    }
+                }
+            }
+        });
     }
 
     private void editUserTextStatus(final Dialog fbDialogue){
@@ -538,7 +555,9 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             public void onClick(View v) {
                 fbDialogue.dismiss();
                 if(mediaPlayer != null) {
-                    playAudioStatusSelectionSong();
+                    if(mediaPlayer.isPlaying()) {
+                        playAudioStatusSelectionSong();
+                    }
                 }
             }
         });
