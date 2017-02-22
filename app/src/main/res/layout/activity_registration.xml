@@ -27,114 +27,114 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:gravity="center"
-        >
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/man"
-            />
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:gravity="center"
             >
-            <ImageButton
-                android:id="@+id/fbtn_getProfilePicture"
-                android:layout_marginLeft="2dp"
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/appcolor"
-                android:src="@drawable/pic_camera"
+                android:src="@drawable/man"
                 />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                >
+                <ImageButton
+                    android:id="@+id/fbtn_getProfilePicture"
+                    android:layout_marginLeft="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/appcolor"
+                    android:src="@drawable/pic_camera"
+                    />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/userformdata"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="7dp"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:orientation="vertical"
-        android:layout_below="@id/title_registration"
-        >
-        <EditText
-            android:id="@+id/name"
+        <LinearLayout
+            android:id="@+id/userformdata"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:nextFocusDown="@+id/et_phone_number"
-            android:hint="Your Name"
-            android:textStyle="normal|bold"
-            android:background="@drawable/contactsdedicatedesign"
-            android:textAlignment="center"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"
-            android:layout_marginTop="5dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
-            android:imeOptions="actionNext"
-            />
-        <EditText
-            android:id="@+id/et_phone_number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:digits="0123456789"
-            android:hint="Mobile Number"
-            android:inputType="number"
-            android:nextFocusDown="@+id/status_text"
-            android:maxLength="10"
-            android:textColor="@color/white"
-            android:textStyle="normal|bold"
-            android:background="@drawable/contactsdedicatedesign"
-            android:textAlignment="center"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"
-            android:layout_marginTop="5dp"
-            android:textColorHint="@android:color/darker_gray"
-            android:imeOptions="actionNext"
-            />
-        <EditText
-            android:id="@+id/status_text"
-            android:inputType="text"
-            android:nextFocusDown="@+id/et_date_of_birth"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Your Text Status"
-            android:textStyle="normal|bold"
-            android:background="@drawable/contactsdedicatedesign"
-            android:textColor="@color/white"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"
-            android:layout_marginTop="5dp"
-            android:textAlignment="center"
-            android:textColorHint="@android:color/darker_gray"
-            />
-        <EditText
-            android:id="@+id/et_date_of_birth"
-            android:imeOptions="actionGo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:digits="0123456789/"
-            android:hint="Your Birthday"
-            android:maxLines="1"
-            android:textColor="@color/white"
-            android:textStyle="normal|bold"
-            android:background="@drawable/contactsdedicatedesign"
-            android:layout_centerVertical="true"
-            android:textAlignment="center"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"
-            android:layout_marginTop="5dp"
-            android:textColorHint="@android:color/darker_gray"
-            />
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:orientation="vertical"
+            android:layout_below="@id/title_registration"
+            >
+            <EditText
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:nextFocusDown="@+id/et_phone_number"
+                android:hint="Your Name"
+                android:textStyle="normal|bold"
+                android:background="@drawable/contactsdedicatedesign"
+                android:textAlignment="center"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray"
+                android:imeOptions="actionNext"
+                />
+            <EditText
+                android:id="@+id/et_phone_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="0123456789"
+                android:hint="Mobile Number"
+                android:inputType="number"
+                android:nextFocusDown="@+id/status_text"
+                android:maxLength="10"
+                android:textColor="@color/white"
+                android:textStyle="normal|bold"
+                android:background="@drawable/contactsdedicatedesign"
+                android:textAlignment="center"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:layout_marginTop="5dp"
+                android:textColorHint="@android:color/darker_gray"
+                android:imeOptions="actionNext"
+                />
+            <EditText
+                android:id="@+id/status_text"
+                android:inputType="text"
+                android:nextFocusDown="@+id/et_date_of_birth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Your Text Status"
+                android:textStyle="normal|bold"
+                android:background="@drawable/contactsdedicatedesign"
+                android:textColor="@color/white"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:layout_marginTop="5dp"
+                android:textAlignment="center"
+                android:textColorHint="@android:color/darker_gray"
+                />
+            <EditText
+                android:id="@+id/et_date_of_birth"
+                android:imeOptions="actionGo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="0123456789/"
+                android:hint="Your Birthday"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textStyle="normal|bold"
+                android:background="@drawable/contactsdedicatedesign"
+                android:layout_centerVertical="true"
+                android:textAlignment="center"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:layout_marginTop="5dp"
+                android:textColorHint="@android:color/darker_gray"
+                />
 
-    </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -181,3 +181,4 @@
             android:textSize="30sp" />
     </LinearLayout>
 </LinearLayout>
+

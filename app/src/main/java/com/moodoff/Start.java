@@ -74,17 +74,17 @@ public class Start extends AppCompatActivity {
             rd = new StoreRetrieveDataImpl("UserData.txt");
             if (rd.fileExists()) {
                 rd.beginReadTransaction();
-                singleTonUserObject.setUserName(rd.getValueFor("user"));
-                singleTonUserObject.setPhoneNumber(rd.getValueFor("phoneNo"));
-                singleTonUserObject.setDateOfBirth(rd.getValueFor("dob"));
-                singleTonUserObject.setUserTextStatus(rd.getValueFor("textStatus"));
-                singleTonUserObject.setUserAudioStatusSong(rd.getValueFor("audioStatus"));
-                singleTonUserObject.setScore(Integer.parseInt(rd.getValueFor("score")));
+                singleTonUserObject.setUserName(rd.getValueFor("userName"));
+                singleTonUserObject.setPhoneNumber(rd.getValueFor("userPhoneNumber"));
+                singleTonUserObject.setDateOfBirth(rd.getValueFor("userDob"));
+                singleTonUserObject.setUserTextStatus(rd.getValueFor("userTextStatus"));
+                singleTonUserObject.setUserAudioStatusSong(rd.getValueFor("userAudioStatus"));
+                singleTonUserObject.setScore(Integer.parseInt(rd.getValueFor("userScore")));
                 rd.endReadTransaction();
                 return true;
             }
             else {
-                Log.e("Start_USERAPPrnc","User first time..");
+                Log.e("Start_USER_STATUS","User opening app first time..");
                 Intent ii = new Intent(this, RegistrationActivity.class);
                 ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
@@ -331,8 +331,17 @@ public class Start extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        if(askForPermissions())startWork();
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            askForPermissions();
+            // Implicit startWork() after granting permission from onPermissionResult
+        }
+        else if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT) {
+            //For such versions you need to call it explicitly
+            if(askForPermissions()){
+                startWork();
+            }
+        }
     }
 
     private void fetchContactsFromServer(){

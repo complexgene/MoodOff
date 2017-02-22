@@ -97,6 +97,7 @@ public class RegistrationActivity extends AppCompatActivity {
                      */
                     //showOTPdialog
                     //checkIfUserExists(mobile_number.getText().toString());
+                    Log.e("RegistrationActivity","Perfect");
                 }
             }
         });

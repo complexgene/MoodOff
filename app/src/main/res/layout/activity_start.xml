@@ -4,9 +4,34 @@
     android:id="@+id/activity_start"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/mu1"
+    android:background="@drawable/background6"
     tools:context="com.moodoff.Start">
-
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textSize="55dp"
+            android:textColor="#ff1744"
+            android:text="MoodOff"
+            android:textStyle="normal|bold"
+            android:gravity="center"
+            android:fontFamily="cursive"
+            />
+        <TextView
+            android:layout_gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"
+            android:textColor="#4f4f4f"
+            android:text="Just switch it ON...          "
+            android:textStyle="normal"
+            android:gravity="right"
+            />
+    </LinearLayout>
     <ProgressBar
         style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
         android:layout_width="wrap_content"
@@ -18,22 +43,6 @@
         android:indeterminate="false"
         android:indeterminateTint="@color/deep_orange" />
 
-    <!--<TextView
-        android:text="- MoodOff -"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="19dp"
-        android:id="@+id/textView3"
-        android:typeface="normal"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        android:textStyle="normal|bold|italic"
-        android:textSize="36sp"
-        android:lineSpacingExtra="8sp"
-        android:textColor="@android:color/background_dark"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:textAlignment="center" />
--->
     <TextView
         android:text="Good Morning"
         android:layout_width="wrap_content"
