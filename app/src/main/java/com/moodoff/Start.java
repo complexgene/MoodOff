@@ -46,17 +46,21 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class Start extends AppCompatActivity {
+    // All Variables declaration
     public static int switchToTab = 0;
-    //private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 100;
     private String serverURL = HttpGetPostInterface.serverURL;
-    public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true, moodsAndSongsFetchNotComplete = true,
-            fetchContactsFromServerNotComplete = true, allProfilesDataFetchNotComplete = true;
-    ProgressBar spinner;
-    TextView greet;
-    SQLiteDatabase mydatabase;
-    DBHelper dbOpr = new DBHelper(this);
-    LinkedHashMap<String,String> allReadContacts = new LinkedHashMap<>();
+    public static boolean fetchContactsNotComplete = true, notificationFetchNotComplete = true,
+                          moodsAndSongsFetchNotComplete = true, fetchContactsFromServerNotComplete = true,
+                          allProfilesDataFetchNotComplete = true;
+    private ProgressBar spinner;
+    private TextView greet;
+    private SQLiteDatabase mydatabase;
+    private DBHelper dbOpr = new DBHelper(this);
+    private LinkedHashMap<String,String> allReadContacts = new LinkedHashMap<>();
+    private UserDetails singleTonUserObject = UserDetails.getInstance();
+    // Declaration of all varaibles complete
 
+    // Check if user is having network connection
     private boolean checkNetworkAvailability(){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -70,13 +74,12 @@ public class Start extends AppCompatActivity {
             rd = new StoreRetrieveDataImpl("UserData.txt");
             if (rd.fileExists()) {
                 rd.beginReadTransaction();
-                UserDetails.setUserName(rd.getValueFor("user"));
-                UserDetails.setPhoneNumber(rd.getValueFor("phoneNo"));
-                UserDetails.setEmailId(rd.getValueFor("email"));
-                UserDetails.setDateOfBirth(rd.getValueFor("dob"));
-                UserDetails.setUserTextStatus(rd.getValueFor("textStatus"));
-                UserDetails.setUserAudioStatusSong(rd.getValueFor("audioStatus"));
-                UserDetails.setScore(Integer.parseInt(rd.getValueFor("score")));
+                singleTonUserObject.setUserName(rd.getValueFor("user"));
+                singleTonUserObject.setPhoneNumber(rd.getValueFor("phoneNo"));
+                singleTonUserObject.setDateOfBirth(rd.getValueFor("dob"));
+                singleTonUserObject.setUserTextStatus(rd.getValueFor("textStatus"));
+                singleTonUserObject.setUserAudioStatusSong(rd.getValueFor("audioStatus"));
+                singleTonUserObject.setScore(Integer.parseInt(rd.getValueFor("score")));
                 rd.endReadTransaction();
                 return true;
             }
@@ -360,7 +363,7 @@ public class Start extends AppCompatActivity {
                     int appUsingStatus = resultSet.getInt(2);
                     if (appUsingStatus == 1){
                         countOfAppUsers++;
-                        if(!phone_no.equals(singleTonObject.getPhoneNumber()))
+                        if(!phone_no.equals(singleTonUserObject.getPhoneNumber()))
                             ContactsManager.friendsWhoUsesApp.add(phone_no);
                     }
                     else{

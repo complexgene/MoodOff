@@ -2,10 +2,10 @@ package com.moodoff;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -14,60 +14,69 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.moodoff.exceptions.ValidationException;
 import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.Messenger;
-import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
+import com.moodoff.service.RegistrationActivityServiceImpl;
+import com.moodoff.service.RegistrationActivityServiceInterface;
+import com.moodoff.validations.RegistrationActivityBusinessImpl;
+import com.moodoff.validations.RegistrationActivityBusinessInterface;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 
-import static com.moodoff.helper.HttpGetPostInterface.serverURL;
-
 public class RegistrationActivity extends AppCompatActivity {
-
-    EditText name,mobile_number,birthday,email, status_text;
-    RadioGroup genderType;String genderOfUser;
-    ProgressBar progressRegistration;
-    TextView error;
-    Calendar calendar;
-    int year, month, day;
+    //---------------------------------------------------------------------------------
+    // Declaration space for all helper classes
+    //---------------------------------------------------------------------------------
+    RegistrationActivityServiceInterface registrationServiceBot = new RegistrationActivityServiceImpl();
+    RegistrationActivityBusinessInterface registrationValidationBot = new RegistrationActivityBusinessImpl();
     StoreRetrieveDataInterface rd=null;
-    Button register;
-    DBHelper dbOperations;
+    //---------------------------------------------------------------------------------
+    // Declartion for all helper classes is done
+    //---------------------------------------------------------------------------------
+
+    //--------------------------------------------------
+    // Declaration space for all the variables
+    //--------------------------------------------------
+    private EditText name,mobile_number,birthday,status_text;
+    private ProgressBar progressRegistration;
+    private TextView error;
+    private Calendar calendar;
+    private int year, month, day;
+    private Button register;
+    private DBHelper dbOperations;
+    private Context currentContext;
+    // -------------------------------------------------
+    // Declaration of all varaibles complete
+    //--------------------------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
+        // Initilaize all the UI Components
         initComponents();
-        // Need to do this without any lag..
-        createAllNecessaryTablesForAppOperation();
+        registrationServiceBot.createAllNecessaryTablesForAppOperation(currentContext);
 
+        // Clicking on any textbox should remove the red error line if any displayed earlier
+        // as the user is going to rectify the value now.
         name.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
         mobile_number.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
-
         birthday.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 error.setText("");
@@ -81,18 +90,25 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 if (validateRegistrationData()) {
-                    checkIfUserExists(mobile_number.getText().toString());
+                    /*
+                      showOTPDialog
+                      if(OTP successful) populateUserData();
+                      else backoff;
+                     */
+                    //showOTPdialog
+                    //checkIfUserExists(mobile_number.getText().toString());
                 }
             }
         });
     }
 
     private void initComponents(){
+        currentContext = getApplicationContext();
         dbOperations = new DBHelper(this);
         register = (Button)findViewById(R.id.btn_register);
         name = (EditText) findViewById(R.id.name);
-        mobile_number = (EditText) findViewById(R.id.phone_number);
-        birthday = (EditText) findViewById(R.id.date_of_birth);
+        mobile_number = (EditText) findViewById(R.id.et_phone_number);
+        birthday = (EditText) findViewById(R.id.et_date_of_birth);
         status_text = (EditText) findViewById(R.id.status_text);
         error = (TextView) findViewById(R.id.error_message);
         calendar = Calendar.getInstance();
@@ -102,16 +118,31 @@ public class RegistrationActivity extends AppCompatActivity {
         progressRegistration = (ProgressBar)findViewById(R.id.progressBarRegistration);
         progressRegistration.setVisibility(View.INVISIBLE);
     }
+    private boolean validateRegistrationData(){
+        try {
+            // Get the values from UI
+            String  userName = name.getText().toString(),
+                    userPhoneNumber = mobile_number.getText().toString(),
+                    userBirthday = birthday.getText().toString(),
+                    userTextStatus = status_text.getText().toString();
 
+            // Call for validation of the fetched data
+            registrationValidationBot.validateRegistrationData(userName,userPhoneNumber,userBirthday,userTextStatus);
+            return true;
+        }catch(ValidationException ve){
+            error.setText(ve.getMessage());
+        }
+        return false;
+    }
     private void checkIfUserExists(final String userMobileNumber) {
         mRootRef.child(userMobileNumber).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    error.setText("Oops!! You are already registered!! :(");
+                    error.setText("Seems you used this app before!! Wait while we fetch your old data!!");
                 }
                 else {
-                    Toast.makeText(getApplicationContext(), "Registering...Wait!!", Toast.LENGTH_SHORT).show();
+                    Messenger.printCenter(currentContext,"Registering.. Wait!!");
                     progressRegistration.setVisibility(View.VISIBLE);
                     register();
                 }
@@ -122,62 +153,7 @@ public class RegistrationActivity extends AppCompatActivity {
         });
     }
 
-    private void createAllNecessaryTablesForAppOperation(){
-        DBHelper dboperations = new DBHelper(getApplicationContext());
-        dbOperations.dropAllTables();
 
-        LinkedHashMap<String,String> worktodoColumns = new LinkedHashMap<>();
-        worktodoColumns.put("id","INTEGER PRIMARY KEY AUTOINCREMENT");
-        worktodoColumns.put("api","VARCHAR");
-        dboperations.createTable("worktodo",worktodoColumns);
-        Log.e("RegistrationAct_TBL","worktodo table created.");
-
-        LinkedHashMap<String,String> profilesColumns = new LinkedHashMap<>();
-        profilesColumns.put("id","VARCHAR PRIMARY KEY");
-        profilesColumns.put("name","VARCHAR");
-        profilesColumns.put("mailid","VARCHAR");
-        profilesColumns.put("dob","VARCHAR");
-        profilesColumns.put("textstatus","VARCHAR");
-        profilesColumns.put("audiostatus","VARCHAR");
-        dboperations.createTable("profiles",profilesColumns);
-        Log.e("RegistrationAct_TBL","profiles table created.");
-
-        LinkedHashMap<String,String> rnotificationsColumns = new LinkedHashMap<>();
-        rnotificationsColumns.put("from_user_id","VARCHAR");
-        rnotificationsColumns.put("to_user_id","VARCHAR");
-        rnotificationsColumns.put("file_name","VARCHAR");
-        rnotificationsColumns.put("type","VARCHAR");
-        rnotificationsColumns.put("send_done","INTEGER");
-        rnotificationsColumns.put("create_ts","VARCHAR");
-        dboperations.createTable("rnotifications",rnotificationsColumns);
-        Log.e("RegistrationAct_TBL","rnotifications table created");
-
-        LinkedHashMap<String,String> playListColumns = new LinkedHashMap<>();
-        playListColumns.put("date","VARCHAR");
-        playListColumns.put("mood_type","VARCHAR");
-        playListColumns.put("song_name","VARCHAR");
-        playListColumns.put("artist_name","VARCHAR");
-        playListColumns.put("movie_or_album_name","VARCHAR");
-        dboperations.createTable("playlist",playListColumns);
-        Log.e("RegistrationAct_TBL","playlist table created");
-
-        LinkedHashMap<String,String> allprofileColumns = new LinkedHashMap<>();
-        allprofileColumns.put("phno","VARCHAR");
-        allprofileColumns.put("name","VARCHAR");
-        allprofileColumns.put("text_status","VARCHAR");
-        allprofileColumns.put("audio_status","VARCHAR");
-        allprofileColumns.put("text_status_likes","INTEGER");
-        allprofileColumns.put("audio_status_likes","INTEGER");
-        dboperations.createTable("all_profiles",allprofileColumns);
-        Log.e("RegistrationAct_TBL","all_profiles table created");
-
-        // createTable implementation for allcontacts is different as we are fetching data in table creation here.
-        LinkedHashMap<String,String> contactsColumns = new LinkedHashMap<>();
-        contactsColumns.put("phone_no","VARCHAR");
-        contactsColumns.put("name","VARCHAR");
-        contactsColumns.put("status","INTEGER");
-        dboperations.createTable("allcontacts",contactsColumns);
-    }
     public void setDate() {
         new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)).show();
@@ -200,17 +176,7 @@ public class RegistrationActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         birthday.setText(sdf.format(calendar.getTime()));
     }
-    public boolean validateRegistrationData () {
-        if (name.getText().toString().isEmpty()) {
-            error.setText("Error: Name is mandatory.");return false;
-        } else if (mobile_number.getText().toString().isEmpty()) {
-            error.setText("Error: Phone number is mandatory.");return false;
-        } else if (birthday.getText().toString().isEmpty()) {
-            error.setText("Error: Birthday is mandatory.");return false;
-        }  else {
-            return true;
-        }
-    }
+
     private String getGenderNumber(String gender){
         switch(gender){
             case "Male":{return "0";}
@@ -244,6 +210,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
     public boolean saveUserProfileIsSuccesful() {
         try {
+            // Get all the values from UI
             String userName = name.getText().toString();
             String userMobileNumber = mobile_number.getText().toString();
             String userBday = birthday.getText().toString();
@@ -252,6 +219,7 @@ public class RegistrationActivity extends AppCompatActivity {
             String userScore = "0";
             String userOldNotificationCount = "0";
 
+            // Storing all the registration details into the text file
             rd = new StoreRetrieveDataImpl("UserData.txt");
             rd.beginWriteTransaction();
             rd.createNewData("userName", userName);
@@ -263,6 +231,7 @@ public class RegistrationActivity extends AppCompatActivity {
             rd.createNewData("userNumberOfOldNotifications",userOldNotificationCount);
             rd.endWriteTransaction();
 
+            // Populate the POJO
             UserDetails userData = UserDetails.getInstance();
             userData.setUserName(rd.getValueFor("userName"));
             userData.setPhoneNumber(rd.getValueFor("userPhoneNo"));
@@ -273,6 +242,7 @@ public class RegistrationActivity extends AppCompatActivity {
             userData.setNumberOfOldNotifications(Integer.parseInt(rd.getValueFor("userNumberOfOldNotifications")));
             rd.endReadTransaction();
 
+            // Store the details onto the cloud
             dbRef = mRootRef.child(mobile_number.getText().toString());
             dbRef.child("userName").setValue(userData.getUserName());
             dbRef.child("userPhoneNo").setValue(userData.getPhoneNumber());

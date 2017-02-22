@@ -33,6 +33,7 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".RegistrationActivity"
+            android:windowSoftInputMode="stateAlwaysVisible"
             android:screenOrientation="portrait" />
         <activity
             android:name=".helper.DBInternal"
