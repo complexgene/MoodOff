@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -45,27 +46,21 @@ import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.UserDetails;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 
 import static android.app.Activity.RESULT_OK;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link GenericMood.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link GenericMood#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class GenericMood extends Moods implements View.OnClickListener,AudioManager.OnAudioFocusChangeListener{
 
     private AudioManager mAudioManager;
@@ -98,15 +93,6 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment GenericMood.
-     */
-    // TODO: Rename and change types and number of parameters
     public static GenericMood newInstance(String param1, String param2) {
         GenericMood fragment = new GenericMood();
         Bundle args = new Bundle();
@@ -233,7 +219,11 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                     showItemInMiddle(5);
                     addLastOptionAccessedToFile("5");
                 }
-                else if(selectedOption.equalsIgnoreCase("New Story")){
+                else if(selectedOption.equalsIgnoreCase("Today's Quote")){
+                    showItemInMiddle(6);
+                    addLastOptionAccessedToFile("1");
+                }
+                else if(selectedOption.equalsIgnoreCase("Today's Story")){
                     showItemInMiddle(1);
                     addLastOptionAccessedToFile("1");
                 }
@@ -246,7 +236,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                             showItemInMiddle(3);
                         }
                         else {
-                            if (selectedOption.equalsIgnoreCase("Show last Image")) {
+                            if (selectedOption.equalsIgnoreCase("Show Image")) {
                                 showItemInMiddle(4);
                                 addLastOptionAccessedToFile("4");
                             }
@@ -258,10 +248,69 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         });
         popupMenu.show();
     }
-
+    private void checkAndPopulateStory(){
+        // Check if toay's story has already been downloaded
+        String todaysStoryFileName = "story"+AppData.getTodaysDate();
+        //Messenger.printCenter(getContext(),todaysStroyFileName);
+        File f = new File(AppData.getAppDirectoryPath()+"/"+todaysStoryFileName+".txt");
+        if(f.exists()){
+            Log.e("GenericMood_STORY","Story file exists..");
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(f));
+                final StringBuilder storyBody = new StringBuilder("");
+                String body="";
+                final String title=br.readLine();
+                while ((body = br.readLine()) != null) {
+                    storyBody.append(body);
+                }
+                storyTitleTV.setText(title);
+                storyBodyTV.setText(storyBody.toString());
+                storyLoadSpinner.setVisibility(View.GONE);
+                br.close();
+            }catch(Exception ee){
+                Log.e("GenericMood_StoryRead","StoryRead Error!!"+ee.getMessage());
+            }
+        }
+        else{
+            Log.e("GenericMood_STORY","Story file not yet created..");
+            f.mkdirs();
+            ServerManager serverManager = new ServerManager();
+            serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
+        }
+    }
+    private void checkAndPopulateQuote(){
+        // Check if toay's story has already been downloaded
+        String todaysQuoteFileName = "quote"+AppData.getTodaysDate();
+        //Messenger.printCenter(getContext(),todaysStroyFileName);
+        File f = new File(AppData.getAppDirectoryPath()+"/"+todaysQuoteFileName+".txt");
+        if(f.exists()){
+            Log.e("GenericMood_QUOTE","Quote file exists..");
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(f));
+                final StringBuilder storyBody = new StringBuilder("");
+                String body="";
+                while ((body = br.readLine()) != null) {
+                    storyBody.append(body);
+                }
+                storyTitleTV.setText("Quote Of The Day");
+                storyBodyTV.setTypeface(Typeface.DEFAULT_BOLD);
+                storyBodyTV.setText(storyBody.toString());
+                storyLoadSpinner.setVisibility(View.GONE);
+                br.close();
+            }catch(Exception ee){
+                Log.e("GenericMood_QuoteRead","QuoteRead Error!!"+ee.getMessage());
+            }
+        }
+        else{
+            Log.e("GenericMood_QUOTE","Quote file not yet created..");
+            f.mkdirs();
+            ServerManager serverManager = new ServerManager();
+            serverManager.loadQuote(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
+        }
+    }
     TextView txtView_selectedWord,points;
     char[] wordToFill;
-    int totalScore=UserDetails.getScore();
+    int totalScore=userData.getScore();
     public void showItemInMiddle(final int selectedOption){
         switch(selectedOption){
             case 1:{
@@ -270,8 +319,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 gamePanel.setVisibility(View.GONE);
                 photoView.setVisibility(View.GONE);
                 storyLoadSpinner.setVisibility(View.VISIBLE);
-                ServerManager serverManager = new ServerManager();
-                serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
+                checkAndPopulateStory();
                 break;
             }
             case 2:{
@@ -324,6 +372,15 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 });
                 resetGameView();
                 launchGame();
+                break;
+            }
+            case 6: {
+                Log.e("GenericMood","Quote fetching..");
+                likeAndStoryTitle.setVisibility(View.VISIBLE);
+                storyBodyTV.setVisibility(View.VISIBLE);
+                gamePanel.setVisibility(View.GONE);
+                photoView.setVisibility(View.GONE);
+                //checkAndPopulateQuote();
             }
         }
     }
@@ -413,7 +470,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                                 chosenLetter.setEnabled(false);
                                 totalScore+=(selectedWord.length()*3);
                                 points.setText(""+totalScore);
-                                UserDetails.setScore(totalScore);
+                                userData.setScore(totalScore);
                                 fileOperations.beginWriteTransaction();
                                 fileOperations.updateValueFor("score",String.valueOf(totalScore));
                                 fileOperations.endWriteTransaction();
@@ -519,8 +576,8 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         });
 
         storyLoadSpinner.setVisibility(View.VISIBLE);
-        ServerManager serverManager = new ServerManager();
-        serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
+
+        checkAndPopulateStory();
 
         if (currentMood != "") {
             currentplayList = readList(currentMood);
@@ -550,7 +607,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         loveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String currentUser = UserDetails.getPhoneNumber();
+                String currentUser = userData.getPhoneNumber();
                 char type = '1';
                 if(mp==null || !mp.isPlaying()){
                     Messenger.printCenter(getContext(),"Please play a song to like it!!");
@@ -656,7 +713,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
-                String currentUser = UserDetails.getPhoneNumber();
+                String currentUser = userData.getPhoneNumber();
                 char type = '1';
                 final String stredittext=data.getStringExtra("selectedContact");
                 Log.e("GM_selectedmood",stredittext+" ["+currentMood+" ["+currentSong);
@@ -1059,7 +1116,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     //Read the text file similar to activityName and return an listOfSong
     public ArrayList<String> readList(final String mood) {
         try{
-            final String userMobileNumber = UserDetails.getPhoneNumber();
+            final String userMobileNumber = userData.getPhoneNumber();
             final String serverURL = HttpGetPostInterface.serverURL;
 
             // Access the collection of songs that has already been read in Start.java and stored in variable of file PlaylistSongs.java
@@ -1235,7 +1292,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         if(AllTabs.mViewPager.getCurrentItem()==0) {
             releaseMediaPlayerObject();
             ServerManager serverManager = new ServerManager();
-            serverManager.exitLiveMood(UserDetails.getPhoneNumber());
+            serverManager.exitLiveMood(userData.getPhoneNumber());
             mListener = null;
             playOrPauseParm = 0;
         }

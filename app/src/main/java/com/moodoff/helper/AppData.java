@@ -2,8 +2,13 @@ package com.moodoff.helper;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.os.Environment;
+import android.widget.CalendarView;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -24,5 +29,15 @@ public class AppData {
     public static Typeface getAppFont(Context ctx){
         return Typeface.createFromAsset(ctx.getAssets(), "fonts/BLKCHCRY.TTF");
     }
+
+    public static String getTodaysDate(){
+        Calendar c = Calendar.getInstance();
+        String todaysDate = c.get(Calendar.DATE)+""+(c.get(Calendar.MONTH)+1)+c.get(Calendar.YEAR);
+        return todaysDate;
+    }
+    public static String getAppDirectoryPath(){
+        return Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff";
+    }
+
 
 }

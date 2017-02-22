@@ -221,6 +221,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
     int colorOfLoveFloatingActionButton = Color.rgb(0,255,0);
 
+    UserDetails userData = UserDetails.getInstance();
+
     public void designNotPanel(final View view){
         allReadContacts = ContactsManager.allReadContacts;
         Log.e("Not_Design","called..:"+currentPlayButtonId);
@@ -241,7 +243,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             final String fromUserNumber = componentsInNotification[0];
             String fromUserName = allReadContacts.get(fromUserNumber);
             Log.e("NotFrag",fromUserName+" is this");
-            if(fromUserNumber.equals(UserDetails.getPhoneNumber())){
+            if(fromUserNumber.equals(userData.getPhoneNumber())){
                     fromUserName = "You";
             }
             else{
@@ -256,7 +258,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             String toUserName = allReadContacts.get(toUserNumber);
             Log.e("NotFrag",toUserName+" is this2");
 
-            if(toUserNumber.equals(UserDetails.getPhoneNumber())){
+            if(toUserNumber.equals(userData.getPhoneNumber())){
                     toUserName = "You";
             }
             else{
@@ -297,7 +299,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             loveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(fromUserNumber.equals(UserDetails.getPhoneNumber()))
+                    if(fromUserNumber.equals(userData.getPhoneNumber()))
                         Messenger.print(getContext(),"You can't like your own dedicated songs!!");
                     else {
                         String urlToFire = fromUserNumber + "/" + toUserNumber + "/" + date + "_" + time + "/5";
@@ -311,7 +313,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 loveButton.setEnabled(false);
             }
             else {
-                if (fromUserNumber.equals(UserDetails.getPhoneNumber())) {
+                if (fromUserNumber.equals(userData.getPhoneNumber())) {
                     loveButton.setVisibility(View.INVISIBLE);
                 }
                 loveButton.setImageResource(R.drawable.likenot_ns);

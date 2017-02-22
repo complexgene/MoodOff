@@ -19,7 +19,14 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.moodoff.helper.DBHelper;
+import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
@@ -48,7 +55,6 @@ public class RegistrationActivity extends AppCompatActivity {
     StoreRetrieveDataInterface rd=null;
     Button register;
     DBHelper dbOperations;
-    boolean userExists = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,13 +62,11 @@ public class RegistrationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_registration);
 
         initComponents();
-
         // Need to do this without any lag..
         createAllNecessaryTablesForAppOperation();
 
         name.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
         mobile_number.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
-        email.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
 
         birthday.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -71,21 +75,13 @@ public class RegistrationActivity extends AppCompatActivity {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
                 imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                 setDate();
-
             }
         });
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                if (validateRegistrationData()){
-                    Toast.makeText(getApplicationContext(),"Registering...Wait!!",Toast.LENGTH_SHORT).show();
-                    progressRegistration.setVisibility(View.VISIBLE);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            checkIfUserExists(v,mobile_number.getText().toString());
-                        }
-                    }).start();
+                if (validateRegistrationData()) {
+                    checkIfUserExists(mobile_number.getText().toString());
                 }
             }
         });
@@ -97,9 +93,7 @@ public class RegistrationActivity extends AppCompatActivity {
         name = (EditText) findViewById(R.id.name);
         mobile_number = (EditText) findViewById(R.id.phone_number);
         birthday = (EditText) findViewById(R.id.date_of_birth);
-        email = (EditText) findViewById(R.id.email_id);
         status_text = (EditText) findViewById(R.id.status_text);
-        genderType = (RadioGroup)findViewById(R.id.gender);
         error = (TextView) findViewById(R.id.error_message);
         calendar = Calendar.getInstance();
         year = calendar.get(Calendar.YEAR);
@@ -109,59 +103,23 @@ public class RegistrationActivity extends AppCompatActivity {
         progressRegistration.setVisibility(View.INVISIBLE);
     }
 
-    private void checkIfUserExists(final View v,String mobNo) {
-        final String Url = serverURL + "/users/check/" + mobNo;
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
+    private void checkIfUserExists(final String userMobileNumber) {
+        mRootRef.child(userMobileNumber).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void run() {
-                try {
-                    Log.e("RegAct_Not", "Start checking if user exists");
-                    URL url = new URL(Url);
-                    Log.e("RegistrAct_checkUserURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    InputStream is = urlConnection.getInputStream();
-                    isr = new InputStreamReader(is);
-                    Log.e("RegAct_data","here");
-                    int data = isr.read();
-                    final StringBuilder response = new StringBuilder("");
-                    while (data != -1) {
-                        response.append((char) data);
-                        data = isr.read();
-                    }
-                    Log.e("RegAct_usrChkStatus",response.toString());
-                    if(response.toString().equals("true")){
-                        userExists = true;
-                    }
-                    //doNotContinue = false;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(userExists){
-                                error.setText("!! This phone number is already registered !!");
-                                progressRegistration.setVisibility(View.INVISIBLE);
-                            }
-                            else{
-                                register(v);
-                            }
-                        }
-                    });
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    error.setText("Oops!! You are already registered!! :(");
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Registering...Wait!!", Toast.LENGTH_SHORT).show();
+                    progressRegistration.setVisibility(View.VISIBLE);
+                    register();
+                }
 
-                } catch (Exception ee) {
-                    Log.e("RegAct_chkUsrErr", ee.getMessage());
-                }
-                finally {
-                    try{
-                        isr.close();
-                    }
-                    catch(Exception ee){
-                        Log.e("RegAct_Usrchk_Err", "ISR couldn't be closed");
-                    }
-                    urlConnection.disconnect();
-                }
             }
-        }).start();
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 
     private void createAllNecessaryTablesForAppOperation(){
@@ -219,14 +177,11 @@ public class RegistrationActivity extends AppCompatActivity {
         contactsColumns.put("name","VARCHAR");
         contactsColumns.put("status","INTEGER");
         dboperations.createTable("allcontacts",contactsColumns);
-
     }
-
     public void setDate() {
         new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
-
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
         @Override
@@ -240,17 +195,11 @@ public class RegistrationActivity extends AppCompatActivity {
         }
 
     };
-
     private void updateLabel() {
         String myFormat = "dd-MM-yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         birthday.setText(sdf.format(calendar.getTime()));
     }
-
-    public final static boolean isValidEmail(CharSequence target) {
-        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-    }
-
     public boolean validateRegistrationData () {
         if (name.getText().toString().isEmpty()) {
             error.setText("Error: Name is mandatory.");return false;
@@ -258,13 +207,10 @@ public class RegistrationActivity extends AppCompatActivity {
             error.setText("Error: Phone number is mandatory.");return false;
         } else if (birthday.getText().toString().isEmpty()) {
             error.setText("Error: Birthday is mandatory.");return false;
-        } else if (isValidEmail(email.getText()) == false) {
-            error.setText("Error: Invalid Email Format.");return false;
-        } else {
+        }  else {
             return true;
         }
     }
-
     private String getGenderNumber(String gender){
         switch(gender){
             case "Male":{return "0";}
@@ -273,91 +219,69 @@ public class RegistrationActivity extends AppCompatActivity {
         }
         return "2";
     }
+    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    DatabaseReference mRootRef = firebaseDatabase.getReference().child("allusers");
+    DatabaseReference dbRef;
 
-    public void register(View view) {
-        error.setVisibility(View.VISIBLE);
-            genderOfUser = getGenderNumber(((RadioButton)findViewById(genderType.getCheckedRadioButtonId())).getText().toString());
-            final String nm = name.getText().toString().replaceAll(" ", "_"),
-                    pn = mobile_number.getText().toString(),
-                    dob = birthday.getText().toString(),
-                    em = email.getText().toString(),
-                    textStatus = status_text.getText().toString().replaceAll(" ","_"),
-                    audioStatus = "romantic@HERO.mp3",
-                    userProfileString;
-
-            userProfileString = nm + "/" + pn + "/" + em + "/" + dob + "/" + genderOfUser +"/" + textStatus + "/" + audioStatus;
-            final String Url = serverURL+"/users/" + userProfileString;
-            //dbOperations.todoWorkEntry(Url);
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    HttpURLConnection urlConnection = null;
-                    try {
-                        runOnUiThread(new Runnable() {
-                                          @Override
-                                          public void run() {
-                                              Toast.makeText(getApplicationContext(), "Setting up things..!!", Toast.LENGTH_SHORT).show();
-                                          }
-                                      });
-                                // Proide the URL fto which you would fire a post
-                        URL url = new URL(Url);
-                        Log.e("RegActivity_RegURL", url.toString());
-                        urlConnection = (HttpURLConnection) url.openConnection();
-                        urlConnection.setDoOutput(true);
-                        int responseCode = urlConnection.getResponseCode();
-                        Log.e("RegAct_RESCODE", "" + responseCode);
-                        if (responseCode == 200) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    saveUserProfile();
-                                    Toast.makeText(getApplicationContext(), "Successfully Registered", Toast.LENGTH_SHORT).show();
-
-                                    Intent mainIntent = new Intent(RegistrationActivity.this, Start.class);
-                                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
-                                    finish(); // destroy current activity..
-                                    startActivity(mainIntent);
-                                }
-                            });
-                        } else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getApplicationContext(), "Registration Failed!! Try after sometime..", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    } catch (Exception ee) {
-                        Log.e("RegistrationAct_Err", ee.getMessage());
-                        ee.printStackTrace();
-                    }
-                    // Close the Http Connection that you started in finally.
-                    finally {
-                        if (urlConnection != null)
-                            urlConnection.disconnect();
-                    }
-                }
-            }).start();
+    public void register() {
+        try{
+            if(saveUserProfileIsSuccesful()) {
+                Toast.makeText(getApplicationContext(), "Successfully Registered", Toast.LENGTH_SHORT).show();
+                Intent mainIntent = new Intent(RegistrationActivity.this, Start.class);
+                mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
+                finish(); // destroy current activity..
+                startActivity(mainIntent);
+            }
+            else{
+                error.setText("Sorry!! Seems there is a technical issue now!! ");
+            }
+        } catch (Exception ee) {
+            Log.e("RegistrationAct_Err", ee.getMessage());
+            ee.printStackTrace();
+        }
     }
 
-    public boolean saveUserProfile() {
+    public boolean saveUserProfileIsSuccesful() {
         try {
+            String userName = name.getText().toString();
+            String userMobileNumber = mobile_number.getText().toString();
+            String userBday = birthday.getText().toString();
+            String userTextStatus = status_text.getText().toString();
+            String userAudioStatus = "romantic@HERO.mp3";
+            String userScore = "0";
+            String userOldNotificationCount = "0";
+
             rd = new StoreRetrieveDataImpl("UserData.txt");
             rd.beginWriteTransaction();
-            rd.createNewData("user", name.getText().toString().replaceAll(" ", "_"));
-            rd.createNewData("phoneNo", mobile_number.getText().toString());
-            rd.createNewData("dob", birthday.getText().toString());
-            rd.createNewData("email", email.getText().toString());
-            rd.createNewData("gender",genderOfUser);
-            rd.createNewData("textStatus",status_text.getText().toString().replaceAll(" ","_"));
-            rd.createNewData("audioStatus","romantic@HERO.mp3");
-            rd.createNewData("score","0");
-            rd.createNewData("numberOfOldNotifications","0");
+            rd.createNewData("userName", userName);
+            rd.createNewData("userPhoneNo", userMobileNumber);
+            rd.createNewData("userDob", userBday);
+            rd.createNewData("userTextStatus",userTextStatus);
+            rd.createNewData("userAudioStatus",userAudioStatus);
+            rd.createNewData("userScore",userScore);
+            rd.createNewData("userNumberOfOldNotifications",userOldNotificationCount);
             rd.endWriteTransaction();
-            ServerManager serverManager = new ServerManager();
-            serverManager.setLiveMood(UserDetails.getPhoneNumber(),"sad");
+
+            UserDetails userData = UserDetails.getInstance();
+            userData.setUserName(rd.getValueFor("userName"));
+            userData.setPhoneNumber(rd.getValueFor("userPhoneNo"));
+            userData.setDateOfBirth(rd.getValueFor("userDob"));
+            userData.setUserTextStatus(rd.getValueFor("userTextStatus"));
+            userData.setUserAudioStatusSong(rd.getValueFor("userAudioStatus"));
+            userData.setScore(Integer.parseInt(rd.getValueFor("userScore")));
+            userData.setNumberOfOldNotifications(Integer.parseInt(rd.getValueFor("userNumberOfOldNotifications")));
+            rd.endReadTransaction();
+
+            dbRef = mRootRef.child(mobile_number.getText().toString());
+            dbRef.child("userName").setValue(userData.getUserName());
+            dbRef.child("userPhoneNo").setValue(userData.getPhoneNumber());
+            dbRef.child("userDob").setValue(userData.getDateOfBirth());
+            dbRef.child("userTextStatus").setValue(userData.getUserTextStatus());
+            dbRef.child("userAudioStatus").setValue(userData.getUserAudioStatusSong());
+            dbRef.child("userScore").setValue(userData.getScore());
+            dbRef.child("userNumberOfOldNotifications").setValue(userData.getNumberOfOldNotifications());
+
             return true;
         } catch (IOException e) {
             error.setText("Couldn't save the file.");

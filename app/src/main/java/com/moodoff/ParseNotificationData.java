@@ -77,25 +77,19 @@ public class ParseNotificationData {
 
         try {
             JSONObject jsonRootObject = new JSONObject(strJson);
-            String name = jsonRootObject.optString("name").toString();
-            String phoneNumber = jsonRootObject.optString("phoneNumber").toString();
-            String email = jsonRootObject.optString("email").toString();
-            String dob = jsonRootObject.optString("dob");
-            String genderpic = jsonRootObject.optString("genderPic");
-            String textStatus = jsonRootObject.optString("textStatus").toString();
-            String audioStatusURL = jsonRootObject.optString("audioStatusURL").toString();
-            String textStatusLoveCount = jsonRootObject.optString("textStatusLoveCount").toString();
-            String audioStatusLoveCount =  jsonRootObject.optString("audioStatusLoveCount").toString();
+            String name = jsonRootObject.optString("userName").toString();
+            String phoneNumber = jsonRootObject.optString("userPhoneNo").toString();
+            String dob = jsonRootObject.optString("userDob");
+            String textStatus = jsonRootObject.optString("userTextStatus").toString();
+            String audioStatusURL = jsonRootObject.optString("userAudioStatus").toString();
 
-            allProfileData.put("name",name);
-            allProfileData.put("phoneNumber",phoneNumber);
-            allProfileData.put("email",email);
-            allProfileData.put("dob",dob);
-            allProfileData.put("genderpic",genderpic);
-            allProfileData.put("textStatus",textStatus);
-            allProfileData.put("audioStatusURL",audioStatusURL);
-            allProfileData.put("textStatusLoveCount",textStatusLoveCount);
-            allProfileData.put("audioStatusLoveCount",audioStatusLoveCount);
+            allProfileData.put("userName",name);
+            allProfileData.put("userPhoneNo",phoneNumber);
+            allProfileData.put("userDob",dob);
+            allProfileData.put("userTextStatus",textStatus);
+            allProfileData.put("userAudioStatus",audioStatusURL);
+            allProfileData.put("userTextStatusLoveCount","0");
+            allProfileData.put("userAudioStatusLoveCount","0");
 
             return allProfileData;
 

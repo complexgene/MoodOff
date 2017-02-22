@@ -193,6 +193,7 @@ public class Moods extends Fragment {
        startParticularMood(moodToEnter,0);
     }
 
+    UserDetails userData = UserDetails.getInstance();
 
     private void startParticularMood(String moodType, int status){
         /*if(status == 0)fm=AllTabs.moodsFragmentManager;
@@ -203,7 +204,7 @@ public class Moods extends Fragment {
             ContactsFragment.openedAProfile = false;
         }
         ServerManager serverManager = new ServerManager();
-        serverManager.setLiveMood(UserDetails.getPhoneNumber(),moodType);
+        serverManager.setLiveMood(userData.getPhoneNumber(),moodType);
         if(AppData.allMoodPlayList.containsKey(moodType)) {
             FragmentTransaction transaction = fm.beginTransaction();
             Fragment newFragment=GenericMood.newInstance(moodType, "b");

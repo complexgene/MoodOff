@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1019392756996",
+    "firebase_url": "https://moodoff-ff2cf.firebaseio.com",
+    "project_id": "moodoff-ff2cf",
+    "storage_bucket": "moodoff-ff2cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019392756996:android:3202cfa7b9170123",
+        "android_client_info": {
+          "package_name": "com.moodoff"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1019392756996-17mjnta9tn71n9067o6n010n4nla73p1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmbYnHtT_tdgZweivMz5Q43ElC9fU_LEc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

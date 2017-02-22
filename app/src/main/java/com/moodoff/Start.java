@@ -20,6 +20,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.DBHelper;
@@ -30,8 +35,10 @@ import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -321,13 +328,7 @@ public class Start extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        /*ViewPager viewPager = (ViewPager) AllTabs.mViewPager.findViewById(R.id.container);
-        viewPager.setCurrentItem(switchToTab);*/
-        //if(switchToTab)
-
         if(askForPermissions())startWork();
-        //while(permissionNotDone);
-
 
     }
 
@@ -346,26 +347,6 @@ public class Start extends AppCompatActivity {
         },5000);
     }
 
-    public boolean checkIfATableExists(String tableName) {
-        mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
-        try {
-            Cursor allTables = mydatabase.rawQuery("SELECT name from sqlite_master WHERE type='table' and name='" + tableName + "'", null);
-            if (allTables.getCount() == 1) {
-                Log.e("Start_chkTbl", tableName + " exists");
-                mydatabase.close();
-                return true;
-            } else {
-                Log.e("Start_chkTbl", tableName + " doesn't exist");
-                mydatabase.close();
-                return false;
-            }
-        } catch (Exception ee) {
-            Log.e("Start_chkEr", ee.getMessage());
-        }
-        mydatabase.close();
-        return false;
-    }
-
     public LinkedHashMap<String,String> getContactsTableData(LinkedHashMap<String,String> allContacts){
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);
         try {
@@ -379,7 +360,7 @@ public class Start extends AppCompatActivity {
                     int appUsingStatus = resultSet.getInt(2);
                     if (appUsingStatus == 1){
                         countOfAppUsers++;
-                        if(!phone_no.equals(UserDetails.getPhoneNumber()))
+                        if(!phone_no.equals(singleTonObject.getPhoneNumber()))
                             ContactsManager.friendsWhoUsesApp.add(phone_no);
                     }
                     else{
@@ -404,6 +385,4 @@ public class Start extends AppCompatActivity {
         mydatabase.close();
         return allContacts;
     }
-
 }
-

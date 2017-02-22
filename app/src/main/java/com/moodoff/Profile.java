@@ -3,6 +3,7 @@ package com.moodoff;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
@@ -37,6 +38,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
@@ -152,6 +158,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     public static Handler seekHandler = new Handler();
     public static int ifSelectingAudioStatus = 0;
     public static String myAudioStatusSong;
+    UserDetails userData = UserDetails.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -165,10 +172,10 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         profileOfUser = mParam1;
         String p=ContactsManager.allReadContacts.get(profileOfUser);
 
-        Toast.makeText(getContext(),"Loading profile of: "+ (p==null?UserDetails.getUserName():p),Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(),"Loading profile of: "+ (p==null?userData.getUserName():p),Toast.LENGTH_SHORT).show();
 
         // Check if its someone else's profile, then remove the edit button
-        if(!profileOfUser.equals(UserDetails.getPhoneNumber())){
+        if(!profileOfUser.equals(userData.getPhoneNumber())){
             editAudioStatus.setVisibility(View.GONE);editTextStatus.setVisibility(View.GONE);editBasicInfo.setVisibility(View.GONE);
         }
 
@@ -305,10 +312,10 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             playOrPause = playOrPause.toLowerCase();
             if (playOrPause == "play") {
                 isSongPlaying = false;
-                playAudioStatusButton.setImageResource(R.drawable.play);
+                playAudioStatusButton.setImageResource(R.drawable.playdedicate);
             } else {
                 isSongPlaying = true;
-                playAudioStatusButton.setImageResource(R.drawable.stop);
+                playAudioStatusButton.setImageResource(R.drawable.stopdedicate);
             }
             spinner.setVisibility(ProgressBar.GONE);
             playAudioStatusButton.setVisibility(Button.VISIBLE);
@@ -429,8 +436,8 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                 fileOperations.updateValueFor(statusType,newStatus);
             }
             fileOperations.endWriteTransaction();
-            if(type==0)UserDetails.setUserTextStatus(newStatus);
-            else if(type==1){myAudioStatusSong=newStatus;UserDetails.setUserAudioStatusSong(newStatus);}
+            if(type==0)userData.setUserTextStatus(newStatus);
+            else if(type==1){myAudioStatusSong=newStatus;userData.setUserAudioStatusSong(newStatus);}
             Log.e("Profile_"+statusType+"Chng","Internal File Change DONE");
             return true;
         } catch (IOException e) {
@@ -540,6 +547,10 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ProgressDialog dialog = new ProgressDialog(getContext());
+                dialog.setMessage("Updating the audio status...");
+                dialog.show();
+                dialog.setCancelable(false);
                 String moodAndSong = allSongsInMap.get(rg.getCheckedRadioButtonId()-1);
                 String songStorePattern = moodAndSong.replace(" : ","@");
                 Messenger.print(getContext(),songStorePattern);
@@ -548,6 +559,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                     Messenger.print(getContext(),"Audio Status Updated..");
                     fbDialogue.dismiss();
                 }
+                dialog.dismiss();
             }
         });
         cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -685,8 +697,10 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
 
     public static boolean profileDetailsNotRetrievedYet = true;
     HashMap<String,String> profileDataParsed = new HashMap<>();
+    DatabaseReference dbRef;
     public static String currentMood = "Not Live";
     private void setUserProfileData(final String userPhoneNumber){
+        dbRef = FirebaseDatabase.getInstance().getReference().child(profileOfUser);
         final String serverURL = HttpGetPostInterface.serverURL;
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
@@ -728,19 +742,34 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     private int getPicFor(String genderType){
         return (genderType.equals("0"))?R.drawable.man:R.drawable.woman;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                myName.setText(dataSnapshot.child("user").getValue(String.class).replaceAll("_"," "));
+                myPhNo.setText(dataSnapshot.child("phNo").getValue(String.class));
+                profileImage.setImageResource(getPicFor(dataSnapshot.child("gender").getValue(String.class)));
+                myTextStatus.setText(profileDataParsed.get("textStatus").replaceAll("_"," "));
+                myAudioStatusSong=profileDataParsed.get("audioStatusURL");
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
     private void showProfileData(){
-        String name = profileDataParsed.get("name");
-        if(name.length()>17){name=name.substring(0,17)+"...";}
-        String phNo = profileDataParsed.get("phoneNumber");
-        String email = profileDataParsed.get("email");
-        if(email.length()>17){email=email.substring(0,15)+"...";}
+        /*String email = profileDataParsed.get("email");
         String dob = profileDataParsed.get("dob");
-        myName.setText(name.replaceAll("_"," "));
-        myPhNo.setText(phNo);
+        email = dbRef.child("email").toString();
+        dob = dbRef.child("dob").toString();
+*/
         //myEmail.setText(email);
         //myDob.setText(dob);
-        profileImage.setImageResource(getPicFor(profileDataParsed.get("genderpic")));
-        new UserDetails();
+        //profileImage.setImageResource(getPicFor(profileDataParsed.get("genderpic")));
         myTextStatus.setText(profileDataParsed.get("textStatus").replaceAll("_"," "));
         myAudioStatusSong=profileDataParsed.get("audioStatusURL");
         //Messenger.print(getContext(),myAudioStatusSong);
@@ -758,7 +787,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
        }
         else{
            userStatusText = "[Live]:";
-           userStatusColor = Color.rgb(0,255,0);
+           userStatusColor = Color.rgb(255,0,255);
            lastMoodListened.setText("Listening To Mood..");
        }
         txtViewUserStatus.setTextColor(userStatusColor);

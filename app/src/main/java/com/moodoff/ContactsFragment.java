@@ -34,6 +34,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.DBInternal;
@@ -75,15 +80,6 @@ public class ContactsFragment extends Fragment{
     public ContactsFragment() {
         // Required empty public constructor
     }
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ContactsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static ContactsFragment newInstance(String param1, String param2) {
         ContactsFragment fragment = new ContactsFragment();
         Bundle args = new Bundle();
@@ -113,6 +109,8 @@ public class ContactsFragment extends Fragment{
     FloatingActionButton refreshContactButton;
     HashMap<String,String> allC = new HashMap<>();
     boolean contactReadingStatusNotComplete = true;
+    UserDetails userData = UserDetails.getInstance();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -162,6 +160,7 @@ public class ContactsFragment extends Fragment{
         },5000);
     }
 
+
     private View getHorizontalLine(int width){
         View v = new View(getContext());
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, width);
@@ -179,7 +178,7 @@ public class ContactsFragment extends Fragment{
         v.setBackgroundColor(Color.parseColor("#B3B3B3"));
         return v;
     }
-
+    Button myProfile;
     private void addOwnProfileAndRefreshButton(){
         ImageButton refreshContactButton = (ImageButton) mainView.findViewById(R.id.btn_refreshContact);
         refreshContactButton.setImageResource(R.drawable.refresh_contacts);
@@ -204,15 +203,14 @@ public class ContactsFragment extends Fragment{
                 }).start();
             }
         });
-        Button myProfile = (Button)mainView.findViewById(R.id.ownProfile);//new Button(getContext());
+        myProfile = (Button)mainView.findViewById(R.id.ownProfile);//new Button(getContext());
         myProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openedAProfile = true;
-                loadProfile(UserDetails.getPhoneNumber());
+                loadProfile(userData.getPhoneNumber());
             }
         });
-
         // Populating all contacts who uses app and who doesn't
         ScrollView contactsScroll = (ScrollView)mainView.findViewById(R.id.allContacts);
         contactsScroll.removeAllViews();

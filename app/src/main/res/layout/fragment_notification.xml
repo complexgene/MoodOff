@@ -5,11 +5,5 @@
     android:layout_height="match_parent"
     android:background="@color/appcolor"
     tools:context="com.moodoff.NotificationFragment">
-
-
-
-
         <!-- TODO: Update blank fragment layout -->
-
-
 </FrameLayout>

@@ -42,20 +42,8 @@ import java.util.ArrayList;
 
 public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener,SingSong.OnFragmentInteractionListener,Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    //private ViewPager mViewPager;
     public static ViewPager mViewPager;
     public static ArrayList<String> tabNames = new ArrayList<>();
     private  TabLayout tabLayout;
@@ -70,7 +58,6 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         tabNames.clear();tabNames.add("MOODS");tabNames.add("ACTIVITY");tabNames.add("PROFILE");
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -237,6 +224,8 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         }catch (Exception ee){return;}
     }
 
+    UserDetails userData = UserDetails.getInstance();
+
     @Override
     protected void onDestroy() {
         Log.e("AllTabs_onDestroy","onDestroy");
@@ -249,7 +238,7 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         }
         else*/
         if(AppData.noOfTimesBackPressed==2){
-            new ServerManager().exitLiveMood(UserDetails.getPhoneNumber());
+            new ServerManager().exitLiveMood(userData.getPhoneNumber());
             GenericMood.releaseMediaPlayerObject();
             NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
             Profile.releaseMediaPlayerObject(Profile.mediaPlayer);

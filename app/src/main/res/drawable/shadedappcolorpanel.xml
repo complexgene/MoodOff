@@ -13,7 +13,7 @@
         </shape>
 
     </item>
-    <item android:bottom="1.75dp"
+    <item android:bottom="0.5dp"
         android:top="0.5dp"
         >
         <shape

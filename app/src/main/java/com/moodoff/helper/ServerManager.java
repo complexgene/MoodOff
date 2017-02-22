@@ -42,6 +42,9 @@ import com.moodoff.Start;
 import com.moodoff.model.UserDetails;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -54,13 +57,16 @@ import java.util.Random;
 import static com.moodoff.helper.HttpGetPostInterface.serverURL;
 
 /**
+ *
  * Created by snaskar on 12/21/2016.
+ *
  */
 
 public class ServerManager{
     DBHelper dbOperations;
     Context context;
     int currentNumberOfNotifications, oldNumberOfNotifications;
+    UserDetails userData = UserDetails.getInstance();
 
     public ServerManager(){}
 
@@ -68,7 +74,6 @@ public class ServerManager{
         this.context = context;
         dbOperations = new DBHelper(context);
     }
-
     public void fetchContactsFromServer() {
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -97,7 +102,7 @@ public class ServerManager{
                             //Iterate through each of them
                             for(String eachContactNo : ContactsManager.allReadContactsFromDBServer){
                                 // If the person is in my contact list and if its not my own number
-                                if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(UserDetails.getPhoneNumber())){
+                                if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(userData.getPhoneNumber())){
                                     contactNumbers.add(eachContactNo);
                                 }
                             }
@@ -333,7 +338,7 @@ public class ServerManager{
         },8000);
     }
     public void readNotificationsFromServerAndWriteToInternalDB(){
-        final String userMobileNumber = UserDetails.getPhoneNumber();
+        final String userMobileNumber = userData.getPhoneNumber();
         final String serverURL = HttpGetPostInterface.serverURL;
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -394,7 +399,6 @@ public class ServerManager{
             }
         },10000);
     }
-
     private void displayAlertNotificationOnTopBarOfPhone(final Context context, final int diff){
         // Getting the number of last unseen notifications from Userdata file
         StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("UserData.txt");
@@ -416,8 +420,8 @@ public class ServerManager{
                     .setColor(001500)
                     .setContentTitle("MoodOff")
                     .setWhen(System.currentTimeMillis())
-                    .setTicker(UserDetails.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" new "+notificationTextSingularPlural+"!!")
-                    .setContentText(UserDetails.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" unseen "+notificationTextSingularPlural+"!!");
+                    .setTicker(userData.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" new "+notificationTextSingularPlural+"!!")
+                    .setContentText(userData.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" unseen "+notificationTextSingularPlural+"!!");
 
         final Intent notificationIntent = new Intent(currActivity, AllTabs.class);
 
@@ -453,7 +457,6 @@ public class ServerManager{
                         // Add as notification
                         NotificationManager manager = (NotificationManager) currActivity.getSystemService(Context.NOTIFICATION_SERVICE);
                         manager.notify(0, builder.build());
-
                     }
                 }
             });
@@ -462,8 +465,6 @@ public class ServerManager{
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Ringtone r = RingtoneManager.getRingtone(currActivity, notification);
         r.play();
-
-
     }
     public boolean isAppForground(Context mContext) {
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -476,8 +477,7 @@ public class ServerManager{
         }
         return true;
     }
-    public boolean voteLove(final String urlAPI, final Activity curActivity, final ImageButton loveButton)
-    {
+    public boolean voteLove(final String urlAPI, final Activity curActivity, final ImageButton loveButton) {
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
             InputStreamReader isr = null;
@@ -516,7 +516,6 @@ public class ServerManager{
         }).start();
         return false;
     }
-
     public void writeStatusChange(final int type, final String newValue, final Activity curActivity, final TextView userTextStatus){
         // type:0 for TEXT ,,,, type:1 for AUDIO
         new Handler().postDelayed(new Runnable() {
@@ -528,7 +527,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(serverURL+"/users/update/" + type + "/" + UserDetails.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
+                            URL url = new URL(serverURL+"/users/update/" + type + "/" + userData.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
                             Log.e("ServerM_ASModf_url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             urlConnection.setDoOutput(true);
@@ -567,9 +566,20 @@ public class ServerManager{
             }
         },0);
     }
+    private String getStoryName(String moodType){return "story"+new Random().nextInt(16)+".txt";}
+    private void writeTheStoryIntoFile(String storyTitle, String storyBody){
+        try{
+            File f = new File(AppData.getAppDirectoryPath()+"/story"+AppData.getTodaysDate()+".txt");
+            Log.e("ServerManager_READSTORY",f.getAbsolutePath().toString());
 
-    private String getStoryName(String moodType){return "story"+new Random().nextInt(14)+".txt";}
-
+            BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+            bw.write(storyTitle+"\n"+storyBody);
+            bw.close();
+        }
+        catch(Exception ee){
+            Log.e("ServerMan_StoryWrtErr","Story File Write Error:"+ee.getMessage());
+        }
+    }
     public void loadStory(final String currentMood, final Activity curActivity, final TextView storyTitleTV, final TextView storyBodyTV, final ProgressBar storyLoadSpinner){
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -581,7 +591,7 @@ public class ServerManager{
                     public void run() {
                         try {
                             URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/allstories/" + getStoryName(currentMood));
-                            Log.e("GenericMood_Story_url", url.toString());
+                            Log.e("ServerMan_STORY_Url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
                             InputStreamReader isr = new InputStreamReader(is);
@@ -592,6 +602,8 @@ public class ServerManager{
                             while ((body = bufferedReader.readLine()) != null) {
                                 storyBody.append(body);
                             }
+                            writeTheStoryIntoFile(title,storyBody.toString());
+                            Log.e("ServerMan_STORY","Story file written..");
                             curActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -617,9 +629,58 @@ public class ServerManager{
             }
         },0);
     }
+    public void loadQuote(final String currentMood, final Activity curActivity, final TextView storyTitleTV, final TextView storyBodyTV, final ProgressBar storyLoadSpinner){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    HttpURLConnection urlConnection = null;
+                    BufferedReader bufferedReader = null;
+                    @Override
+                    public void run() {
+                        try {
+                            URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/allquotes/" + getStoryName(currentMood));
+                            Log.e("ServerMan_STORY_Url", url.toString());
+                            urlConnection = (HttpURLConnection) url.openConnection();
+                            InputStream is = urlConnection.getInputStream();
+                            InputStreamReader isr = new InputStreamReader(is);
+                            bufferedReader = new BufferedReader(isr);
+                            final StringBuilder storyBody = new StringBuilder("");
+                            String body="";
+                            final String title=bufferedReader.readLine();
+                            while ((body = bufferedReader.readLine()) != null) {
+                                storyBody.append(body);
+                            }
+                            writeTheStoryIntoFile(title,storyBody.toString());
+                            Log.e("ServerMan_STORY","Story file written..");
+                            curActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    storyTitleTV.setText(title);
+                                    storyBodyTV.setText(storyBody.toString());
+                                    storyLoadSpinner.setVisibility(View.GONE);
+                                }
+                            });
 
+                        } catch (Exception ee) {
+                            Log.e("GenericM_StoryReadErr", ee.getMessage());
+                        } finally {
+                            try {
+                                bufferedReader.close();
+                            } catch (Exception ee) {
+                                Log.e("GenericM_Err", "BufferedReader couldn't be closed");
+                            }
+                            urlConnection.disconnect();
+
+                        }
+                    }
+                }).start();
+            }
+        },0);
+    }
     public void loveTextStatus(final String user, final TextView txtViewToChange, final Activity curActivity){
-    /*    new Handler().postDelayed(new Runnable() {
+    /*
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 new Thread(new Runnable() {
@@ -664,6 +725,7 @@ public class ServerManager{
                     }
                 }).start();
             }
-        },0);*/
+        },0);
+    */
     }
 }

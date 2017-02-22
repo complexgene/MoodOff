@@ -19,12 +19,17 @@
     <item
         android:id="@+id/lastImageBG"
         android:orderInCategory="100"
-        android:title="Show last Image"
+        android:title="Show Image"
         app:showAsAction="never" />
     <item
         android:id="@+id/storybg"
         android:orderInCategory="100"
-        android:title="New Story"
+        android:title="Today's Story"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/quotebg"
+        android:orderInCategory="100"
+        android:title="Today's Quote"
         app:showAsAction="never" />
     <item
         android:id="@+id/playGame"
