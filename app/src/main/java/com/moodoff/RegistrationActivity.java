@@ -90,7 +90,7 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 if (validateRegistrationData()) {
-                    /*
+                    /***
                       showOTPDialog
                       if(OTP successful) populateUserData();
                       else backoff;
