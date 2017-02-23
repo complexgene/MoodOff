@@ -208,7 +208,7 @@ public class ContactsFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 openedAProfile = true;
-                loadProfile(userData.getPhoneNumber());
+                loadProfile(userData.getMobileNumber());
             }
         });
         // Populating all contacts who uses app and who doesn't

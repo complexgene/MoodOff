@@ -243,7 +243,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             final String fromUserNumber = componentsInNotification[0];
             String fromUserName = allReadContacts.get(fromUserNumber);
             Log.e("NotFrag",fromUserName+" is this");
-            if(fromUserNumber.equals(userData.getPhoneNumber())){
+            if(fromUserNumber.equals(userData.getMobileNumber())){
                     fromUserName = "You";
             }
             else{
@@ -258,7 +258,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             String toUserName = allReadContacts.get(toUserNumber);
             Log.e("NotFrag",toUserName+" is this2");
 
-            if(toUserNumber.equals(userData.getPhoneNumber())){
+            if(toUserNumber.equals(userData.getMobileNumber())){
                     toUserName = "You";
             }
             else{
@@ -299,7 +299,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             loveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(fromUserNumber.equals(userData.getPhoneNumber()))
+                    if(fromUserNumber.equals(userData.getMobileNumber()))
                         Messenger.print(getContext(),"You can't like your own dedicated songs!!");
                     else {
                         String urlToFire = fromUserNumber + "/" + toUserNumber + "/" + date + "_" + time + "/5";
@@ -313,7 +313,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 loveButton.setEnabled(false);
             }
             else {
-                if (fromUserNumber.equals(userData.getPhoneNumber())) {
+                if (fromUserNumber.equals(userData.getMobileNumber())) {
                     loveButton.setVisibility(View.INVISIBLE);
                 }
                 loveButton.setImageResource(R.drawable.likenot_ns);

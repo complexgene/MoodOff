@@ -148,8 +148,8 @@ public class RegistrationActivity extends AppCompatActivity {
         return false;
     }
     private void showAndValidateOTP(){
-        Dialog dialog = new Dialog(currentContext);
-        dialog.setContentView(R.layout.gamerules);
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.layout_otp_validation);
         dialog.show();
     }
 
@@ -234,7 +234,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
             // Populate the POJO
             singleTonUser.setUserName(userName);
-            singleTonUser.setmobileNumber(userMobileNumber);
+            singleTonUser.setMobileNumber(userMobileNumber);
             singleTonUser.setDateOfBirth(userBirthday);
             singleTonUser.setUserTextStatus(userTextStatus);
             singleTonUser.setUserAudioStatusSong(userAudioStatus);

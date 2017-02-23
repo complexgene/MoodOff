@@ -102,7 +102,7 @@ public class ServerManager{
                             //Iterate through each of them
                             for(String eachContactNo : ContactsManager.allReadContactsFromDBServer){
                                 // If the person is in my contact list and if its not my own number
-                                if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(userData.getPhoneNumber())){
+                                if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(userData.getMobileNumber())){
                                     contactNumbers.add(eachContactNo);
                                 }
                             }
@@ -338,7 +338,7 @@ public class ServerManager{
         },8000);
     }
     public void readNotificationsFromServerAndWriteToInternalDB(){
-        final String userMobileNumber = userData.getPhoneNumber();
+        final String userMobileNumber = userData.getMobileNumber();
         final String serverURL = HttpGetPostInterface.serverURL;
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -527,7 +527,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(serverURL+"/users/update/" + type + "/" + userData.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
+                            URL url = new URL(serverURL+"/users/update/" + type + "/" + userData.getMobileNumber() + "/" + newValue.replaceAll(" ","_"));
                             Log.e("ServerM_ASModf_url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             urlConnection.setDoOutput(true);

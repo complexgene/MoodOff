@@ -75,7 +75,7 @@ public class Start extends AppCompatActivity {
             if (rd.fileExists()) {
                 rd.beginReadTransaction();
                 singleTonUserObject.setUserName(rd.getValueFor("userName"));
-                singleTonUserObject.setPhoneNumber(rd.getValueFor("userPhoneNumber"));
+                singleTonUserObject.setMobileNumber(rd.getValueFor("userPhoneNumber"));
                 singleTonUserObject.setDateOfBirth(rd.getValueFor("userDob"));
                 singleTonUserObject.setUserTextStatus(rd.getValueFor("userTextStatus"));
                 singleTonUserObject.setUserAudioStatusSong(rd.getValueFor("userAudioStatus"));
@@ -372,7 +372,7 @@ public class Start extends AppCompatActivity {
                     int appUsingStatus = resultSet.getInt(2);
                     if (appUsingStatus == 1){
                         countOfAppUsers++;
-                        if(!phone_no.equals(singleTonUserObject.getPhoneNumber()))
+                        if(!phone_no.equals(singleTonUserObject.getMobileNumber()))
                             ContactsManager.friendsWhoUsesApp.add(phone_no);
                     }
                     else{

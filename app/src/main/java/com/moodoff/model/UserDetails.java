@@ -41,7 +41,7 @@ public class UserDetails {
     public String getMobileNumber() {
         return mobileNumber;
     }
-    public void setmobileNumber(String pN) {
+    public void setMobileNumber(String pN) {
         mobileNumber = pN;
     }
     public String getDateOfBirth() {

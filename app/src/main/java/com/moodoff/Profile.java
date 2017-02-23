@@ -175,7 +175,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         Toast.makeText(getContext(),"Loading profile of: "+ (p==null?userData.getUserName():p),Toast.LENGTH_SHORT).show();
 
         // Check if its someone else's profile, then remove the edit button
-        if(!profileOfUser.equals(userData.getPhoneNumber())){
+        if(!profileOfUser.equals(userData.getMobileNumber())){
             editAudioStatus.setVisibility(View.GONE);editTextStatus.setVisibility(View.GONE);editBasicInfo.setVisibility(View.GONE);
         }
 

@@ -204,7 +204,7 @@ public class Moods extends Fragment {
             ContactsFragment.openedAProfile = false;
         }
         ServerManager serverManager = new ServerManager();
-        serverManager.setLiveMood(userData.getPhoneNumber(),moodType);
+        serverManager.setLiveMood(userData.getMobileNumber(),moodType);
         if(AppData.allMoodPlayList.containsKey(moodType)) {
             FragmentTransaction transaction = fm.beginTransaction();
             Fragment newFragment=GenericMood.newInstance(moodType, "b");

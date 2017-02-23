@@ -433,7 +433,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
             @Override
             public void onClick(View v) {
                 Dialog dialog = new Dialog(getContext());
-                dialog.setContentView(R.layout.layout_otp_validation);
+                dialog.setContentView(R.layout.gamerules);
                 dialog.show();
             }
         });
@@ -607,7 +607,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         loveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String currentUser = userData.getPhoneNumber();
+                String currentUser = userData.getMobileNumber();
                 char type = '1';
                 if(mp==null || !mp.isPlaying()){
                     Messenger.printCenter(getContext(),"Please play a song to like it!!");
@@ -713,7 +713,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
-                String currentUser = userData.getPhoneNumber();
+                String currentUser = userData.getMobileNumber();
                 char type = '1';
                 final String stredittext=data.getStringExtra("selectedContact");
                 Log.e("GM_selectedmood",stredittext+" ["+currentMood+" ["+currentSong);
@@ -1116,7 +1116,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     //Read the text file similar to activityName and return an listOfSong
     public ArrayList<String> readList(final String mood) {
         try{
-            final String userMobileNumber = userData.getPhoneNumber();
+            final String userMobileNumber = userData.getMobileNumber();
             final String serverURL = HttpGetPostInterface.serverURL;
 
             // Access the collection of songs that has already been read in Start.java and stored in variable of file PlaylistSongs.java
@@ -1292,7 +1292,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         if(AllTabs.mViewPager.getCurrentItem()==0) {
             releaseMediaPlayerObject();
             ServerManager serverManager = new ServerManager();
-            serverManager.exitLiveMood(userData.getPhoneNumber());
+            serverManager.exitLiveMood(userData.getMobileNumber());
             mListener = null;
             playOrPauseParm = 0;
         }

@@ -238,7 +238,7 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         }
         else*/
         if(AppData.noOfTimesBackPressed==2){
-            new ServerManager().exitLiveMood(userData.getPhoneNumber());
+            new ServerManager().exitLiveMood(userData.getMobileNumber());
             GenericMood.releaseMediaPlayerObject();
             NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
             Profile.releaseMediaPlayerObject(Profile.mediaPlayer);
