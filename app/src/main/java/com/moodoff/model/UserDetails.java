@@ -8,7 +8,7 @@ import com.moodoff.helper.HttpGetPostInterface;
 
 public class UserDetails {
     private String userName;
-    private String phoneNumber;
+    private String mobileNumber;
     private String dateOfBirth;
     private String userTextStatus;
     private String userAudioStatusSong;
@@ -18,13 +18,13 @@ public class UserDetails {
 
     private UserDetails(){
         this.userAudioStatusSong = HttpGetPostInterface.serverSongURL+"romantic/HERO.mp3";
-    }
+    } // To maintain singleTon property across app
     public static UserDetails getInstance(){
         if(instance == null){
             instance = new UserDetails();
         }
         return instance;
-    }
+    } // same instance will be returned everytime a call is made to this
 
     public int getNumberOfOldNotifications() {
         return numberOfOldNotifications;
@@ -38,11 +38,11 @@ public class UserDetails {
     public void setUserName(String uN) {
         userName = uN;
     }
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getMobileNumber() {
+        return mobileNumber;
     }
-    public void setPhoneNumber(String pN) {
-        phoneNumber = pN;
+    public void setmobileNumber(String pN) {
+        mobileNumber = pN;
     }
     public String getDateOfBirth() {
         return dateOfBirth;

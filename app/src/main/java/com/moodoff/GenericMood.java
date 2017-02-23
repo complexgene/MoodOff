@@ -433,7 +433,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
             @Override
             public void onClick(View v) {
                 Dialog dialog = new Dialog(getContext());
-                dialog.setContentView(R.layout.gamerules);
+                dialog.setContentView(R.layout.layout_otp_validation);
                 dialog.show();
             }
         });

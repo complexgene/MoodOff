@@ -2,6 +2,7 @@ package com.moodoff;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -45,14 +46,20 @@ public class RegistrationActivity extends AppCompatActivity {
     RegistrationActivityServiceInterface registrationServiceBot = new RegistrationActivityServiceImpl();
     RegistrationActivityBusinessInterface registrationValidationBot = new RegistrationActivityBusinessImpl();
     StoreRetrieveDataInterface rd=null;
+    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    DatabaseReference mRootRef = firebaseDatabase.getReference().child("allusers");
+    DatabaseReference dbRef;
+    UserDetails singleTonUser;
     //---------------------------------------------------------------------------------
     // Declartion for all helper classes is done
     //---------------------------------------------------------------------------------
 
     //--------------------------------------------------
-    // Declaration space for all the variables
+    // Declaration space for all UI variables
     //--------------------------------------------------
-    private EditText name,mobile_number,birthday,status_text;
+    private EditText et_userName,et_userMobileNumber,et_userBirthday,et_userTextStatus;
+    private String userName, userMobileNumber, userBirthday, userTextStatus, userAudioStatus;
+    private int userScore, userOldNotificationCount;
     private ProgressBar progressRegistration;
     private TextView error;
     private Calendar calendar;
@@ -75,9 +82,9 @@ public class RegistrationActivity extends AppCompatActivity {
 
         // Clicking on any textbox should remove the red error line if any displayed earlier
         // as the user is going to rectify the value now.
-        name.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
-        mobile_number.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
-        birthday.setOnClickListener(new View.OnClickListener() {
+        et_userName.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
+        et_userMobileNumber.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {error.setText("");}});
+        et_userBirthday.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 error.setText("");
                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -90,13 +97,14 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 if (validateRegistrationData()) {
-                    /***
+                    showAndValidateOTP();
+                     /***
                       showOTPDialog
-                      if(OTP successful) populateUserData();
+                      if(OTP successful) populatesingleTonUser();
                       else backoff;
                      */
                     //showOTPdialog
-                    //checkIfUserExists(mobile_number.getText().toString());
+                    //checkIfUserExistsAndProceed(mobile_number.getText().toString());
                     Log.e("RegistrationActivity","Perfect");
                 }
             }
@@ -105,12 +113,13 @@ public class RegistrationActivity extends AppCompatActivity {
 
     private void initComponents(){
         currentContext = getApplicationContext();
+        singleTonUser = UserDetails.getInstance();
         dbOperations = new DBHelper(this);
         register = (Button)findViewById(R.id.btn_register);
-        name = (EditText) findViewById(R.id.name);
-        mobile_number = (EditText) findViewById(R.id.et_phone_number);
-        birthday = (EditText) findViewById(R.id.et_date_of_birth);
-        status_text = (EditText) findViewById(R.id.status_text);
+        et_userName = (EditText) findViewById(R.id.name);
+        et_userMobileNumber = (EditText) findViewById(R.id.et_phone_number);
+        et_userBirthday = (EditText) findViewById(R.id.et_date_of_birth);
+        et_userTextStatus = (EditText) findViewById(R.id.status_text);
         error = (TextView) findViewById(R.id.error_message);
         calendar = Calendar.getInstance();
         year = calendar.get(Calendar.YEAR);
@@ -121,20 +130,29 @@ public class RegistrationActivity extends AppCompatActivity {
     }
     private boolean validateRegistrationData(){
         try {
-            // Get the values from UI
-            String  userName = name.getText().toString(),
-                    userPhoneNumber = mobile_number.getText().toString(),
-                    userBirthday = birthday.getText().toString(),
-                    userTextStatus = status_text.getText().toString();
+            // Get the values from UI, and populate reference variable fields
+            userName = et_userName.getText().toString();
+            userMobileNumber = et_userMobileNumber.getText().toString();
+            userBirthday = et_userBirthday.getText().toString();
+            userTextStatus = et_userTextStatus.getText().toString();
+            userAudioStatus = "romantic@HERO.com";
+            userScore = 0;
+            userOldNotificationCount = 0;
 
             // Call for validation of the fetched data
-            registrationValidationBot.validateRegistrationData(userName,userPhoneNumber,userBirthday,userTextStatus);
+            registrationValidationBot.validateRegistrationData(userName,userMobileNumber,userBirthday,userTextStatus);
             return true;
         }catch(ValidationException ve){
             error.setText(ve.getMessage());
         }
         return false;
     }
+    private void showAndValidateOTP(){
+        Dialog dialog = new Dialog(currentContext);
+        dialog.setContentView(R.layout.gamerules);
+        dialog.show();
+    }
+
     private void checkIfUserExists(final String userMobileNumber) {
         mRootRef.child(userMobileNumber).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -175,20 +193,10 @@ public class RegistrationActivity extends AppCompatActivity {
     private void updateLabel() {
         String myFormat = "dd-MM-yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-        birthday.setText(sdf.format(calendar.getTime()));
+        et_userBirthday.setText(sdf.format(calendar.getTime()));
     }
 
-    private String getGenderNumber(String gender){
-        switch(gender){
-            case "Male":{return "0";}
-            case "Female":{return "1";}
-            case "NA":{return "2";}
-        }
-        return "2";
-    }
-    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    DatabaseReference mRootRef = firebaseDatabase.getReference().child("allusers");
-    DatabaseReference dbRef;
+
 
     public void register() {
         try{
@@ -211,47 +219,37 @@ public class RegistrationActivity extends AppCompatActivity {
 
     public boolean saveUserProfileIsSuccesful() {
         try {
-            // Get all the values from UI
-            String userName = name.getText().toString();
-            String userMobileNumber = mobile_number.getText().toString();
-            String userBday = birthday.getText().toString();
-            String userTextStatus = status_text.getText().toString();
-            String userAudioStatus = "romantic@HERO.mp3";
-            String userScore = "0";
-            String userOldNotificationCount = "0";
 
             // Storing all the registration details into the text file
-            rd = new StoreRetrieveDataImpl("UserData.txt");
+            rd = new StoreRetrieveDataImpl("singleTonUser.txt");
             rd.beginWriteTransaction();
             rd.createNewData("userName", userName);
             rd.createNewData("userPhoneNo", userMobileNumber);
-            rd.createNewData("userDob", userBday);
+            rd.createNewData("userDob", userBirthday);
             rd.createNewData("userTextStatus",userTextStatus);
             rd.createNewData("userAudioStatus",userAudioStatus);
-            rd.createNewData("userScore",userScore);
-            rd.createNewData("userNumberOfOldNotifications",userOldNotificationCount);
+            rd.createNewData("userScore",String.valueOf(userScore));
+            rd.createNewData("userNumberOfOldNotifications",String.valueOf(userOldNotificationCount));
             rd.endWriteTransaction();
 
             // Populate the POJO
-            UserDetails userData = UserDetails.getInstance();
-            userData.setUserName(rd.getValueFor("userName"));
-            userData.setPhoneNumber(rd.getValueFor("userPhoneNo"));
-            userData.setDateOfBirth(rd.getValueFor("userDob"));
-            userData.setUserTextStatus(rd.getValueFor("userTextStatus"));
-            userData.setUserAudioStatusSong(rd.getValueFor("userAudioStatus"));
-            userData.setScore(Integer.parseInt(rd.getValueFor("userScore")));
-            userData.setNumberOfOldNotifications(Integer.parseInt(rd.getValueFor("userNumberOfOldNotifications")));
-            rd.endReadTransaction();
+            singleTonUser.setUserName(userName);
+            singleTonUser.setmobileNumber(userMobileNumber);
+            singleTonUser.setDateOfBirth(userBirthday);
+            singleTonUser.setUserTextStatus(userTextStatus);
+            singleTonUser.setUserAudioStatusSong(userAudioStatus);
+            singleTonUser.setScore(userScore);
+            singleTonUser.setNumberOfOldNotifications(userOldNotificationCount);
 
             // Store the details onto the cloud
-            dbRef = mRootRef.child(mobile_number.getText().toString());
-            dbRef.child("userName").setValue(userData.getUserName());
-            dbRef.child("userPhoneNo").setValue(userData.getPhoneNumber());
-            dbRef.child("userDob").setValue(userData.getDateOfBirth());
-            dbRef.child("userTextStatus").setValue(userData.getUserTextStatus());
-            dbRef.child("userAudioStatus").setValue(userData.getUserAudioStatusSong());
-            dbRef.child("userScore").setValue(userData.getScore());
-            dbRef.child("userNumberOfOldNotifications").setValue(userData.getNumberOfOldNotifications());
+            dbRef = mRootRef.child(userMobileNumber);
+            dbRef.child("userName").setValue(singleTonUser.getUserName());
+            dbRef.child("userPhoneNo").setValue(singleTonUser.getMobileNumber());
+            dbRef.child("userDob").setValue(singleTonUser.getDateOfBirth());
+            dbRef.child("userTextStatus").setValue(singleTonUser.getUserTextStatus());
+            dbRef.child("userAudioStatus").setValue(singleTonUser.getUserAudioStatusSong());
+            dbRef.child("userScore").setValue(singleTonUser.getScore());
+            dbRef.child("userNumberOfOldNotifications").setValue(singleTonUser.getNumberOfOldNotifications());
 
             return true;
         } catch (IOException e) {
