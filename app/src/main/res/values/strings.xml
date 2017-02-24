@@ -18,4 +18,5 @@
     <string name="title_activity_edit_audio_status">EditAudioStatus</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="wrong_otp">!! The OTP entered is not correct !!</string>
 </resources>

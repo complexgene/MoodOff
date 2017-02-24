@@ -19,4 +19,9 @@ public class RegistrationActivityBusinessImpl implements RegistrationActivityBus
             return true;
         }
     }
+    public boolean validateOTPValue(String otp) throws ValidationException{
+        if(otp.length()<6 || otp.length()>6)
+            throw new ValidationException("RegistrationActivity"," Invalid length of OTP");
+        return true;
+    }
 }

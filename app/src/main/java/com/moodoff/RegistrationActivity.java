@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,13 +45,14 @@ public class RegistrationActivity extends AppCompatActivity {
     //---------------------------------------------------------------------------------
     // Declaration space for all helper classes
     //---------------------------------------------------------------------------------
-    RegistrationActivityServiceInterface registrationServiceBot = new RegistrationActivityServiceImpl();
-    RegistrationActivityBusinessInterface registrationValidationBot = new RegistrationActivityBusinessImpl();
-    StoreRetrieveDataInterface rd=null;
-    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    DatabaseReference mRootRef = firebaseDatabase.getReference().child("allusers");
-    DatabaseReference dbRef;
-    UserDetails singleTonUser;
+    private RegistrationActivityServiceInterface registrationServiceBot = new RegistrationActivityServiceImpl();
+    private RegistrationActivityBusinessInterface validationBot = new RegistrationActivityBusinessImpl();
+    private StoreRetrieveDataInterface rd=null;
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private DatabaseReference mRootRef = firebaseDatabase.getReference().child("allusers");
+    private DatabaseReference dbRef;
+    private UserDetails singleTonUser;
+    private String userName, userMobileNumber, userBirthday, userTextStatus, userAudioStatus, valueOfOTP;;
     //---------------------------------------------------------------------------------
     // Declartion for all helper classes is done
     //---------------------------------------------------------------------------------
@@ -57,16 +60,16 @@ public class RegistrationActivity extends AppCompatActivity {
     //--------------------------------------------------
     // Declaration space for all UI variables
     //--------------------------------------------------
-    private EditText et_userName,et_userMobileNumber,et_userBirthday,et_userTextStatus;
-    private String userName, userMobileNumber, userBirthday, userTextStatus, userAudioStatus;
+    private EditText et_userName,et_userMobileNumber,et_userBirthday,et_userTextStatus,et_otpBox;
     private int userScore, userOldNotificationCount;
     private ProgressBar progressRegistration;
-    private TextView error;
+    private TextView error, statusMsg;
     private Calendar calendar;
     private int year, month, day;
-    private Button register;
+    private Button register, btn_resendotp;
     private DBHelper dbOperations;
     private Context currentContext;
+    private ImageButton btn_okButton, btn_cancelButton;
     // -------------------------------------------------
     // Declaration of all varaibles complete
     //--------------------------------------------------
@@ -140,17 +143,59 @@ public class RegistrationActivity extends AppCompatActivity {
             userOldNotificationCount = 0;
 
             // Call for validation of the fetched data
-            registrationValidationBot.validateRegistrationData(userName,userMobileNumber,userBirthday,userTextStatus);
+            validationBot.validateRegistrationData(userName,userMobileNumber,userBirthday,userTextStatus);
             return true;
-        }catch(ValidationException ve){
+        }
+        catch(ValidationException ve){
             error.setText(ve.getMessage());
         }
         return false;
     }
     private void showAndValidateOTP(){
-        Dialog dialog = new Dialog(this);
+        final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_otp_validation);
+        dialog.setCancelable(false);
         dialog.show();
+
+        btn_okButton = (ImageButton)dialog.findViewById(R.id.btn_otp_layout_ok);
+        btn_cancelButton = (ImageButton)dialog.findViewById(R.id.btn_otp_layout_cancel);
+        btn_resendotp = (Button)dialog.findViewById(R.id.btn_otp_layout_resendotp);
+        btn_resendotp.setVisibility(View.GONE);
+        statusMsg = (TextView)dialog.findViewById(R.id.tv_status_msg);
+        statusMsg.setVisibility(View.GONE);
+        et_otpBox = (EditText)dialog.findViewById(R.id.et_otp);
+
+        btn_okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try{
+                    valueOfOTP = et_otpBox.getText().toString();
+                    validationBot.validateOTPValue(valueOfOTP);
+
+                    if(!valueOfOTP.equals("123456")){
+                        statusMsg.setVisibility(View.VISIBLE);
+                        btn_resendotp.setVisibility(View.VISIBLE);
+                        et_otpBox.setText("");
+                        et_otpBox.setFocusable(true);
+                    }
+                }catch (ValidationException ve){
+                    statusMsg.setText(ve.getMessage());
+                }
+            }
+        });
+        btn_cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+        btn_resendotp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // resend OTP msg to the user
+            }
+        });
+
     }
 
     private void checkIfUserExists(final String userMobileNumber) {
