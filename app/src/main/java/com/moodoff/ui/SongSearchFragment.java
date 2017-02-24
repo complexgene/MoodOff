@@ -1,27 +1,25 @@
-package com.moodoff;
+package com.moodoff.ui;
 
-import android.app.FragmentManager;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
+
+import com.moodoff.R;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link SingSong.OnFragmentInteractionListener} interface
+ * {@link SongSearchFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link SingSong#newInstance} factory method to
+ * Use the {@link SongSearchFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SingSong extends Fragment {
+public class SongSearchFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -33,7 +31,7 @@ public class SingSong extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public SingSong() {
+    public SongSearchFragment() {
         // Required empty public constructor
     }
 
@@ -43,11 +41,11 @@ public class SingSong extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment SingSong.
+     * @return A new instance of fragment SongSearchFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SingSong newInstance(String param1, String param2) {
-        SingSong fragment = new SingSong();
+    public static SongSearchFragment newInstance(String param1, String param2) {
+        SongSearchFragment fragment = new SongSearchFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -64,41 +62,11 @@ public class SingSong extends Fragment {
         }
     }
 
-    View view;
-    Button savedsong, singsong;
-    LinearLayout karaokepanel;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_sing_song, container, false);
-        savedsong = (Button)view.findViewById(R.id.savedsong);
-        singsong = (Button)view.findViewById(R.id.singsong);
-
-
-        singsong.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                Fragment newFragment = KaraokeFragment.newInstance("romantic","b");
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack if needed
-                //transaction.replace(R.id.allmoods, newFragment);
-                transaction.replace(R.id.singsongmain, newFragment);
-                transaction.addToBackStack("karaokefragemnt");
-                transaction.commitAllowingStateLoss();
-            }
-        });
-
-        savedsong.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-
-        return view;
+        return inflater.inflate(R.layout.fragment_song_search, container, false);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

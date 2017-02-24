@@ -1,12 +1,10 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -16,10 +14,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -43,6 +38,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.moodoff.R;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
@@ -175,7 +171,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         Toast.makeText(getContext(),"Loading profile of: "+ (p==null?userData.getUserName():p),Toast.LENGTH_SHORT).show();
 
         // Check if its someone else's profile, then remove the edit button
-        if(!profileOfUser.equals(userData.getMobileNumber())){
+        if(!profileOfUser.equals(userData.getUserMobileNumber())){
             editAudioStatus.setVisibility(View.GONE);editTextStatus.setVisibility(View.GONE);editBasicInfo.setVisibility(View.GONE);
         }
 

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:id="@+id/allContactDisplay"
     android:orientation="vertical"
-    tools:context="com.moodoff.ContactsFragment">
+    tools:context="com.moodoff.ui.ContactsFragment">
     <LinearLayout
         android:id="@+id/refreshAndMyProfile"
         android:layout_width="match_parent"

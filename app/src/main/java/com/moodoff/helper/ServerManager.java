@@ -8,37 +8,26 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.media.Image;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.PagerTitleStrip;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.RemoteViews;
-import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.moodoff.AllTabs;
-import com.moodoff.ContactsFragment;
-import com.moodoff.NotificationFragment;
-import com.moodoff.ParseNotificationData;
-import com.moodoff.Profile;
+import com.moodoff.ui.AllTabs;
+import com.moodoff.ui.ContactsFragment;
+import com.moodoff.ui.NotificationFragment;
+import com.moodoff.ui.ParseNotificationData;
+import com.moodoff.ui.Profile;
 import com.moodoff.R;
-import com.moodoff.Start;
+import com.moodoff.ui.Start;
 import com.moodoff.model.UserDetails;
 
 import java.io.BufferedReader;
@@ -102,7 +91,7 @@ public class ServerManager{
                             //Iterate through each of them
                             for(String eachContactNo : ContactsManager.allReadContactsFromDBServer){
                                 // If the person is in my contact list and if its not my own number
-                                if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(userData.getMobileNumber())){
+                                if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(userData.getUserMobileNumber())){
                                     contactNumbers.add(eachContactNo);
                                 }
                             }
@@ -338,7 +327,7 @@ public class ServerManager{
         },8000);
     }
     public void readNotificationsFromServerAndWriteToInternalDB(){
-        final String userMobileNumber = userData.getMobileNumber();
+        final String userMobileNumber = userData.getUserMobileNumber();
         final String serverURL = HttpGetPostInterface.serverURL;
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -527,7 +516,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(serverURL+"/users/update/" + type + "/" + userData.getMobileNumber() + "/" + newValue.replaceAll(" ","_"));
+                            URL url = new URL(serverURL+"/users/update/" + type + "/" + userData.getUserMobileNumber() + "/" + newValue.replaceAll(" ","_"));
                             Log.e("ServerM_ASModf_url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             urlConnection.setDoOutput(true);

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:id="@+id/singsongmain"
     android:orientation="vertical"
-    tools:context="com.moodoff.SingSong">
+    tools:context="com.moodoff.ui.SingSong">
 
     <!-- TODO: Update blank fragment layout -->
 <LinearLayout

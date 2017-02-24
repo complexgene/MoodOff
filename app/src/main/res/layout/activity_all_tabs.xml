@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.moodoff.AllTabs">
+    tools:context="com.moodoff.ui.AllTabs">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
@@ -40,7 +40,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:id="@+id/tabA"
-            android:name="com.moodoff.Moods"
+            android:name="com.moodoff.ui.Moods"
             tools:layout="@layout/fragment_moods" />
 
     </FrameLayout>-->

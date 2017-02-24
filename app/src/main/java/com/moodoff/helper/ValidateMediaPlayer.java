@@ -1,14 +1,12 @@
 package com.moodoff.helper;
 
 
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.util.Log;
 
-import com.moodoff.GenericMood;
-import com.moodoff.NotificationFragment;
-import com.moodoff.Profile;
+import com.moodoff.ui.GenericMood;
+import com.moodoff.ui.NotificationFragment;
+import com.moodoff.ui.Profile;
 import com.moodoff.R;
 
 import java.util.ArrayList;

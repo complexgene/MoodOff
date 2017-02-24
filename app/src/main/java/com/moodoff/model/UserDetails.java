@@ -8,12 +8,12 @@ import com.moodoff.helper.HttpGetPostInterface;
 
 public class UserDetails {
     private String userName;
-    private String mobileNumber;
-    private String dateOfBirth;
+    private String userMobileNumber;
+    private String userDateOfBirth;
     private String userTextStatus;
     private String userAudioStatusSong;
-    private int score;
-    private int numberOfOldNotifications;
+    private int userScore;
+    private int userNumberOfOldNotifications;
     private static UserDetails instance;
 
     private UserDetails(){
@@ -25,32 +25,27 @@ public class UserDetails {
         }
         return instance;
     } // same instance will be returned everytime a call is made to this
-
-    public int getNumberOfOldNotifications() {
-        return numberOfOldNotifications;
-    }
-    public void setNumberOfOldNotifications(int numberOfOldNotifications) {
-        this.numberOfOldNotifications = numberOfOldNotifications;
-    }
     public String getUserName() {
         return userName;
     }
-    public void setUserName(String uN) {
-        userName = uN;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
-    public String getMobileNumber() {
-        return mobileNumber;
+    public String getUserMobileNumber() {
+        return userMobileNumber;
     }
-    public void setMobileNumber(String pN) {
-        mobileNumber = pN;
+    public void setUserMobileNumber(String userMobileNumber) {
+        this.userMobileNumber = userMobileNumber;
     }
-    public String getDateOfBirth() {
-        return dateOfBirth;
+    public String getUserDateOfBirth() {
+        return userDateOfBirth;
     }
-    public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+    public void setUserDateOfBirth(String userDateOfBirth) {
+        this.userDateOfBirth = userDateOfBirth;
     }
-    public String getUserTextStatus(){return userTextStatus;}
+    public String getUserTextStatus() {
+        return userTextStatus;
+    }
     public void setUserTextStatus(String userTextStatus) {
         this.userTextStatus = userTextStatus;
     }
@@ -60,10 +55,16 @@ public class UserDetails {
     public void setUserAudioStatusSong(String userAudioStatusSong) {
         this.userAudioStatusSong = userAudioStatusSong;
     }
-    public int getScore() {
-        return score;
+    public int getUserScore() {
+        return userScore;
     }
-    public void setScore(int score) {
-        this.score = score;
+    public void setUserScore(int userScore) {
+        this.userScore = userScore;
+    }
+    public int getUserNumberOfOldNotifications() {
+        return userNumberOfOldNotifications;
+    }
+    public void setUserNumberOfOldNotifications(int userNumberOfOldNotifications) {
+        this.userNumberOfOldNotifications = userNumberOfOldNotifications;
     }
 }

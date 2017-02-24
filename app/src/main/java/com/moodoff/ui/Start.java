@@ -1,4 +1,4 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.Manifest;
 import android.content.Context;
@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -20,11 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.moodoff.R;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.DBHelper;
@@ -35,11 +30,6 @@ import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.UserDetails;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -75,11 +65,11 @@ public class Start extends AppCompatActivity {
             if (rd.fileExists()) {
                 rd.beginReadTransaction();
                 singleTonUserObject.setUserName(rd.getValueFor("userName"));
-                singleTonUserObject.setMobileNumber(rd.getValueFor("userPhoneNumber"));
-                singleTonUserObject.setDateOfBirth(rd.getValueFor("userDob"));
+                singleTonUserObject.setUserMobileNumber(rd.getValueFor("userPhoneNumber"));
+                singleTonUserObject.setUserDateOfBirth(rd.getValueFor("userDob"));
                 singleTonUserObject.setUserTextStatus(rd.getValueFor("userTextStatus"));
                 singleTonUserObject.setUserAudioStatusSong(rd.getValueFor("userAudioStatus"));
-                singleTonUserObject.setScore(Integer.parseInt(rd.getValueFor("userScore")));
+                singleTonUserObject.setUserScore(Integer.parseInt(rd.getValueFor("userScore")));
                 rd.endReadTransaction();
                 return true;
             }
@@ -372,7 +362,7 @@ public class Start extends AppCompatActivity {
                     int appUsingStatus = resultSet.getInt(2);
                     if (appUsingStatus == 1){
                         countOfAppUsers++;
-                        if(!phone_no.equals(singleTonUserObject.getMobileNumber()))
+                        if(!phone_no.equals(singleTonUserObject.getUserMobileNumber()))
                             ContactsManager.friendsWhoUsesApp.add(phone_no);
                     }
                     else{

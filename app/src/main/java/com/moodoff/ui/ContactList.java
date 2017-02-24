@@ -1,4 +1,4 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.Manifest;
 import android.app.Dialog;
@@ -20,14 +20,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.moodoff.R;
 import com.moodoff.helper.ContactsManager;
-import com.moodoff.helper.DBInternal;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class ContactList extends AppCompatActivity {

@@ -1,20 +1,8 @@
-package com.moodoff;
+package com.moodoff.ui;
 
-import android.app.Activity;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 
@@ -30,9 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews;
-import android.widget.TabHost;
-import android.widget.TextView;
 
+import com.moodoff.R;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
@@ -238,7 +225,7 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         }
         else*/
         if(AppData.noOfTimesBackPressed==2){
-            new ServerManager().exitLiveMood(userData.getMobileNumber());
+            new ServerManager().exitLiveMood(userData.getUserMobileNumber());
             GenericMood.releaseMediaPlayerObject();
             NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
             Profile.releaseMediaPlayerObject(Profile.mediaPlayer);

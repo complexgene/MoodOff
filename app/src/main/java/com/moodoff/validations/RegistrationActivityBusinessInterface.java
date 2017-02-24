@@ -8,5 +8,5 @@ import com.moodoff.exceptions.ValidationException;
 
 public interface RegistrationActivityBusinessInterface {
     boolean validateRegistrationData (String userName,String userPhoneNumber, String userBirthday, String userTextStatus) throws ValidationException;
-    boolean validateOTPValue(String otp) throws ValidationException;
+    boolean validateOTPLength(String otp) throws ValidationException;
 }

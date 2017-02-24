@@ -2,16 +2,32 @@ package com.moodoff.service;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.moodoff.dao.RegistrationActivitydaoImpl;
+import com.moodoff.dao.RegistrationActivitydaoInterface;
+import com.moodoff.exceptions.IncorrectOTPException;
+import com.moodoff.exceptions.SMSGateWayException;
 import com.moodoff.helper.DBHelper;
+import com.moodoff.helper.Messenger;
+import com.moodoff.model.UserDetails;
 
 import java.util.LinkedHashMap;
+
+import static com.moodoff.helper.LoggerBaba.printMsg;
 
 /**
  * Created by santanu on 22/2/17.
  */
 
 public class RegistrationActivityServiceImpl implements RegistrationActivityServiceInterface{
+    //--------------------------------------------------------------------------------------------
+        RegistrationActivitydaoInterface regAct_daoBot = new RegistrationActivitydaoImpl();
+    //--------------------------------------------------------------------------------------------
+    //-----VOID Methods-----
     public void createAllNecessaryTablesForAppOperation(Context context){
         DBHelper dbOperations = new DBHelper(context);
         dbOperations.dropAllTables();
@@ -67,5 +83,40 @@ public class RegistrationActivityServiceImpl implements RegistrationActivityServ
         contactsColumns.put("name","VARCHAR");
         contactsColumns.put("status","INTEGER");
         dbOperations.createTable("allcontacts",contactsColumns);
+    }
+    public String generateAndSendOTP(String userMobileNumber) throws SMSGateWayException{
+        String otpGotFromSMSGateway;
+        try{
+            // Logic to Access SMS Gateway API to initiate OTP message and get the new OTP Value
+            otpGotFromSMSGateway = "123456";
+
+        }catch (SMSGateWayException smsException){
+            throw smsException;
+        }
+        return otpGotFromSMSGateway;
+    }
+    public void storeUserDataToCloudDB(UserDetails singleTonUser){
+        printMsg("RegAct_storeUser","Storing user object to cloud DB..");
+        regAct_daoBot.storeUserDataToCloudDB(singleTonUser);
+        printMsg("RegAct_storeUser","Storing user object to cloud DB complete..");
+    }
+    //-----That's all---------------------
+
+    //-----Boolean return methods--------
+    public boolean checkIfOTPIsCorrect(String generatedOTP, String user_OTP_From_UI) throws IncorrectOTPException{
+        try{
+                if(!generatedOTP.equals(user_OTP_From_UI.trim()))
+                    throw  new IncorrectOTPException("RegistrationActivity"," Wrong OTP!! Please try again!!");
+
+        }catch (IncorrectOTPException ioe){
+            throw ioe;
+        }
+        return true;
+    }
+    public boolean checkIfUserExistsAndDecideWhatToDoNext(final String userMobileNumber) {
+        printMsg("RegAct_chkExists","Checking if user exists..");
+        boolean userExists = regAct_daoBot.checkIfUserExists(userMobileNumber);
+        printMsg("RegAct_chkExists","Checking if user exists resulted in : "+userExists);
+        return userExists;
     }
 }

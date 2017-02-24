@@ -1,20 +1,15 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.app.Dialog;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -29,33 +24,20 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.moodoff.helper.AppData;
+import com.moodoff.R;
 import com.moodoff.helper.ContactsManager;
-import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.Messenger;
 import com.moodoff.model.UserDetails;
 
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Random;
-import java.util.regex.Pattern;
 
-import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
 
@@ -208,7 +190,7 @@ public class ContactsFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 openedAProfile = true;
-                loadProfile(userData.getMobileNumber());
+                loadProfile(userData.getUserMobileNumber());
             }
         });
         // Populating all contacts who uses app and who doesn't

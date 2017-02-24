@@ -1,4 +1,4 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -10,16 +10,13 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
-import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -32,8 +29,8 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.moodoff.R;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.HttpGetPostInterface;
@@ -243,7 +240,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             final String fromUserNumber = componentsInNotification[0];
             String fromUserName = allReadContacts.get(fromUserNumber);
             Log.e("NotFrag",fromUserName+" is this");
-            if(fromUserNumber.equals(userData.getMobileNumber())){
+            if(fromUserNumber.equals(userData.getUserMobileNumber())){
                     fromUserName = "You";
             }
             else{
@@ -258,7 +255,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             String toUserName = allReadContacts.get(toUserNumber);
             Log.e("NotFrag",toUserName+" is this2");
 
-            if(toUserNumber.equals(userData.getMobileNumber())){
+            if(toUserNumber.equals(userData.getUserMobileNumber())){
                     toUserName = "You";
             }
             else{
@@ -299,7 +296,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             loveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(fromUserNumber.equals(userData.getMobileNumber()))
+                    if(fromUserNumber.equals(userData.getUserMobileNumber()))
                         Messenger.print(getContext(),"You can't like your own dedicated songs!!");
                     else {
                         String urlToFire = fromUserNumber + "/" + toUserNumber + "/" + date + "_" + time + "/5";
@@ -313,7 +310,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 loveButton.setEnabled(false);
             }
             else {
-                if (fromUserNumber.equals(userData.getMobileNumber())) {
+                if (fromUserNumber.equals(userData.getUserMobileNumber())) {
                     loveButton.setVisibility(View.INVISIBLE);
                 }
                 loveButton.setImageResource(R.drawable.likenot_ns);

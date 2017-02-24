@@ -1,4 +1,4 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,12 +12,13 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
+import com.moodoff.R;
 
 import java.io.File;
 

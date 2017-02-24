@@ -13,7 +13,7 @@
         <TextView
             android:gravity="center"
             android:background="@color/little_deep_orange"
-            android:text="Enter OTP sent to your Mobile"
+            android:text="Enter OTP Sent To Your Mobile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="center"
@@ -31,10 +31,10 @@
             android:textStyle="bold"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:inputType="textEmailAddress"
+            android:inputType="numberDecimal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter OTP" />
+            android:hint="ENTER OTP" />
         <TextView
             android:id="@+id/tv_status_msg"
             android:gravity="center"
@@ -54,6 +54,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_weight="1"
+            android:background="@color/appcolor_backup1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <ImageButton
@@ -73,11 +74,12 @@
                 />
             <Button
                 android:id="@+id/btn_otp_layout_resendotp"
+                android:background="#795548"
+                android:layout_marginRight="2dp"
                 android:layout_weight="1"
                 android:textAllCaps="false"
                 android:textColor="#00FF00"
-                android:text="Resend\n OTP"
-                android:src="@drawable/wrongletter"
+                android:text="Resend OTP"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />

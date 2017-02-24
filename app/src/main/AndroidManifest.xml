@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Start"
+            android:name=".ui.Start"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,23 +26,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AllTabs"
+            android:name=".ui.AllTabs"
             android:label="@string/title_activity_all_tabs"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".RegistrationActivity"
+            android:name=".ui.RegistrationActivity"
             android:windowSoftInputMode="stateAlwaysVisible"
             android:screenOrientation="portrait" />
         <activity
             android:name=".helper.DBInternal"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ContactList"
+            android:name=".ui.ContactList"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PermissionRequest"
+            android:name=".ui.PermissionRequest"
             android:screenOrientation="portrait" />
     </application>
 

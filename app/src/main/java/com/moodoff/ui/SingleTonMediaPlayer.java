@@ -1,4 +1,4 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.app.Activity;
 import android.media.MediaPlayer;

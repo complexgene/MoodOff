@@ -7,7 +7,12 @@ import android.util.Log;
  */
 
 public class GenericException extends Exception {
+    public GenericException(String module, String errorMessage){
+        super(errorMessage);
+        Log.e(module, errorMessage);
+    }
     public GenericException(String module, String errorMessage, Exception e){
-
+        super(errorMessage);
+        Log.e(module, errorMessage);
     }
 }

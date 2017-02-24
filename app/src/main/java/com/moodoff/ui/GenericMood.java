@@ -1,4 +1,4 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -14,8 +14,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -35,6 +33,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.moodoff.R;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.HangManWords;
@@ -44,7 +43,6 @@ import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.helper.ValidateMediaPlayer;
-import com.moodoff.model.UserDetails;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -54,7 +52,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
@@ -310,7 +307,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     }
     TextView txtView_selectedWord,points;
     char[] wordToFill;
-    int totalScore=userData.getScore();
+    int totalScore=userData.getUserScore();
     public void showItemInMiddle(final int selectedOption){
         switch(selectedOption){
             case 1:{
@@ -470,7 +467,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                                 chosenLetter.setEnabled(false);
                                 totalScore+=(selectedWord.length()*3);
                                 points.setText(""+totalScore);
-                                userData.setScore(totalScore);
+                                userData.setUserScore(totalScore);
                                 fileOperations.beginWriteTransaction();
                                 fileOperations.updateValueFor("score",String.valueOf(totalScore));
                                 fileOperations.endWriteTransaction();
@@ -607,7 +604,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         loveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String currentUser = userData.getMobileNumber();
+                String currentUser = userData.getUserMobileNumber();
                 char type = '1';
                 if(mp==null || !mp.isPlaying()){
                     Messenger.printCenter(getContext(),"Please play a song to like it!!");
@@ -713,7 +710,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
-                String currentUser = userData.getMobileNumber();
+                String currentUser = userData.getUserMobileNumber();
                 char type = '1';
                 final String stredittext=data.getStringExtra("selectedContact");
                 Log.e("GM_selectedmood",stredittext+" ["+currentMood+" ["+currentSong);
@@ -1116,7 +1113,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     //Read the text file similar to activityName and return an listOfSong
     public ArrayList<String> readList(final String mood) {
         try{
-            final String userMobileNumber = userData.getMobileNumber();
+            final String userMobileNumber = userData.getUserMobileNumber();
             final String serverURL = HttpGetPostInterface.serverURL;
 
             // Access the collection of songs that has already been read in Start.java and stored in variable of file PlaylistSongs.java
@@ -1292,7 +1289,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         if(AllTabs.mViewPager.getCurrentItem()==0) {
             releaseMediaPlayerObject();
             ServerManager serverManager = new ServerManager();
-            serverManager.exitLiveMood(userData.getMobileNumber());
+            serverManager.exitLiveMood(userData.getUserMobileNumber());
             mListener = null;
             playOrPauseParm = 0;
         }

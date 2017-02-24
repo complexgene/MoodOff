@@ -1,4 +1,4 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 /**
  * Created by Arindam on 02-10-2016.

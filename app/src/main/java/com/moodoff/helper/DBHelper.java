@@ -7,8 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
 import android.util.Log;
 
-import com.moodoff.ContactList;
-import com.moodoff.model.UserDetails;
+import com.moodoff.ui.ContactList;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import static com.moodoff.Start.fetchContactsNotComplete;
 import static com.moodoff.helper.ContactsManager.allReadContacts;
 
 /**

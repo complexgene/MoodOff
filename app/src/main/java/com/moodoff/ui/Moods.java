@@ -1,32 +1,26 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ExpandableListView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
+import com.moodoff.R;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.model.UserDetails;
-
-import java.lang.reflect.Field;
 
 
 /**
@@ -204,7 +198,7 @@ public class Moods extends Fragment {
             ContactsFragment.openedAProfile = false;
         }
         ServerManager serverManager = new ServerManager();
-        serverManager.setLiveMood(userData.getMobileNumber(),moodType);
+        serverManager.setLiveMood(userData.getUserMobileNumber(),moodType);
         if(AppData.allMoodPlayList.containsKey(moodType)) {
             FragmentTransaction transaction = fm.beginTransaction();
             Fragment newFragment=GenericMood.newInstance(moodType, "b");

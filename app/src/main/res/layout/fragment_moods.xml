@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:background="@color/black"
-    tools:context="com.moodoff.Moods">
+    tools:context="com.moodoff.ui.Moods">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -1,11 +1,10 @@
-package com.moodoff;
+package com.moodoff.ui;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,6 +24,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.moodoff.R;
+import com.moodoff.exceptions.IncorrectOTPException;
 import com.moodoff.exceptions.ValidationException;
 import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.Messenger;
@@ -41,38 +42,38 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class RegistrationActivity extends AppCompatActivity {
-    //---------------------------------------------------------------------------------
-    // Declaration space for all helper classes
-    //---------------------------------------------------------------------------------
-    private RegistrationActivityServiceInterface registrationServiceBot = new RegistrationActivityServiceImpl();
-    private RegistrationActivityBusinessInterface validationBot = new RegistrationActivityBusinessImpl();
-    private StoreRetrieveDataInterface rd=null;
-    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference mRootRef = firebaseDatabase.getReference().child("allusers");
-    private DatabaseReference dbRef;
-    private UserDetails singleTonUser;
-    private String userName, userMobileNumber, userBirthday, userTextStatus, userAudioStatus, valueOfOTP;;
-    //---------------------------------------------------------------------------------
-    // Declartion for all helper classes is done
-    //---------------------------------------------------------------------------------
+import static com.moodoff.helper.LoggerBaba.printMsg;
 
-    //--------------------------------------------------
-    // Declaration space for all UI variables
-    //--------------------------------------------------
-    private EditText et_userName,et_userMobileNumber,et_userBirthday,et_userTextStatus,et_otpBox;
-    private int userScore, userOldNotificationCount;
+public class RegistrationActivity extends AppCompatActivity {
+    // ---------------------------------------------------------------------------------
+    //     Declaration space for all helper classes
+    // ---------------------------------------------------------------------------------
+    private RegistrationActivityServiceInterface regAct_ServiceBot = new RegistrationActivityServiceImpl();
+    private RegistrationActivityBusinessInterface regAct_validationBot = new RegistrationActivityBusinessImpl();
+    private StoreRetrieveDataInterface rd=null;
+    private UserDetails singleTonUser;
+    private String userName, userMobileNumber, userBirthday, userTextStatus, userAudioStatus, valueOfOTP, generatedOTP;
+    private int userScore, userOldNotificationCount, year, month, day;
+    private Calendar calendar;
+    private DBHelper dbOperations;
+
+    // ---------------------------------------------------------------------------------
+    //     Declartion for all helper classes is done
+    // ---------------------------------------------------------------------------------
+
+    // --------------------------------------------------
+    //      Declaration space for all UI variables
+    // --------------------------------------------------
+    private EditText et_userName,et_userMobileNumber,et_userBirthday,et_userTextStatus,et_otp;
     private ProgressBar progressRegistration;
     private TextView error, statusMsg;
-    private Calendar calendar;
-    private int year, month, day;
     private Button register, btn_resendotp;
-    private DBHelper dbOperations;
     private Context currentContext;
     private ImageButton btn_okButton, btn_cancelButton;
+    private Dialog dialog;
     // -------------------------------------------------
-    // Declaration of all varaibles complete
-    //--------------------------------------------------
+    //     Declaration of all varaibles complete
+    // --------------------------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +82,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
         // Initilaize all the UI Components
         initComponents();
-        registrationServiceBot.createAllNecessaryTablesForAppOperation(currentContext);
+        regAct_ServiceBot.createAllNecessaryTablesForAppOperation(currentContext);
 
         // Clicking on any textbox should remove the red error line if any displayed earlier
         // as the user is going to rectify the value now.
@@ -99,16 +100,14 @@ public class RegistrationActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
+                printMsg("RegistrationActivity","Checking for registration validation data..");
                 if (validateRegistrationData()) {
+                    printMsg("RegistrationActivity","Registration validation data is valid..");
+                    printMsg("RegistrationActivity","OTP from SMS Gateway to cloud..");
+                    generatedOTP = regAct_ServiceBot.generateAndSendOTP(userMobileNumber);
+                    printMsg("RegistrationActivity","OTP successfully added to cloud..");
+                    printMsg("RegistrationActivity","Initiate OTP Panel..");
                     showAndValidateOTP();
-                     /***
-                      showOTPDialog
-                      if(OTP successful) populatesingleTonUser();
-                      else backoff;
-                     */
-                    //showOTPdialog
-                    //checkIfUserExistsAndProceed(mobile_number.getText().toString());
-                    Log.e("RegistrationActivity","Perfect");
                 }
             }
         });
@@ -143,7 +142,7 @@ public class RegistrationActivity extends AppCompatActivity {
             userOldNotificationCount = 0;
 
             // Call for validation of the fetched data
-            validationBot.validateRegistrationData(userName,userMobileNumber,userBirthday,userTextStatus);
+            regAct_validationBot.validateRegistrationData(userName,userMobileNumber,userBirthday,userTextStatus);
             return true;
         }
         catch(ValidationException ve){
@@ -151,8 +150,9 @@ public class RegistrationActivity extends AppCompatActivity {
         }
         return false;
     }
+
     private void showAndValidateOTP(){
-        final Dialog dialog = new Dialog(this);
+        dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_otp_validation);
         dialog.setCancelable(false);
         dialog.show();
@@ -163,23 +163,46 @@ public class RegistrationActivity extends AppCompatActivity {
         btn_resendotp.setVisibility(View.GONE);
         statusMsg = (TextView)dialog.findViewById(R.id.tv_status_msg);
         statusMsg.setVisibility(View.GONE);
-        et_otpBox = (EditText)dialog.findViewById(R.id.et_otp);
+        et_otp = (EditText)dialog.findViewById(R.id.et_otp);
+
+        et_otp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btn_resendotp.setVisibility(View.GONE);
+            }
+        });
 
         btn_okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try{
-                    valueOfOTP = et_otpBox.getText().toString();
-                    validationBot.validateOTPValue(valueOfOTP);
+                    valueOfOTP = et_otp.getText().toString();
+                    printMsg("RegistrationActivity","Validation of OTP initiated..");
+                    regAct_validationBot.validateOTPLength(valueOfOTP);
+                    printMsg("RegistrationActivity","Validation of OTP successful..");
 
-                    if(!valueOfOTP.equals("123456")){
-                        statusMsg.setVisibility(View.VISIBLE);
-                        btn_resendotp.setVisibility(View.VISIBLE);
-                        et_otpBox.setText("");
-                        et_otpBox.setFocusable(true);
+                    printMsg("RegistrationActivity","Checking if OTP is correct..");
+                    if(regAct_ServiceBot.checkIfOTPIsCorrect(generatedOTP,valueOfOTP)){
+                        printMsg("RegistrationActivity","OTP entered is correct..");
+                        printMsg("RegistrationActivity","Checking if user already registered before...");
+                        if(regAct_ServiceBot.checkIfUserExistsAndDecideWhatToDoNext(userMobileNumber)){
+                            // TRUE means user exists and already registered before. So extract old details.
+                            register(true);
+                        }
+                        else{
+                            // FALSE means user is having fresh registration.
+                            register(false);
+                        }
                     }
                 }catch (ValidationException ve){
+                    statusMsg.setVisibility(View.VISIBLE);
+                    et_otp.setText("");
+                    et_otp.setHint("Enter OTP again");
                     statusMsg.setText(ve.getMessage());
+                }catch(IncorrectOTPException ioe){
+                    statusMsg.setVisibility(View.VISIBLE);
+                    statusMsg.setText(ioe.getMessage());
+                    btn_resendotp.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -192,31 +215,15 @@ public class RegistrationActivity extends AppCompatActivity {
         btn_resendotp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // resend OTP msg to the user
+                btn_resendotp.setVisibility(View.GONE);
+                et_otp.setText("");
+                printMsg("RegistrationActivity","Initiating OTP addition to cloud DB..");
+                regAct_ServiceBot.generateAndSendOTP(userMobileNumber);
+                printMsg("RegistrationActivity","New OTP added to cloud DB..");
+                statusMsg.setText("New OTP Sent To You.");
             }
         });
-
     }
-
-    private void checkIfUserExists(final String userMobileNumber) {
-        mRootRef.child(userMobileNumber).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()){
-                    error.setText("Seems you used this app before!! Wait while we fetch your old data!!");
-                }
-                else {
-                    Messenger.printCenter(currentContext,"Registering.. Wait!!");
-                    progressRegistration.setVisibility(View.VISIBLE);
-                    register();
-                }
-
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-    }
-
 
     public void setDate() {
         new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
@@ -243,9 +250,15 @@ public class RegistrationActivity extends AppCompatActivity {
 
 
 
-    public void register() {
+    public void register(boolean ifUserExists) {
         try{
+            /*if (ifUserExists){
+                printMsg("RegistrationActivity","User registered in past. Will fetch old data..");
+            }
+            else{
+            }*/
             if(saveUserProfileIsSuccesful()) {
+                dialog.dismiss();
                 Toast.makeText(getApplicationContext(), "Successfully Registered", Toast.LENGTH_SHORT).show();
                 Intent mainIntent = new Intent(RegistrationActivity.this, Start.class);
                 mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -264,37 +277,34 @@ public class RegistrationActivity extends AppCompatActivity {
 
     public boolean saveUserProfileIsSuccesful() {
         try {
-
             // Storing all the registration details into the text file
-            rd = new StoreRetrieveDataImpl("singleTonUser.txt");
+            printMsg("RegistrationActivity","Creating text file and writing user data into that..");
+            rd = new StoreRetrieveDataImpl("UserData.txt");
             rd.beginWriteTransaction();
             rd.createNewData("userName", userName);
-            rd.createNewData("userPhoneNo", userMobileNumber);
-            rd.createNewData("userDob", userBirthday);
+            rd.createNewData("userMobileNumber", userMobileNumber);
+            rd.createNewData("userDateOfBirth", userBirthday);
             rd.createNewData("userTextStatus",userTextStatus);
             rd.createNewData("userAudioStatus",userAudioStatus);
             rd.createNewData("userScore",String.valueOf(userScore));
             rd.createNewData("userNumberOfOldNotifications",String.valueOf(userOldNotificationCount));
             rd.endWriteTransaction();
+            printMsg("RegistrationActivity","Creating text file and writing user data completed..");
 
+            printMsg("RegistrationActivity","Creating the User POJO..");
             // Populate the POJO
             singleTonUser.setUserName(userName);
-            singleTonUser.setMobileNumber(userMobileNumber);
-            singleTonUser.setDateOfBirth(userBirthday);
+            singleTonUser.setUserMobileNumber(userMobileNumber);
+            singleTonUser.setUserDateOfBirth(userBirthday);
             singleTonUser.setUserTextStatus(userTextStatus);
             singleTonUser.setUserAudioStatusSong(userAudioStatus);
-            singleTonUser.setScore(userScore);
-            singleTonUser.setNumberOfOldNotifications(userOldNotificationCount);
+            singleTonUser.setUserScore(userScore);
+            singleTonUser.setUserNumberOfOldNotifications(userOldNotificationCount);
+            printMsg("RegistrationActivity","Creating User POJO done..");
 
-            // Store the details onto the cloud
-            dbRef = mRootRef.child(userMobileNumber);
-            dbRef.child("userName").setValue(singleTonUser.getUserName());
-            dbRef.child("userPhoneNo").setValue(singleTonUser.getMobileNumber());
-            dbRef.child("userDob").setValue(singleTonUser.getDateOfBirth());
-            dbRef.child("userTextStatus").setValue(singleTonUser.getUserTextStatus());
-            dbRef.child("userAudioStatus").setValue(singleTonUser.getUserAudioStatusSong());
-            dbRef.child("userScore").setValue(singleTonUser.getScore());
-            dbRef.child("userNumberOfOldNotifications").setValue(singleTonUser.getNumberOfOldNotifications());
+            printMsg("RegistrationActivity","Store the POJO to cloud..");
+            regAct_ServiceBot.storeUserDataToCloudDB(singleTonUser);
+            printMsg("RegistrationActivity","Storing of POJO to cloud complete..");
 
             return true;
         } catch (IOException e) {

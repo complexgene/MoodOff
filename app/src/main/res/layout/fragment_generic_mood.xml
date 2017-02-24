@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:id="@+id/genericmood"
     android:layout_height="match_parent"
-    tools:context="com.moodoff.GenericMood">
+    tools:context="com.moodoff.ui.GenericMood">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
