@@ -39,7 +39,7 @@ import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.helper.ValidateMediaPlayer;
-import com.moodoff.model.UserDetails;
+import com.moodoff.model.User;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -218,7 +218,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
     int colorOfLoveFloatingActionButton = Color.rgb(0,255,0);
 
-    UserDetails userData = UserDetails.getInstance();
+    User userData = User.getInstance();
 
     public void designNotPanel(final View view){
         allReadContacts = ContactsManager.allReadContacts;

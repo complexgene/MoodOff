@@ -25,7 +25,7 @@ public class AppData {
     public static int noOfFriendUsesTheApp = 0;
     public static String backPressedFragement="";
     public static int noOfTimesBackPressed=0;
-
+    public static int fileSizeToRead = 2048*2048;
     public static Typeface getAppFont(Context ctx){
         return Typeface.createFromAsset(ctx.getAssets(), "fonts/BLKCHCRY.TTF");
     }

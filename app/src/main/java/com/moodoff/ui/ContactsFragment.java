@@ -31,7 +31,7 @@ import android.widget.Toast;
 import com.moodoff.R;
 import com.moodoff.helper.ContactsManager;
 import com.moodoff.helper.Messenger;
-import com.moodoff.model.UserDetails;
+import com.moodoff.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,7 +91,7 @@ public class ContactsFragment extends Fragment{
     FloatingActionButton refreshContactButton;
     HashMap<String,String> allC = new HashMap<>();
     boolean contactReadingStatusNotComplete = true;
-    UserDetails userData = UserDetails.getInstance();
+    User userData = User.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

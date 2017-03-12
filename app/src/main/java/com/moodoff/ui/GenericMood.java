@@ -270,7 +270,6 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         }
         else{
             Log.e("GenericMood_STORY","Story file not yet created..");
-            f.mkdirs();
             ServerManager serverManager = new ServerManager();
             serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
         }

@@ -6,7 +6,7 @@ import com.moodoff.helper.HttpGetPostInterface;
  * Created by snaskar on 10/11/2016.
  */
 
-public class UserDetails {
+public class User {
     private String userName;
     private String userMobileNumber;
     private String userDateOfBirth;
@@ -14,14 +14,14 @@ public class UserDetails {
     private String userAudioStatusSong;
     private int userScore;
     private int userNumberOfOldNotifications;
-    private static UserDetails instance;
+    private static User instance;
 
-    private UserDetails(){
+    private User(){
         this.userAudioStatusSong = HttpGetPostInterface.serverSongURL+"romantic/HERO.mp3";
     } // To maintain singleTon property across app
-    public static UserDetails getInstance(){
+    public static User getInstance(){
         if(instance == null){
-            instance = new UserDetails();
+            instance = new User();
         }
         return instance;
     } // same instance will be returned everytime a call is made to this

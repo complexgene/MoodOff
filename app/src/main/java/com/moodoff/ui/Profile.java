@@ -47,7 +47,7 @@ import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.helper.ValidateMediaPlayer;
-import com.moodoff.model.UserDetails;
+import com.moodoff.model.User;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,7 +154,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     public static Handler seekHandler = new Handler();
     public static int ifSelectingAudioStatus = 0;
     public static String myAudioStatusSong;
-    UserDetails userData = UserDetails.getInstance();
+    User userData = User.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

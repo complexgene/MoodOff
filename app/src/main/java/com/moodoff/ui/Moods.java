@@ -20,7 +20,7 @@ import com.moodoff.helper.AppData;
 import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
-import com.moodoff.model.UserDetails;
+import com.moodoff.model.User;
 
 
 /**
@@ -187,7 +187,7 @@ public class Moods extends Fragment {
        startParticularMood(moodToEnter,0);
     }
 
-    UserDetails userData = UserDetails.getInstance();
+    User userData = User.getInstance();
 
     private void startParticularMood(String moodType, int status){
         /*if(status == 0)fm=AllTabs.moodsFragmentManager;

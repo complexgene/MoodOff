@@ -21,6 +21,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.moodoff.model.User;
+import com.moodoff.service.ContentManagementService;
 import com.moodoff.ui.AllTabs;
 import com.moodoff.ui.ContactsFragment;
 import com.moodoff.ui.NotificationFragment;
@@ -28,7 +33,6 @@ import com.moodoff.ui.ParseNotificationData;
 import com.moodoff.ui.Profile;
 import com.moodoff.R;
 import com.moodoff.ui.Start;
-import com.moodoff.model.UserDetails;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -36,6 +40,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -55,7 +60,7 @@ public class ServerManager{
     DBHelper dbOperations;
     Context context;
     int currentNumberOfNotifications, oldNumberOfNotifications;
-    UserDetails userData = UserDetails.getInstance();
+    User userData = User.getInstance();
 
     public ServerManager(){}
 
@@ -128,7 +133,6 @@ public class ServerManager{
             }
         },13000);
     }
-
     // LIVE FEED FUNCTIONS
     String liveMood = "";
     public String getLiveMood(final String userNumber){
@@ -237,78 +241,71 @@ public class ServerManager{
     }
     // LIVE FEED FUNCTIONS COMPLETE
 
+    // This below function reads the playlist file from the server ----CONVERTED----
     public void readPlayListFromServer(final Context curContext, final String todaysDate){
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            BufferedReader bufferedReader = null;
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference();
+        // Create a child reference
+        StorageReference imagesRef = storageRef.child("allsongdata.txt");
+        Log.e("ServerManager",imagesRef.getPath());
+        imagesRef.getBytes(AppData.fileSizeToRead).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
-            public void run() {
+            public void onSuccess(byte[] bytes) {
                 try {
-                    URL url = new URL(HttpGetPostInterface.serverSongURL + "allsongdata.txt");
-                    Log.e("Start_allsongsURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setConnectTimeout(3000);
-                    InputStream is = urlConnection.getInputStream();
-                    InputStreamReader isr = new InputStreamReader(is);
-                    bufferedReader = new BufferedReader(isr);
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < bytes.length; i++) {
+                        sb.append((char) bytes[i]);
+                    }
+                    Log.e("ServerManager", sb.toString());
+                    BufferedReader bufferedReader = new BufferedReader(new StringReader(sb.toString()));
 
                     int noOfMoods = Integer.parseInt(bufferedReader.readLine());
                     ArrayList<String> typeOfMoods = new ArrayList<String>(noOfMoods);
-                    for(int i=0;i<noOfMoods;i++) {
+                    for (int i = 0; i < noOfMoods; i++) {
                         typeOfMoods.add(bufferedReader.readLine());
                     }
 
-                    Log.e("Start_typeOfMoods",typeOfMoods.toString());
-
+                    Log.e("Start_typeOfMoods", typeOfMoods.toString());
                     bufferedReader.readLine(); //SEPARATOR
-
                     String song = "";
                     ArrayList<String> allSongInAMood = new ArrayList<String>();
-                    for(int i=0;i<noOfMoods;i++) {
+                    for (int i = 0; i < noOfMoods; i++) {
                         while ((song = bufferedReader.readLine()) != null) {
-                            if(!song.equals("")) {
+                            if (!song.equals("")) {
                                 allSongInAMood.add(song);
-                            }
-                            else {
+                            } else {
                                 break;
                             }
                         }
-                        AppData.allMoodPlayList.put(typeOfMoods.get(i),allSongInAMood);
-                        Log.e("Start_MoodAndSongs",typeOfMoods.get(i)+" "+allSongInAMood.toString());
+                        AppData.allMoodPlayList.put(typeOfMoods.get(i), allSongInAMood);
+                        Log.e("Start_MoodAndSongs", typeOfMoods.get(i) + " " + allSongInAMood.toString());
                         allSongInAMood = new ArrayList<String>();
                     }
                     Start.moodsAndSongsFetchNotComplete = false;
                     DBHelper dbOperations = new DBHelper(curContext);
                     SQLiteDatabase writeDB = dbOperations.getWritableDatabase();
                     writeDB.execSQL("delete from playlist");
-                    Log.e("Start_Playlist","Deleted all songs from playlist");
+                    Log.e("Start_Playlist", "Deleted all songs from playlist");
 
-                    HashMap<String,ArrayList<String>> allSongs = AppData.allMoodPlayList;
-                    for(String moodType : allSongs.keySet())
-                    {
+                    HashMap<String, ArrayList<String>> allSongs = AppData.allMoodPlayList;
+                    for (String moodType : allSongs.keySet()) {
                         ArrayList<String> songs = allSongs.get(moodType);
-                        for(String eachSong : songs) {
-                            String queryToFireToInsertSong = "insert into playlist values('" + todaysDate + "','"+ moodType +"','"+ eachSong +"','xxx','xxx')";
-                            Log.e("Start_QUERYINSRT",queryToFireToInsertSong);
+                        for (String eachSong : songs) {
+                            String queryToFireToInsertSong = "insert into playlist values('" + todaysDate + "','" + moodType + "','" + eachSong + "','xxx','xxx')";
+                            Log.e("Start_QUERYINSRT", queryToFireToInsertSong);
                             writeDB.execSQL(queryToFireToInsertSong);
                         }
                     }
-                    Log.e("Start_Playlist","Songs written to DB");
+                    Log.e("Start_Playlist", "Songs written to DB");
                     Log.e("Start_allmoods_Read", "AllMoods read complete..");
                 } catch (Exception ee) {
-                    Log.e("Start_notRd_Err", "Server not reachable i think:"+ee.getMessage());
-                } finally {
-                    try {
-                        bufferedReader.close();
-                    } catch (Exception ee) {
-                        Log.e("ServerManager_ReadErr1", "BufferedReader couldn't be closed");
-                    }
-                    urlConnection.disconnect();
+                    Log.e("Start_notRd_Er", "Server not reachable i think:" + ee.getMessage());
                 }
             }
-        }).start();
+        });
     }
-    public void readAllProfileDataFromServerAndWriteToInternalDB(){
+    public void readAllProfileDataFromServerAndWriteToInternalDB()  {
         ArrayList<String> allContactsOfUser = ContactsManager.friendsWhoUsesApp;
         Log.e("ServerManager_FWUA",allContactsOfUser.toString());
         new Handler().postDelayed(new Runnable() {
@@ -328,10 +325,10 @@ public class ServerManager{
     }
     public void readNotificationsFromServerAndWriteToInternalDB(){
         final String userMobileNumber = userData.getUserMobileNumber();
-        final String serverURL = HttpGetPostInterface.serverURL;
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
+                final String serverURL = HttpGetPostInterface.serverURL;
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
                 new Thread(new Runnable() {
                     HttpURLConnection urlConnection = null;
                     InputStreamReader isr = null;
@@ -339,8 +336,9 @@ public class ServerManager{
                     public void run() {
                         try {
                             //Log.e("ServerManager_Not","Start reading notifications from Server");
-                            URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
-                            //Log.e("ServerManager_ReadURL", url.toString());
+                            //URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
+                            URL url = new URL(serverURL+ "/allNotifications/" + userMobileNumber + ".json");
+                            Log.e("ServerManager_ReadURL", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
                             isr = new InputStreamReader(is);
@@ -350,6 +348,7 @@ public class ServerManager{
                                 response.append((char) data);
                                 data = isr.read();
                             }
+                            Log.e("ServerManager",response.toString());
                             ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
                             currentNumberOfNotifications = allYourNotificationFromServer.size();
                             oldNumberOfNotifications = AppData.totalNoOfNot;
@@ -370,9 +369,8 @@ public class ServerManager{
                                     displayAlertNotificationOnTopBarOfPhone(context,(currentNumberOfNotifications-oldNumberOfNotifications));
                                 else
                                     NotificationFragment.changeDetected = true;
-
-                                /*else
-                                    displayAlertNotificationOnTopBarOfPhone(context,(AppData.lovedDedicateNewCount-AppData.lovedDedicateOldCount));*/
+                                //else
+                                    displayAlertNotificationOnTopBarOfPhone(context,(AppData.lovedDedicateNewCount-AppData.lovedDedicateOldCount));
                             }
                             else{
                                 //Log.e("ServerManager_allNot","No new Notifications..");
@@ -381,6 +379,7 @@ public class ServerManager{
                         } catch (Exception ee) {
                             Log.e("ServerManager_Not_Err1", ee.getMessage());
                             ee.printStackTrace();
+                            ee.fillInStackTrace();
                         }
                     }
                 }).start();
@@ -678,7 +677,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL("http://192.168.2.4:5789/controller/moodoff/users/update/" + type + "/" + UserDetails.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
+                            URL url = new URL("http://192.168.2.4:5789/controller/moodoff/users/update/" + type + "/" + User.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
                             Log.e("ServerM_ASModf_url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             urlConnection.setDoOutput(true);

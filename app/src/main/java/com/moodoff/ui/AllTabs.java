@@ -23,7 +23,7 @@ import com.moodoff.R;
 import com.moodoff.helper.AppData;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
-import com.moodoff.model.UserDetails;
+import com.moodoff.model.User;
 
 import java.util.ArrayList;
 
@@ -211,14 +211,14 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         }catch (Exception ee){return;}
     }
 
-    UserDetails userData = UserDetails.getInstance();
+    User userData = User.getInstance();
 
     @Override
     protected void onDestroy() {
         Log.e("AllTabs_onDestroy","onDestroy");
         super.onDestroy();
         /*if(AppData.noOfTimesBackPressed==1 && mViewPager.getCurrentItem()==1){
-            new ServerManager().exitLiveMood(UserDetails.getPhoneNumber());
+            new ServerManager().exitLiveMood(User.getPhoneNumber());
             GenericMood.releaseMediaPlayerObject();
             NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
             Profile.releaseMediaPlayerObject(Profile.mediaPlayer);

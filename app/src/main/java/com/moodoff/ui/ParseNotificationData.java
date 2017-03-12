@@ -7,7 +7,6 @@ package com.moodoff.ui;
 import android.util.Log;
 
 import com.moodoff.helper.AppData;
-import com.moodoff.model.UserDetails;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,6 +14,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class ParseNotificationData {
 
@@ -36,25 +36,15 @@ public class ParseNotificationData {
 
     public static ArrayList<String> getNotification(String raw_json)
     {
+        int lovedDedicateServerCount = 0;
         String strJson = raw_json;
         ArrayList<String> allNotifications = new ArrayList<>();
         try {
             JSONObject jsonRootObject = new JSONObject(strJson);
-
-            //Get the instance of JSONArray that contains JSONObjects
-            JSONObject jsonTypeObject = jsonRootObject.getJSONObject("allNotifications");
-            JSONArray jsonArray = jsonTypeObject.optJSONArray("entry");
-            //Iterate the jsonArray and print the info of JSONObjects
-            int lovedDedicateServerCount = 0;
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                String timeStamp = jsonObject.optString("key").toString();
-                String fileWithType = jsonObject.optString("value").toString();
-
-                //Log.e("jsonObj",jsonObject.toString());
-
-                String[] allData = fileWithType.split("#");
+            Iterator<String> allTS = jsonRootObject.keys();
+            int sizeOfNots = jsonRootObject.length();
+            while(allTS.hasNext()){
+                String[] allData = jsonRootObject.get(allTS.next()).toString().split("#");
                 String fromUser = allData[0];
                 String toUser = allData[1];
                 String songName = allData[2];
