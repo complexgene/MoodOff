@@ -207,7 +207,7 @@ public class Moods extends Fragment {
             transaction.replace(R.id.allmoods, newFragment);
             transaction.addToBackStack(null);
             transaction.commitAllowingStateLoss();
-            putAllButtonsOff();
+            //putAllButtonsOff();
         /*Intent ii = new Intent(getContext(),GenericSelectedMood.class);
         Bundle bundle = new Bundle();
         bundle.putString("selectedmood",moodType);
