@@ -78,6 +78,8 @@ public class Moods extends Fragment {
     static FragmentManager fm;
     static Fragment fragment;
     static Activity activity;
+    User singleTonUser;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -88,6 +90,9 @@ public class Moods extends Fragment {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_moods, container,
                 false);
+
+        initItemsInView();
+
         //rootView.setBackgroundColor(Color.WHITE);
         btnOnTour = (Button)rootView.findViewById(R.id.btn_ontour);
         btnParty = (Button)rootView.findViewById(R.id.btn_party);
@@ -183,11 +188,13 @@ public class Moods extends Fragment {
         return rootView;
     }
 
+    private void initItemsInView(){
+        singleTonUser = User.getInstance();
+    }
+
     private void cameFromNotification(){
        startParticularMood(moodToEnter,0);
     }
-
-    User userData = User.getInstance();
 
     private void startParticularMood(String moodType, int status){
         /*if(status == 0)fm=AllTabs.moodsFragmentManager;
@@ -198,7 +205,7 @@ public class Moods extends Fragment {
             ContactsFragment.openedAProfile = false;
         }
         ServerManager serverManager = new ServerManager();
-        serverManager.setLiveMood(userData.getUserMobileNumber(),moodType);
+        serverManager.setLiveMood(singleTonUser.getUserMobileNumber(),moodType);
         if(AppData.allMoodPlayList.containsKey(moodType)) {
             FragmentTransaction transaction = fm.beginTransaction();
             Fragment newFragment=GenericMood.newInstance(moodType, "b");

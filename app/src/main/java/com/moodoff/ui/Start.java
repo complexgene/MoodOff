@@ -266,13 +266,12 @@ public class Start extends AppCompatActivity {
                     AppData.allNotifications = allNotificationsFromDB;
                     AppData.totalNoOfNot = allNotificationsFromDB.size();
                     NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
-                    Log.e("Start_Notifictions","Fetched " + AppData.totalNoOfNot + " notifications..");
+                    Log.e("Start_Notifications","Fetched " + AppData.totalNoOfNot + " notifications from internal DB..");
                     serverManager.readNotificationsFromServerAndWriteToInternalDB();
-                    Log.e("Start_NotB4",allNotificationsFromDB.toString());
                     notificationFetchNotComplete = false;
-                    Log.e("Start_Notif_Read", "Notification read complete and started auto script..");
+                    Log.e("Start_Notifications", "Notification read complete and auto notification read script started..");
                 } catch (Exception ee) {
-                    Log.e("Start_Notif_ReadErr", ee.getMessage());
+                    Log.e("Start_Notifications_Err", ee.getMessage());
                     ee.printStackTrace();
                 }
     }

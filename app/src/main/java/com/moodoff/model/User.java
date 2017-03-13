@@ -67,4 +67,8 @@ public class User {
     public void setUserNumberOfOldNotifications(int userNumberOfOldNotifications) {
         this.userNumberOfOldNotifications = userNumberOfOldNotifications;
     }
+    public String toString(){
+        return userMobileNumber + "|" + userName + "|" + userDateOfBirth + "|" + userTextStatus + "|"
+                + userAudioStatusSong + "|" + userNumberOfOldNotifications + "|" +userScore;
+    }
 }

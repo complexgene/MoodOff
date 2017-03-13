@@ -107,7 +107,7 @@ public class UserManagementService {
                 singleTonUserObject.setUserScore(Integer.parseInt(rd.getValueFor("userScore")));
                 singleTonUserObject.setUserNumberOfOldNotifications(Integer.parseInt(rd.getValueFor("userNumberOfOldNotifications")));
                 rd.endReadTransaction();
-                printMsg("UserManagementService",singleTonUserObject.getUserMobileNumber());
+                printMsg("UserManagementService","User object populated:\n" + singleTonUserObject.toString());
                 return true;
             }
             else {
@@ -120,5 +120,6 @@ public class UserManagementService {
         }
         return true;
     }
+
 
 }

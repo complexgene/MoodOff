@@ -24,6 +24,8 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.moodoff.dao.NotificationManagerDaoImpl;
+import com.moodoff.dao.NotificationManagerDaoInterface;
 import com.moodoff.model.User;
 import com.moodoff.service.ContentManagementService;
 import com.moodoff.ui.AllTabs;
@@ -323,6 +325,7 @@ public class ServerManager{
             }
         },8000);
     }
+    /*********-----------NOTIFICATION FUNCTIONS-------------------***********/
     public void readNotificationsFromServerAndWriteToInternalDB(){
         final String userMobileNumber = userData.getUserMobileNumber();
                 final String serverURL = HttpGetPostInterface.serverURL;
@@ -354,17 +357,9 @@ public class ServerManager{
                             oldNumberOfNotifications = AppData.totalNoOfNot;
                             if((currentNumberOfNotifications>oldNumberOfNotifications)||(AppData.lovedDedicateNewCount>AppData.lovedDedicateOldCount)){
                                 dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
-                                //stopWriteToReadTableCopyScript();
                                 dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
-                                //deleteAllNotificationsFromServerReadtable(UserMobileNumber);
-                                //startWriteToReadTableCopyScript();
-                                //AppData.allNotifications = allYourNotificationFromServer;
                                 AppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
                                 AppData.totalNoOfNot = currentNumberOfNotifications;
-                                //Log.e("ServerManager_allNot","Some new notifications written to DB..");
-                                //Log.e("ServerManager_allNot",allYourNotificationFromServer.toString());
-
-                                // Display the notification alert
                                 if(currentNumberOfNotifications>oldNumberOfNotifications)
                                     displayAlertNotificationOnTopBarOfPhone(context,(currentNumberOfNotifications-oldNumberOfNotifications));
                                 else
@@ -387,6 +382,12 @@ public class ServerManager{
             }
         },10000);
     }
+    public boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type){
+        NotificationManagerDaoInterface notificationManagerDao = new NotificationManagerDaoImpl();
+        return notificationManagerDao.writeSongDedicateToCloudDB(ts, fromUser, toUser, currentMood, currentSong, type);
+    }
+    /*********-----------NOTIFICATION FUNCTIONS ENDS-------------------***********/
+
     private void displayAlertNotificationOnTopBarOfPhone(final Context context, final int diff){
         // Getting the number of last unseen notifications from Userdata file
         StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("UserData.txt");

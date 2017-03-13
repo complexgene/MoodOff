@@ -159,6 +159,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return allProfilesData;
     }
     public ArrayList<String> readNotificationsFromInternalDB() {
+        Log.e("DBHelper", "Came to read the notifications from the Internal DB");
         ArrayList<String> allNotifications = new ArrayList<>();
         mydatabaseReadable = getReadableDatabase();
         Cursor resultSet = mydatabaseReadable.rawQuery("Select * from rnotifications", null);
@@ -178,9 +179,11 @@ public class DBHelper extends SQLiteOpenHelper {
             resultSet.moveToNext();
         }
         AppData.lovedDedicateOldCount = countLoveType;
+        Log.e("DBHelper", "Reading of the notifications from the Internal DB -> DONE");
         return allNotifications;
     }
     public void writeNewNotificationsToInternalDB(ArrayList<String> newNotifications){
+        Log.e("DBHelper", "Came to write the newly arrived notifications to internal DB..");
         myDatabaseWritable = getWritableDatabase();
         ArrayList<String> loveUpdateMarkerQueries = new ArrayList<>();
         for(String eachNotification : newNotifications){
@@ -204,10 +207,13 @@ public class DBHelper extends SQLiteOpenHelper {
         for(String eachUpdateQuery : loveUpdateMarkerQueries){
             myDatabaseWritable.execSQL(eachUpdateQuery);
         }
+        Log.e("DBHelper", "Writing of newly arrived notifications to internal DB is DONE..");
     }
     public void deleteAllDataFromNotificationTableFromInternalDB(){
+        Log.e("DBHelper", "Came to delete all the notifications from the notifications table..");
         myDatabaseWritable = getWritableDatabase();
         myDatabaseWritable.execSQL("delete from rnotifications");
+        Log.e("DBHelper", "Deletion of all the notifications from the notifications table DONE..");
     }
 
     public void changeStatusOfUsersInContactsTable(ArrayList<String> allUsers){

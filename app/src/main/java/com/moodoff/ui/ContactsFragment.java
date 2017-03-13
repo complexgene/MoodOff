@@ -106,7 +106,7 @@ public class ContactsFragment extends Fragment{
 
         addOwnProfileAndRefreshButton();
 
-        monitorViewChange();
+        //monitorViewChange();
 
         //spinner = (ProgressBar)mainView.findViewById(R.id.refreshSpin);
         //DBInternal dbInternal = new DBInternal();
