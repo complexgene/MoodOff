@@ -6,6 +6,8 @@ package com.moodoff.ui;
 
 import android.util.Log;
 
+import com.moodoff.helper.LoggerBaba;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,17 +16,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import static com.moodoff.helper.LoggerBaba.printMsg;
+
 public class ParseNotificationData {
 
     public static ArrayList<String> parseAllContacts(String contactsInJson){
         ArrayList<String> allContactNumbersInServer = new ArrayList<>();
         try {
             JSONObject jsonRootObject = new JSONObject(contactsInJson);
-            JSONArray jsonArray = jsonRootObject.optJSONArray("allUserPhoneNumbers");
-            for(int i=0;i<jsonArray.length();i++){
-                allContactNumbersInServer.add(jsonArray.get(i).toString());
+            Iterator<String> keys = jsonRootObject.keys();
+            while(keys.hasNext()) {
+                allContactNumbersInServer.add(keys.next());
             }
-            Log.e("ParseNot_CNTCServer",allContactNumbersInServer.toString());
+            printMsg("ParseNotificationData",allContactNumbersInServer.toString());
         }
         catch(Exception ee){
             ee.printStackTrace();

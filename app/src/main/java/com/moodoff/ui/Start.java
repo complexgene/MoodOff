@@ -270,7 +270,7 @@ public class Start extends AppCompatActivity {
                     AllAppData.totalNoOfNot = allNotificationsFromDB.size();
                     NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
                     Log.e("Start_Notifications","Fetched " + AllAppData.totalNoOfNot + " notifications from internal DB..");
-                    //serverManager.readNotificationsFromServerAndWriteToInternalDB();
+                    serverManager.readNotificationsFromServerAndWriteToInternalDB();
                     notificationFetchNotComplete = false;
                     Log.e("Start_Notifications", "Notification read complete and auto notification read script started..");
                 } catch (Exception ee) {

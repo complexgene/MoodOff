@@ -15,24 +15,26 @@ import static com.moodoff.helper.LoggerBaba.printMsg;
 public class UserManagementdaoImpl implements UserManagementdaoInterface {
     //----------------------------Google Firebase-------------------------------------------------
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference mRootRef = firebaseDatabase.getReference().child("allusers");
-    private DatabaseReference dbRef;
+    private DatabaseReference allUserDetailsNode = firebaseDatabase.getReference().child("allusers");
+    private DatabaseReference onlyUserPhoneNumbersNode = firebaseDatabase.getReference().child("userlist");
+    private DatabaseReference dbRefForAllUserDetailsNode, dbRefForOnlyUserPhoneNumbersNode;
     //--------------------------------------------------------------------------------------------
-    private String userOTPValue;
-    private boolean userExists;
-    //--------------------------------------------------------------------------------------------
-    //--------------VOID METHODS-----------------------
+
     public boolean storeUserDataToCloudDB(User singleTonUser){
         try{
-            dbRef = mRootRef.child(singleTonUser.getUserMobileNumber());
-            dbRef.setValue(singleTonUser);
-            printMsg("UserManagementdaoImpl","User Data uploaded to cloud DB..");
+            printMsg("UserManagementdaoImpl","Came to create two nodes to cloud DB..");
+            // Entry to allUserDetailsNode
+            dbRefForAllUserDetailsNode = allUserDetailsNode.child(singleTonUser.getUserMobileNumber());
+            dbRefForAllUserDetailsNode.setValue(singleTonUser);
+            // Entry to onlyUserPhoneNumbersNode
+            dbRefForOnlyUserPhoneNumbersNode = onlyUserPhoneNumbersNode.child(singleTonUser.getUserMobileNumber());
+            dbRefForOnlyUserPhoneNumbersNode.setValue(1);
+            printMsg("UserManagementdaoImpl","User Data uploaded to cloud DB at 1.allUserDetailsNode 2.OnlyUserPhNoNode..");
             return true;
         }
         catch(Exception cloudDBException){
             Log.e("UserManagementdaoImpl","DBException raised in methiod storeUserDataToCloudDB");
             return false;
         }
-
     }
 }

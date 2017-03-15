@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.moodoff.helper.AllAppData.serverURL;
+import static com.moodoff.helper.LoggerBaba.printMsg;
 
 /**
  * Created by snaskar on 12/21/2016.
@@ -78,9 +79,9 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            Log.e("ServerMan_AppUsers","Start reading Users from Server every 13 secs");
-                            URL url = new URL(serverURL + "/allusers.json");
-                            Log.e("ServerMan_AppUsers_URL", url.toString());
+                            printMsg("ServerManager","Start reading Users from Server every 13 secs");
+                            URL url = new URL(serverURL + "/userlist.json");
+                            printMsg("ServerManager", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
                             isr = new InputStreamReader(is);
@@ -90,9 +91,10 @@ public class ServerManager{
                                 response.append((char) data);
                                 data = isr.read();
                             }
+                            printMsg("ServerManager", "Response: "+response);
                             // Reading all the registered Users
                             AllAppData.allReadContactsFromDBServer = ParseNotificationData.parseAllContacts(response.toString());
-                            ArrayList<String> contactNumbers = new ArrayList<>(),contactsToBeRemoved = new ArrayList<>();
+                            ArrayList<String> contactNumbers = new ArrayList<>();
                             //Iterate through each of them
                             for(String eachContactNo : AllAppData.allReadContactsFromDBServer){
                                 // If the person is in my contact list and if its not my own number
@@ -102,13 +104,13 @@ public class ServerManager{
                             }
                             int currentCountOfAppUsersInMyContacts = contactNumbers.size();
                             if(currentCountOfAppUsersInMyContacts> AllAppData.countFriendsUsingApp){
-                                Log.e("ServerMan_AppUsers","Got some new app users\nUpdate the data containers\n Refresh the contacts display view..");
+                                printMsg("ServerManager","Got some new app users\nUpdate the data containers\n Refresh the contacts display view..");
                                 for(String eachno : contactNumbers){
                                     if(!AllAppData.friendsWhoUsesApp.contains(eachno)){
                                         AllAppData.friendsWhoUsesApp.add(eachno);
                                         AllAppData.friendsWhoDoesntUseApp.remove(eachno);
-                                        Log.e("ServerMan_AppUsers_New","Added to users and deleted from non-users");
-                                        Log.e("ServerMan_AppUsers_New", AllAppData.friendsWhoUsesApp.toString());
+                                        printMsg("ServerManager","Added to users and deleted from non-users");
+                                        printMsg("ServerManager", AllAppData.friendsWhoUsesApp.toString());
                                     }
                                 }
                                 // Update the container counts now as based on counts only the above is triggered
@@ -120,18 +122,17 @@ public class ServerManager{
                                 // update the contactsFragment list
                                 ContactsFragment.updateViewCalled = true;
                                // Notify users that some new friends joined
-
                             }
                             Start.fetchContactsFromServerNotComplete = false;
                         } catch (Exception ee) {
-                            Log.e("ServerManager_Not_Err0", ee.getMessage());
+                            printMsg("ServerManager_ERR", ee.getMessage());
                             ee.printStackTrace();
                         }
                     }
                 }).start();
                 fetchContactsFromServer();
             }
-        },13000);
+        },10000);
     }
     // LIVE FEED FUNCTIONS
     String liveMood = "";
@@ -414,7 +415,7 @@ public class ServerManager{
                 @Override
                 public void run() {
                     if(isAppForground(context)) {
-                        Log.e("SM","Here yoooooo foreground");
+                        Log.e("ServerManager","Here yoooooo foreground");
                         if(AllTabs.mViewPager.getCurrentItem()!=1) {
                             AllTabs.tabNames.clear();
                             AllTabs.tabNames.add("MOODS");
@@ -427,7 +428,7 @@ public class ServerManager{
                         Toast.makeText(context,"Hey! You got new notifications!!",Toast.LENGTH_LONG).show();
                     }
                     else{
-                        Log.e("SM","Here yoooooo");
+                        Log.e("ServerManager","Here yoooooo");
                         Start.switchToTab = 1;
                         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         PendingIntent contentIntent = PendingIntent.getActivity(currActivity, 0, notificationIntent,
