@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.moodoff.R;
-import com.moodoff.helper.AppData;
+import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
@@ -206,7 +206,7 @@ public class Moods extends Fragment {
         }
         ServerManager serverManager = new ServerManager();
         serverManager.setLiveMood(singleTonUser.getUserMobileNumber(),moodType);
-        if(AppData.allMoodPlayList.containsKey(moodType)) {
+        if(AllAppData.allMoodPlayList.containsKey(moodType)) {
             FragmentTransaction transaction = fm.beginTransaction();
             Fragment newFragment=GenericMood.newInstance(moodType, "b");
             // Replace whatever is in the fragment_container view with this fragment,

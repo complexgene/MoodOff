@@ -39,9 +39,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.moodoff.R;
-import com.moodoff.helper.AppData;
-import com.moodoff.helper.ContactsManager;
-import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
@@ -166,7 +164,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         init();
 
         profileOfUser = mParam1;
-        String p=ContactsManager.allReadContacts.get(profileOfUser);
+        String p= AllAppData.allReadContacts.get(profileOfUser);
 
         Toast.makeText(getContext(),"Loading profile of: "+ (p==null?userData.getUserName():p),Toast.LENGTH_SHORT).show();
 
@@ -253,7 +251,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     public static void playAudioStatusSong(String myAudioStatusSongURL){
         // Write the code to play the song and handle the seekbar too
         showSpinner();
-        String songURL = HttpGetPostInterface.serverSongURL+myAudioStatusSongURL.replaceAll("@","/");
+        String songURL = AllAppData.serverSongURL+myAudioStatusSongURL.replaceAll("@","/");
         releaseMediaPlayerObject(mediaPlayer);
         mediaPlayer = new MediaPlayer();
         Log.e("Profile_SongPlayURL",songURL.toString());
@@ -448,7 +446,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         int playButtonId = 0;
         statusChangeTitle.setText("Change Audio Status");
         dialogContainer.removeAllViews();
-        HashMap<String,ArrayList<String>> allSongs = AppData.allMoodPlayList;
+        HashMap<String,ArrayList<String>> allSongs = AllAppData.allMoodPlayList;
         final RadioGroup rg = new RadioGroup(getContext());
 
         for(final String eachMood : allSongs.keySet()) {
@@ -505,7 +503,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             playButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String songURL = HttpGetPostInterface.serverSongURL+eachMood+"/"+eachSong;
+                    String songURL = AllAppData.serverSongURL+eachMood+"/"+eachSong;
                     //Messenger.print(getContext(),songURL);
                     Log.e("ProfilePLAYBTN",songURL);
                     currentPlayOrStopButtonId = v.getId();
@@ -697,7 +695,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     public static String currentMood = "Not Live";
     private void setUserProfileData(final String userPhoneNumber){
         dbRef = FirebaseDatabase.getInstance().getReference().child(profileOfUser);
-        final String serverURL = HttpGetPostInterface.serverURL;
+        final String serverURL = AllAppData.serverURL;
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
             InputStreamReader isr = null;

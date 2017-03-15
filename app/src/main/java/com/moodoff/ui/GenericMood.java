@@ -34,10 +34,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.R;
-import com.moodoff.helper.AppData;
+import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.DBHelper;
-import com.moodoff.helper.HangManWords;
-import com.moodoff.helper.HttpGetPostInterface;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
@@ -80,8 +78,8 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private String serverURL = HttpGetPostInterface.serverURL;
-    private String serverSongURL = HttpGetPostInterface.serverSongURL;
+    private String serverURL = AllAppData.serverURL;
+    private String serverSongURL = AllAppData.serverSongURL;
     View view;
     Bitmap bitmap;
     String imageFilePath;
@@ -403,9 +401,9 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     static String getPictureName(){return "wallimage.jpg";}
     private void checkAndPopulateStory(){
         // Check if toay's story has already been downloaded
-        String todaysStoryFileName = "story"+AppData.getTodaysDate();
+        String todaysStoryFileName = "story"+ AllAppData.getTodaysDate();
         //Messenger.printCenter(getContext(),todaysStroyFileName);
-        File f = new File(AppData.getAppDirectoryPath()+"/"+todaysStoryFileName+".txt");
+        File f = new File(AllAppData.getAppDirectoryPath()+"/"+todaysStoryFileName+".txt");
         if(f.exists()){
             Log.e("GenericMood_STORY","Story file exists..");
             try {
@@ -432,9 +430,9 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     }
     private void checkAndPopulateQuote(){
         // Check if toay's story has already been downloaded
-        String todaysQuoteFileName = "quote"+AppData.getTodaysDate();
+        String todaysQuoteFileName = "quote"+ AllAppData.getTodaysDate();
         //Messenger.printCenter(getContext(),todaysStroyFileName);
-        File f = new File(AppData.getAppDirectoryPath()+"/"+todaysQuoteFileName+".txt");
+        File f = new File(AllAppData.getAppDirectoryPath()+"/"+todaysQuoteFileName+".txt");
         if(f.exists()){
             Log.e("GenericMood_QUOTE","Quote file exists..");
             try {
@@ -556,7 +554,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         int totalScore = singleTonUser.getUserScore();
         final HashSet<Character> lettersPicked = new HashSet<>();
         numberOfChances=5;
-        ArrayList<String> words = HangManWords.getAllWords();
+        ArrayList<String> words = AllAppData.getAllWordsOfHangmanGame;
         int randomNo = new Random().nextInt(words.size());
         final String selectedWord = words.get(randomNo);
         Log.e("GM_SELECTEDWORD",selectedWord);
@@ -802,7 +800,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         }
     }
     private void showPlayList(){
-        ArrayList<String> allSongsOfCurrentMood = AppData.allMoodPlayList.get(currentMood);
+        ArrayList<String> allSongsOfCurrentMood = AllAppData.allMoodPlayList.get(currentMood);
         Log.e("GM_UGETSONGS",allSongsOfCurrentMood.toString());
         PopupMenu popupMenu = new PopupMenu(view.getContext(),playListButton);
         popupMenu.getMenuInflater().inflate(R.menu.genericmoodplaylist_popup,popupMenu.getMenu());
@@ -932,7 +930,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
             if (mp == null) {
                 //for playing new song
                 showSpinner();
-                currentSong = (String) songNameFromList(currentplayList, currentIndex);
+                currentSong = songNameFromList(currentplayList, currentIndex);
                 displaySongName(songName, "Loading...");
                 setSongSource(currentIndex, currentMood);
                 mp.setLooping(false);
@@ -965,7 +963,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 if(!mp.isPlaying()) {
                     isPlayOrPauseFromGM = 1;
                     showPlayPauseButton("pause");
-                    currentSong = (String)songNameFromList(currentplayList,currentIndex);
+                    currentSong = songNameFromList(currentplayList,currentIndex);
                     displaySongName(songName, currentSong.substring(0,currentSong.lastIndexOf(".")));
                     if(mp!=null) {
                         seekBar.setMax(mp.getDuration());
@@ -1066,10 +1064,10 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     public ArrayList<String> readList(final String mood) {
         try{
             final String userMobileNumber = singleTonUser.getUserMobileNumber();
-            final String serverURL = HttpGetPostInterface.serverURL;
+            final String serverURL = AllAppData.serverURL;
 
             // Access the collection of songs that has already been read in Start.java and stored in variable of file PlaylistSongs.java
-            listOfSong = AppData.allMoodPlayList.get(mood);
+            listOfSong = AllAppData.allMoodPlayList.get(mood);
 
             Collections.shuffle(listOfSong);
             return(listOfSong);

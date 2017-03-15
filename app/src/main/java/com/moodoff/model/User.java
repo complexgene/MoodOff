@@ -1,6 +1,6 @@
 package com.moodoff.model;
 
-import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.AllAppData;
 
 /**
  * Created by snaskar on 10/11/2016.
@@ -17,7 +17,7 @@ public class User {
     private static User instance;
 
     private User(){
-        this.userAudioStatusSong = HttpGetPostInterface.serverSongURL+"romantic/HERO.mp3";
+        this.userAudioStatusSong = AllAppData.serverSongURL+"romantic/HERO.mp3";
     } // To maintain singleTon property across app
     public static User getInstance(){
         if(instance == null){

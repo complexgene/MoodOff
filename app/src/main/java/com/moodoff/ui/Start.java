@@ -18,14 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.R;
-import com.moodoff.dao.StartdaoImpl;
-import com.moodoff.helper.AppData;
-import com.moodoff.helper.ContactsManager;
+import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
-import com.moodoff.helper.StoreRetrieveDataImpl;
-import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.model.User;
 import com.moodoff.service.ContentManagementService;
 import com.moodoff.service.StartedTodoService;
@@ -89,27 +85,36 @@ public class Start extends AppCompatActivity {
     }
     private boolean askForPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Log.e("Start_Permission","Asking Permission...");
+            Log.e("Start_Permission","Asking Permission as not yet asked...");
             int contactsPermission = checkSelfPermission(Manifest.permission.READ_CONTACTS);
             int extStoragePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             int cameraPermission = checkSelfPermission(Manifest.permission.CAMERA);
-            if(cameraPermission != PackageManager.PERMISSION_GRANTED && contactsPermission != PackageManager.PERMISSION_GRANTED &&
-                    extStoragePermission != PackageManager.PERMISSION_GRANTED){
-                requestPermissions(new String[]{Manifest.permission.CAMERA,Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+            if(  // Check if any of the permissions not given yet..
+                    cameraPermission != PackageManager.PERMISSION_GRANTED &&
+                    contactsPermission != PackageManager.PERMISSION_GRANTED &&
+                    extStoragePermission != PackageManager.PERMISSION_GRANTED
+              ){ // Ask for the permissions if any of the permissions not given yet..
+                    requestPermissions(new String[] {
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    },  REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
             }
-            else{
-                Log.e("Start_Permission","Already Granted...");
+            else {
+                Log.e("Start_Permission","Already granted all the permissions...");
                 startWork();
             }
             return true;
         }
         else {
-            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-                return true;
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.READ_CONTACTS,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.CAMERA
+                        },      MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+               return true;
             }
         }
         return false;
@@ -117,32 +122,30 @@ public class Start extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
-            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                        grantResults[2] == PackageManager.PERMISSION_GRANTED) {
-                    /*Intent ii = new Intent(this,Start.class);
-                    ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
-                    finish(); // destroy current activity..
-                    startActivity(ii);*/
+            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
+                if  (   grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                        grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                        grantResults[2] == PackageManager.PERMISSION_GRANTED
+                    )
+                {
                     startWork();
                 }
-                else{
-                    Toast.makeText(getApplicationContext(),"Sorry!! The app needs all permissions to go ahead!!",Toast.LENGTH_LONG).show();
-                }
-            case MY_PERMISSIONS_REQUEST_READ_CONTACTS:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                        grantResults[2] == PackageManager.PERMISSION_GRANTED) {
-                    /*Intent ii = new Intent(this,Start.class);
-                    ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // clears all previous activities task
-                    finish(); // destroy current activity..
-                    startActivity(ii);*/
+                else { Messenger.print(this, "[__Sorry!! The app needs all permissions to go ahead!!__]"); }
+                break;
+            }
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                if  (    grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                        grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                        grantResults[2] == PackageManager.PERMISSION_GRANTED
+                    )
+                {
                     startWork();
                 }
-                else{
-                    Toast.makeText(getApplicationContext(),"Sorry!! The app needs all permissions to go ahead!!",Toast.LENGTH_LONG).show();
+                else
+                {
+                    Messenger.print(this, "[__Sorry!! The app needs all permissions to go ahead!!__]");
                 }
+            }
         }
     }
     // Check if user is having network connection
@@ -171,8 +174,8 @@ public class Start extends AppCompatActivity {
                 while (fetchContactsNotComplete) ;
                 fetchNotifications();
                 // Distinguishes who uses app and who don't
-                /*fetchContactsFromServer();
-                fetchAllProfilesData();*/
+                fetchContactsFromServer();
+                fetchAllProfilesData();
                 Log.e("Start_FILEREADS", "DONE..");
                 try {
                     new Handler().postDelayed(new Runnable() {
@@ -209,20 +212,20 @@ public class Start extends AppCompatActivity {
     }
     private void resetAllDataContainers(){
         Log.e("Start_DataSetRESET","Resetting of all data conatiners started..");
-        if(AppData.allMoodPlayList!=null)
-            AppData.allMoodPlayList.clear();
-        if(AppData.allNotifications!=null)
-            AppData.allNotifications.clear();
-        if(AppData.allProfileData!=null)
-            AppData.allProfileData.clear();
-        ContactsManager.countFriendsUsingApp=0;
-        ContactsManager.countFriendsNotUsingApp = 0;
-        if(ContactsManager.allReadContacts!=null)
-            ContactsManager.allReadContacts.clear();
-        if(ContactsManager.friendsWhoUsesApp!=null)
-            ContactsManager.friendsWhoUsesApp.clear();
-        if(ContactsManager.friendsWhoDoesntUseApp!=null)
-            ContactsManager.friendsWhoDoesntUseApp.clear();
+        if(AllAppData.allMoodPlayList!=null)
+            AllAppData.allMoodPlayList.clear();
+        if(AllAppData.allNotifications!=null)
+            AllAppData.allNotifications.clear();
+        if(AllAppData.allProfileData!=null)
+            AllAppData.allProfileData.clear();
+        AllAppData.countFriendsUsingApp=0;
+        AllAppData.countFriendsNotUsingApp = 0;
+        if(AllAppData.allReadContacts!=null)
+            AllAppData.allReadContacts.clear();
+        if(AllAppData.friendsWhoUsesApp!=null)
+            AllAppData.friendsWhoUsesApp.clear();
+        if(AllAppData.friendsWhoDoesntUseApp!=null)
+            AllAppData.friendsWhoDoesntUseApp.clear();
         Log.e("Start_DataSetRESET","Resetting of all data conatiners done..");
     }
     private void fetchMoodsAndPlayListFiles(){
@@ -263,11 +266,11 @@ public class Start extends AppCompatActivity {
                 try {
                     Log.e("Start_Notifications","Start loading notifications from DB");
                     ArrayList<String> allNotificationsFromDB = dbOperations.readNotificationsFromInternalDB();
-                    AppData.allNotifications = allNotificationsFromDB;
-                    AppData.totalNoOfNot = allNotificationsFromDB.size();
+                    AllAppData.allNotifications = allNotificationsFromDB;
+                    AllAppData.totalNoOfNot = allNotificationsFromDB.size();
                     NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
-                    Log.e("Start_Notifications","Fetched " + AppData.totalNoOfNot + " notifications from internal DB..");
-                    serverManager.readNotificationsFromServerAndWriteToInternalDB();
+                    Log.e("Start_Notifications","Fetched " + AllAppData.totalNoOfNot + " notifications from internal DB..");
+                    //serverManager.readNotificationsFromServerAndWriteToInternalDB();
                     notificationFetchNotComplete = false;
                     Log.e("Start_Notifications", "Notification read complete and auto notification read script started..");
                 } catch (Exception ee) {
@@ -282,7 +285,7 @@ public class Start extends AppCompatActivity {
     private void fetchAllProfilesData(){
         try{
             Log.e("Start_ProfileFetch","Start reading profile data for all friends..");
-            AppData.allProfileData = dbOperations.readAllProfilesDataFromInternalDB();
+            AllAppData.allProfileData = dbOperations.readAllProfilesDataFromInternalDB();
             allProfilesDataFetchNotComplete = false;
             serverManager.readAllProfileDataFromServerAndWriteToInternalDB();
             Log.e("Start_ProfileFetch","End reading profile data for all friends..");
@@ -291,9 +294,6 @@ public class Start extends AppCompatActivity {
             Log.e("Start_ProfileFetch_Err",ee.getMessage());
             ee.printStackTrace();
         }
-    }
-    private boolean checkEntryOfPlaylistInInternalTableAndReadIfRequired(String todaysDate){
-        return new StartdaoImpl().checkEntryOfPlaylistInInternalTableAndReadIfRequired(dbOperations, todaysDate, moodsAndSongsFetchNotComplete);
     }
     private void startAutoBots(){
         Log.e("Start_Bots","Bots in work");
@@ -304,7 +304,10 @@ public class Start extends AppCompatActivity {
             }
         },5000);
     }
+    private boolean checkEntryOfPlaylistInInternalTableAndReadIfRequired(String todaysDate){
+        return startedTodoService.checkEntryOfPlaylistInInternalTableAndReadIfRequired(dbOperations, todaysDate, moodsAndSongsFetchNotComplete);
+    }
     public LinkedHashMap<String,String> getContactsTableData(LinkedHashMap<String,String> allContacts, DBHelper dbOpr, User singleTonUserObject){
-        return new StartdaoImpl().getContactsTableData(allContacts, dbOpr, singleTonUserObject);
+        return startedTodoService.getContactsTableData(allContacts, dbOpr, singleTonUserObject);
     }
 }

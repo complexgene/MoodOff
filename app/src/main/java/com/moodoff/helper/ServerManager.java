@@ -27,7 +27,6 @@ import com.google.firebase.storage.StorageReference;
 import com.moodoff.dao.NotificationManagerDaoImpl;
 import com.moodoff.dao.NotificationManagerDaoInterface;
 import com.moodoff.model.User;
-import com.moodoff.service.ContentManagementService;
 import com.moodoff.ui.AllTabs;
 import com.moodoff.ui.ContactsFragment;
 import com.moodoff.ui.NotificationFragment;
@@ -50,19 +49,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import static com.moodoff.helper.HttpGetPostInterface.serverURL;
+import static com.moodoff.helper.AllAppData.serverURL;
 
 /**
- *
  * Created by snaskar on 12/21/2016.
- *
  */
 
 public class ServerManager{
     DBHelper dbOperations;
     Context context;
+    NotificationManagerDaoInterface notificationManagerDao = new NotificationManagerDaoImpl();
     int currentNumberOfNotifications, oldNumberOfNotifications;
-    User userData = User.getInstance();
+    User singleTonUser = User.getInstance();
 
     public ServerManager(){}
 
@@ -81,7 +79,7 @@ public class ServerManager{
                     public void run() {
                         try {
                             Log.e("ServerMan_AppUsers","Start reading Users from Server every 13 secs");
-                            URL url = new URL(serverURL + "/users/all");
+                            URL url = new URL(serverURL + "/allusers.json");
                             Log.e("ServerMan_AppUsers_URL", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
@@ -93,29 +91,29 @@ public class ServerManager{
                                 data = isr.read();
                             }
                             // Reading all the registered Users
-                            ContactsManager.allReadContactsFromDBServer = ParseNotificationData.parseAllContacts(response.toString());
+                            AllAppData.allReadContactsFromDBServer = ParseNotificationData.parseAllContacts(response.toString());
                             ArrayList<String> contactNumbers = new ArrayList<>(),contactsToBeRemoved = new ArrayList<>();
                             //Iterate through each of them
-                            for(String eachContactNo : ContactsManager.allReadContactsFromDBServer){
+                            for(String eachContactNo : AllAppData.allReadContactsFromDBServer){
                                 // If the person is in my contact list and if its not my own number
-                                if(ContactsManager.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(userData.getUserMobileNumber())){
+                                if(AllAppData.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(singleTonUser.getUserMobileNumber())){
                                     contactNumbers.add(eachContactNo);
                                 }
                             }
                             int currentCountOfAppUsersInMyContacts = contactNumbers.size();
-                            if(currentCountOfAppUsersInMyContacts>ContactsManager.countFriendsUsingApp){
+                            if(currentCountOfAppUsersInMyContacts> AllAppData.countFriendsUsingApp){
                                 Log.e("ServerMan_AppUsers","Got some new app users\nUpdate the data containers\n Refresh the contacts display view..");
                                 for(String eachno : contactNumbers){
-                                    if(!ContactsManager.friendsWhoUsesApp.contains(eachno)){
-                                        ContactsManager.friendsWhoUsesApp.add(eachno);
-                                        ContactsManager.friendsWhoDoesntUseApp.remove(eachno);
+                                    if(!AllAppData.friendsWhoUsesApp.contains(eachno)){
+                                        AllAppData.friendsWhoUsesApp.add(eachno);
+                                        AllAppData.friendsWhoDoesntUseApp.remove(eachno);
                                         Log.e("ServerMan_AppUsers_New","Added to users and deleted from non-users");
-                                        Log.e("ServerMan_AppUsers_New",ContactsManager.friendsWhoUsesApp.toString());
+                                        Log.e("ServerMan_AppUsers_New", AllAppData.friendsWhoUsesApp.toString());
                                     }
                                 }
                                 // Update the container counts now as based on counts only the above is triggered
-                                ContactsManager.countFriendsUsingApp = ContactsManager.friendsWhoUsesApp.size();
-                                ContactsManager.countFriendsNotUsingApp = ContactsManager.friendsWhoDoesntUseApp.size();
+                                AllAppData.countFriendsUsingApp = AllAppData.friendsWhoUsesApp.size();
+                                AllAppData.countFriendsNotUsingApp = AllAppData.friendsWhoDoesntUseApp.size();
                                 // change the status to 1 for these new users
                                 DBHelper dbHelper = new DBHelper(context);
                                 dbHelper.changeStatusOfUsersInContactsTable(contactNumbers);
@@ -251,7 +249,7 @@ public class ServerManager{
         // Create a child reference
         StorageReference imagesRef = storageRef.child("allsongdata.txt");
         Log.e("ServerManager",imagesRef.getPath());
-        imagesRef.getBytes(AppData.fileSizeToRead).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+        imagesRef.getBytes(AllAppData.fileSizeToRead).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
                 try {
@@ -280,7 +278,7 @@ public class ServerManager{
                                 break;
                             }
                         }
-                        AppData.allMoodPlayList.put(typeOfMoods.get(i), allSongInAMood);
+                        AllAppData.allMoodPlayList.put(typeOfMoods.get(i), allSongInAMood);
                         Log.e("Start_MoodAndSongs", typeOfMoods.get(i) + " " + allSongInAMood.toString());
                         allSongInAMood = new ArrayList<String>();
                     }
@@ -290,7 +288,7 @@ public class ServerManager{
                     writeDB.execSQL("delete from playlist");
                     Log.e("Start_Playlist", "Deleted all songs from playlist");
 
-                    HashMap<String, ArrayList<String>> allSongs = AppData.allMoodPlayList;
+                    HashMap<String, ArrayList<String>> allSongs = AllAppData.allMoodPlayList;
                     for (String moodType : allSongs.keySet()) {
                         ArrayList<String> songs = allSongs.get(moodType);
                         for (String eachSong : songs) {
@@ -308,7 +306,7 @@ public class ServerManager{
         });
     }
     public void readAllProfileDataFromServerAndWriteToInternalDB()  {
-        ArrayList<String> allContactsOfUser = ContactsManager.friendsWhoUsesApp;
+        ArrayList<String> allContactsOfUser = AllAppData.friendsWhoUsesApp;
         Log.e("ServerManager_FWUA",allContactsOfUser.toString());
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -327,19 +325,17 @@ public class ServerManager{
     }
     /*********-----------NOTIFICATION FUNCTIONS-------------------***********/
     public void readNotificationsFromServerAndWriteToInternalDB(){
-        final String userMobileNumber = userData.getUserMobileNumber();
-                final String serverURL = HttpGetPostInterface.serverURL;
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
+        final String userMobileNumber = singleTonUser.getUserMobileNumber();
+                final String serverURL = AllAppData.serverURL;
+        //        new Handler().postDelayed(new Runnable() {
+        //            @Override
+        //            public void run() {
                 new Thread(new Runnable() {
                     HttpURLConnection urlConnection = null;
                     InputStreamReader isr = null;
                     @Override
                     public void run() {
                         try {
-                            //Log.e("ServerManager_Not","Start reading notifications from Server");
-                            //URL url = new URL(serverURL+ "/notifications/" + userMobileNumber);
                             URL url = new URL(serverURL+ "/allNotifications/" + userMobileNumber + ".json");
                             Log.e("ServerManager_ReadURL", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
@@ -354,23 +350,15 @@ public class ServerManager{
                             Log.e("ServerManager",response.toString());
                             ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
                             currentNumberOfNotifications = allYourNotificationFromServer.size();
-                            oldNumberOfNotifications = AppData.totalNoOfNot;
-                            if((currentNumberOfNotifications>oldNumberOfNotifications)||(AppData.lovedDedicateNewCount>AppData.lovedDedicateOldCount)){
+                            oldNumberOfNotifications = AllAppData.totalNoOfNot;
+                            if((currentNumberOfNotifications>oldNumberOfNotifications)){
                                 dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
                                 dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
-                                AppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
-                                AppData.totalNoOfNot = currentNumberOfNotifications;
-                                if(currentNumberOfNotifications>oldNumberOfNotifications)
-                                    displayAlertNotificationOnTopBarOfPhone(context,(currentNumberOfNotifications-oldNumberOfNotifications));
-                                else
-                                    NotificationFragment.changeDetected = true;
-                                //else
-                                    displayAlertNotificationOnTopBarOfPhone(context,(AppData.lovedDedicateNewCount-AppData.lovedDedicateOldCount));
+                                AllAppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
+                                AllAppData.totalNoOfNot = currentNumberOfNotifications;
+                                NotificationFragment.changeDetected = true;
+                                displayAlertNotificationOnTopBarOfPhone(context,(currentNumberOfNotifications-oldNumberOfNotifications));
                             }
-                            else{
-                                //Log.e("ServerManager_allNot","No new Notifications..");
-                            }
-                            //Log.e("ServerManager_Not_Read", "Notification read complete from server");
                         } catch (Exception ee) {
                             Log.e("ServerManager_Not_Err1", ee.getMessage());
                             ee.printStackTrace();
@@ -378,13 +366,17 @@ public class ServerManager{
                         }
                     }
                 }).start();
-                readNotificationsFromServerAndWriteToInternalDB();
-            }
-        },10000);
+        notificationManagerDao.detectChangeInNotificationNode(singleTonUser.getUserMobileNumber());
+          //  }
+       // },10000);
     }
     public boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type){
-        NotificationManagerDaoInterface notificationManagerDao = new NotificationManagerDaoImpl();
-        return notificationManagerDao.writeSongDedicateToCloudDB(ts, fromUser, toUser, currentMood, currentSong, type);
+        boolean writeToCloudDBIsSuccessful = notificationManagerDao.writeSongDedicateToCloudDB(ts, fromUser, toUser, currentMood, currentSong, type);
+        if(writeToCloudDBIsSuccessful){
+            readNotificationsFromServerAndWriteToInternalDB();
+            return true;
+        }
+        return false;
     }
     /*********-----------NOTIFICATION FUNCTIONS ENDS-------------------***********/
 
@@ -409,8 +401,8 @@ public class ServerManager{
                     .setColor(001500)
                     .setContentTitle("MoodOff")
                     .setWhen(System.currentTimeMillis())
-                    .setTicker(userData.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" new "+notificationTextSingularPlural+"!!")
-                    .setContentText(userData.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" unseen "+notificationTextSingularPlural+"!!");
+                    .setTicker(singleTonUser.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" new "+notificationTextSingularPlural+"!!")
+                    .setContentText(singleTonUser.getUserName().split("_")[0]+ "!! "+currentNumberOfUnseenNotifications+" unseen "+notificationTextSingularPlural+"!!");
 
         final Intent notificationIntent = new Intent(currActivity, AllTabs.class);
 
@@ -516,7 +508,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(serverURL+"/users/update/" + type + "/" + userData.getUserMobileNumber() + "/" + newValue.replaceAll(" ","_"));
+                            URL url = new URL(serverURL+"/users/update/" + type + "/" + singleTonUser.getUserMobileNumber() + "/" + newValue.replaceAll(" ","_"));
                             Log.e("ServerM_ASModf_url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             urlConnection.setDoOutput(true);
@@ -558,7 +550,7 @@ public class ServerManager{
     private String getStoryName(String moodType){return "story"+new Random().nextInt(16)+".txt";}
     private void writeTheStoryIntoFile(String storyTitle, String storyBody){
         try{
-            File f = new File(AppData.getAppDirectoryPath()+"/story"+AppData.getTodaysDate()+".txt");
+            File f = new File(AllAppData.getAppDirectoryPath()+"/story"+ AllAppData.getTodaysDate()+".txt");
             Log.e("ServerManager_READSTORY",f.getAbsolutePath().toString());
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(f));
@@ -579,7 +571,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/allstories/" + getStoryName(currentMood));
+                            URL url = new URL(AllAppData.serverStoriesURL + "/allstories/" + getStoryName(currentMood));
                             Log.e("ServerMan_STORY_Url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
@@ -628,7 +620,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(HttpGetPostInterface.serverStoriesURL + "/allquotes/" + getStoryName(currentMood));
+                            URL url = new URL(AllAppData.serverStoriesURL + "/allquotes/" + getStoryName(currentMood));
                             Log.e("ServerMan_STORY_Url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();

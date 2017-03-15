@@ -29,7 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.R;
-import com.moodoff.helper.ContactsManager;
+import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.Messenger;
 import com.moodoff.model.User;
 
@@ -110,7 +110,7 @@ public class ContactsFragment extends Fragment{
 
         //spinner = (ProgressBar)mainView.findViewById(R.id.refreshSpin);
         //DBInternal dbInternal = new DBInternal();
-        allC = ContactsManager.allReadContacts;
+        allC = AllAppData.allReadContacts;
 
 
         return mainView;
@@ -200,8 +200,8 @@ public class ContactsFragment extends Fragment{
         eachContact.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         eachContact.setLayoutParams(layoutDetails);
-        allC = ContactsManager.allReadContacts;
-        ArrayList<String> friendWhoUsesApp = ContactsManager.friendsWhoUsesApp;
+        allC = AllAppData.allReadContacts;
+        ArrayList<String> friendWhoUsesApp = AllAppData.friendsWhoUsesApp;
         Log.e("CONTCCCCCTSSSS",allC.size()+" "+friendWhoUsesApp.size());
 
         eachContact.addView(getHorizontalLine(1));
@@ -244,7 +244,7 @@ public class ContactsFragment extends Fragment{
                 name.setLayoutParams(layoutDetails);
                 eachContactLayout.addView(name);
 
-                boolean userIsLive = (new Random().nextInt(2)==1)?true:false;
+                boolean userIsLive = (new Random().nextInt(2) == 1);
 
                 LinearLayout moodStatusAndMood = new LinearLayout(getContext());
                 moodStatusAndMood.setGravity(Gravity.CENTER);
@@ -307,7 +307,7 @@ public class ContactsFragment extends Fragment{
         tvv1.setText(" Friends Not Using App ");
         titleNotAppUsers.addView(tvv1);
         eachContact.addView(titleNotAppUsers);
-        for(final String eachCntct:ContactsManager.friendsWhoDoesntUseApp){
+        for(final String eachCntct: AllAppData.friendsWhoDoesntUseApp){
             final String contactName = allC.get(eachCntct);
             if(contactName!=null && !isNotHavingAnyCharacter(contactName)){
                 eachContact.addView(getHorizontalLine(1));

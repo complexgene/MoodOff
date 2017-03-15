@@ -6,8 +6,6 @@ package com.moodoff.ui;
 
 import android.util.Log;
 
-import com.moodoff.helper.AppData;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +41,7 @@ public class ParseNotificationData {
             JSONObject jsonRootObject = new JSONObject(strJson);
             Iterator<String> allTS = jsonRootObject.keys();
             int sizeOfNots = jsonRootObject.length();
+            Log.e("ParseNotifications", "No of notifications from server:"+sizeOfNots);
             while(allTS.hasNext()){
                 String[] allData = jsonRootObject.get(allTS.next()).toString().split("#");
                 String fromUser = allData[0];
@@ -54,7 +53,6 @@ public class ParseNotificationData {
 
                 allNotifications.add(fromUser+" "+toUser+" "+ts+" "+type+" "+songName);
             }
-            AppData.lovedDedicateNewCount = lovedDedicateServerCount;
             Log.e("ParseNotification",allNotifications.toString());
             return allNotifications;
         } catch (JSONException e) {e.printStackTrace();}

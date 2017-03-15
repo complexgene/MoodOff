@@ -20,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 import com.moodoff.R;
-import com.moodoff.helper.AppData;
+import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.model.User;
@@ -200,10 +200,10 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
     @Override
     public void onBackPressed() {
         try {
-            Log.e("AllTabs_onBackPressed", "onBackPressed:"+AppData.noOfTimesBackPressed);
-            if ((AppData.noOfTimesBackPressed == 1&&mViewPager.getCurrentItem()!=1) || (AppData.noOfTimesBackPressed==0 && mViewPager.getCurrentItem() == 1)) {
+            Log.e("AllTabs_onBackPressed", "onBackPressed:"+ AllAppData.noOfTimesBackPressed);
+            if ((AllAppData.noOfTimesBackPressed == 1&&mViewPager.getCurrentItem()!=1) || (AllAppData.noOfTimesBackPressed==0 && mViewPager.getCurrentItem() == 1)) {
                 Messenger.print(getApplicationContext(), "Press Back again to Exit");
-                if(mViewPager.getCurrentItem()==1)AppData.noOfTimesBackPressed=2;
+                if(mViewPager.getCurrentItem()==1) AllAppData.noOfTimesBackPressed=2;
             }
             else{
                 super.onBackPressed();
@@ -217,19 +217,19 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
     protected void onDestroy() {
         Log.e("AllTabs_onDestroy","onDestroy");
         super.onDestroy();
-        /*if(AppData.noOfTimesBackPressed==1 && mViewPager.getCurrentItem()==1){
+        /*if(AllAppData.noOfTimesBackPressed==1 && mViewPager.getCurrentItem()==1){
             new ServerManager().exitLiveMood(User.getPhoneNumber());
             GenericMood.releaseMediaPlayerObject();
             NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
             Profile.releaseMediaPlayerObject(Profile.mediaPlayer);
         }
         else*/
-        if(AppData.noOfTimesBackPressed==2){
+        if(AllAppData.noOfTimesBackPressed==2){
             new ServerManager().exitLiveMood(userData.getUserMobileNumber());
             GenericMood.releaseMediaPlayerObject();
             NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
             Profile.releaseMediaPlayerObject(Profile.mediaPlayer);
-            /*AppData.noOfTimesBackPressed=0;
+            /*AllAppData.noOfTimesBackPressed=0;
             String currentPlayingSong = GenericMood.currentSong;
             if(currentPlayingSong != null) {
                 manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

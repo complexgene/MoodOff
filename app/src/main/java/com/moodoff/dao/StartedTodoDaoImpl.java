@@ -7,13 +7,19 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.moodoff.helper.AllAppData;
+import com.moodoff.helper.DBHelper;
 import com.moodoff.helper.Messenger;
+import com.moodoff.model.User;
 import com.moodoff.service.StartedTodoService;
 import com.moodoff.ui.ContactList;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import static com.moodoff.helper.ContactsManager.allReadContacts;
+import static com.moodoff.helper.AllAppData.allReadContacts;
+import static com.moodoff.helper.LoggerBaba.printMsg;
 
 /**
  * Created by Santanu on 3/11/2017.
@@ -25,7 +31,6 @@ public class StartedTodoDaoImpl extends SQLiteOpenHelper implements StartedTodoD
         super(context, "moodoff" , null, 1);
         this.context = context;
     }
-
     public Context getContext() {
         return context;
     }
@@ -36,12 +41,13 @@ public class StartedTodoDaoImpl extends SQLiteOpenHelper implements StartedTodoD
 
     public void dropAllInternalTables(){
         SQLiteDatabase myDatabaseWritable = getWritableDatabase();
-        myDatabaseWritable.execSQL("drop table if exists allcontacts");
-        myDatabaseWritable.execSQL("drop table if exists worktodo");
-        myDatabaseWritable.execSQL("drop table if exists profiles");
-        myDatabaseWritable.execSQL("drop table if exists allcontacts");
-        myDatabaseWritable.execSQL("drop table if exists rnotifications");
-        Log.e("DBHelper_DELTab","Deleted all tables");
+        printMsg("StartedTodoDaoImpl", "Came to delete all the tables.");
+            myDatabaseWritable.execSQL("drop table if exists allcontacts");
+            myDatabaseWritable.execSQL("drop table if exists worktodo");
+            myDatabaseWritable.execSQL("drop table if exists profiles");
+            myDatabaseWritable.execSQL("drop table if exists allcontacts");
+            myDatabaseWritable.execSQL("drop table if exists rnotifications");
+        printMsg("StartedTodoDaoImpl","Deleted all the tables.");
     }
     public void createTable(String tableName, final LinkedHashMap<String,String> columnNameAndDataType){
         SQLiteDatabase mydatabase = getWritableDatabase();
@@ -115,5 +121,66 @@ public class StartedTodoDaoImpl extends SQLiteOpenHelper implements StartedTodoD
             ee.fillInStackTrace();
         }
         return allContacts;
+    }
+    public LinkedHashMap<String,String> getContactsTableData(LinkedHashMap<String,String> allContacts, DBHelper dbOpr, User singleTonUserObject) {
+        SQLiteDatabase mydatabase = getReadableDatabase();
+        printMsg("StartedTodoDaoImpl", "Came to fetch contacts and distinguish app users and non app users");
+        try {
+            printMsg("StartedTodoDaoImpl", "[Using:" + AllAppData.countFriendsUsingApp + "] [NotUsing:" + AllAppData.countFriendsNotUsingApp + "]");
+            int countOfNonAppUsers = 0, countOfAppUsers = 0;
+            Cursor resultSet = mydatabase.rawQuery("Select * from allcontacts order by name", null);
+            resultSet.moveToFirst();
+            while (!resultSet.isAfterLast()) {
+                String phone_no = resultSet.getString(0);
+                String name = resultSet.getString(1).replaceAll("'", "\'");
+                int appUsingStatus = resultSet.getInt(2);
+                if (appUsingStatus == 1) {
+                    countOfAppUsers++;
+                    if (!phone_no.equals(singleTonUserObject.getUserMobileNumber()))
+                        AllAppData.friendsWhoUsesApp.add(phone_no);
+                } else {
+                    countOfNonAppUsers++;
+                    AllAppData.friendsWhoDoesntUseApp.add(phone_no);
+                }
+                AllAppData.allReadContacts.put(phone_no, name);
+                resultSet.moveToNext();
+            }
+            allContacts = AllAppData.allReadContacts;
+            AllAppData.countFriendsUsingApp = countOfAppUsers;
+            AllAppData.countFriendsNotUsingApp = countOfNonAppUsers;
+            printMsg("StartedTodoDaoImpl", "[Using:" + AllAppData.countFriendsUsingApp + "] [NotUsing:" + AllAppData.countFriendsNotUsingApp + "]");
+            mydatabase.close();
+        } catch (Exception ee) {
+            Log.e("Start_AppUsersErr", ee.getMessage());
+            ee.fillInStackTrace();
+        }
+        mydatabase.close();
+        return allContacts;
+    }
+    public boolean checkEntryOfPlaylistInInternalTableAndReadIfRequired(DBHelper dbOpr, String todaysDate, boolean moodsAndSongsFetchNotComplete) {
+        SQLiteDatabase readData = dbOpr.getReadableDatabase();
+        Cursor resultSet = readData.rawQuery("Select * from playlist where date='" + todaysDate + "'", null);
+        // If today's playlist file is not downloaded yet
+        if (resultSet.getCount() == 0) return false;
+        // File downloaded
+        HashMap<String, ArrayList<String>> allSongs = new HashMap<>();
+        resultSet.moveToFirst();
+        Log.e("StartedTodoDaoImpl", resultSet.getCount() + " no of rows..");
+        while (!resultSet.isAfterLast()) {
+            String moodType = resultSet.getString(1);
+            String songName = resultSet.getString(2);
+            String artistName = resultSet.getString(3);
+            String movieOrAlbumname = resultSet.getString(4);
+            if (allSongs.containsKey(moodType)) {
+                allSongs.get(moodType).add(songName);
+            } else {
+                ArrayList<String> songs = new ArrayList<>();
+                songs.add(songName);
+                allSongs.put(moodType, songs);
+            }
+            resultSet.moveToNext();
+        }
+        AllAppData.allMoodPlayList = allSongs;
+        return true;
     }
 }

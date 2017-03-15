@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moodoff.R;
-import com.moodoff.helper.AppData;
+import com.moodoff.helper.AllAppData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,7 +94,7 @@ public class SelectsongFragment extends Fragment {
     static int playButtonId = 0;
     private void retrieveAndShowSongs(){
         LinearLayout allSongsContainer = (LinearLayout)view.findViewById(R.id.eachRingToneSong);
-        HashMap<String,ArrayList<String>> allSongs = AppData.allMoodPlayList;
+        HashMap<String,ArrayList<String>> allSongs = AllAppData.allMoodPlayList;
         for(final String eachMood : allSongs.keySet()){
             TextView moodType = new TextView(getContext());
             moodType.setText(eachMood);

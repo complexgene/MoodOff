@@ -5,5 +5,6 @@ package com.moodoff.dao;
  */
 
 public interface NotificationManagerDaoInterface {
+    void detectChangeInNotificationNode(String userMobileNumber);
     boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type);
 }

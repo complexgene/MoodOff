@@ -7,15 +7,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
 import android.util.Log;
 
-import com.moodoff.ui.ContactList;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-
-import static com.moodoff.helper.ContactsManager.allReadContacts;
 
 /**
  * Created by snaskar on 12/15/2016.
@@ -178,7 +173,7 @@ public class DBHelper extends SQLiteOpenHelper {
             //Log.e("DBHelper_RDNot",data);
             resultSet.moveToNext();
         }
-        AppData.lovedDedicateOldCount = countLoveType;
+        AllAppData.lovedDedicateOldCount = countLoveType;
         Log.e("DBHelper", "Reading of the notifications from the Internal DB -> DONE");
         return allNotifications;
     }

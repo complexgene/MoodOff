@@ -31,9 +31,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.moodoff.R;
-import com.moodoff.helper.AppData;
-import com.moodoff.helper.ContactsManager;
-import com.moodoff.helper.HttpGetPostInterface;
+import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
@@ -79,35 +77,27 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         fileOpr.updateValueFor("numberOfOldNotifications","0");
         fileOpr.endWriteTransaction();
     }
-
     @Override
     public void onPageScrollStateChanged(int state) {
 
     }
-
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
     }
-
     public static int totalNumberOfNotifications = 0;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
-    private String serverURL = HttpGetPostInterface.serverURL,serverSongURL = HttpGetPostInterface.serverSongURL;
-
+    private String serverURL = AllAppData.serverURL,serverSongURL = AllAppData.serverSongURL;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
-
     public NotificationFragment() {
         // Required empty public constructor
     }
-
     public static NotificationFragment newInstance(String param1, String param2) {
         NotificationFragment fragment = new NotificationFragment();
         Bundle args = new Bundle();
@@ -136,7 +126,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     ArrayList<String> allNotifications;
     int idOfTheLastPlayButtonClicked=-1;
     boolean isPlaying = false;
-    static HashMap<String,String> allReadContacts = ContactsManager.allReadContacts;
+    static HashMap<String,String> allReadContacts = AllAppData.allReadContacts;
     LayoutInflater mainInflater;
     ViewGroup mainContainer;
     @Override
@@ -151,7 +141,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
         try {
             while(Start.notificationFetchNotComplete);
-            allNotifications = AppData.allNotifications;
+            allNotifications = AllAppData.allNotifications;
             oldCountOfNotifications = allNotifications.size();
             Log.e("NotificationFrag_SIZE",allNotifications.size()+"");
             designNotPanel(view);
@@ -221,7 +211,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     User userData = User.getInstance();
 
     public void designNotPanel(final View view){
-        allReadContacts = ContactsManager.allReadContacts;
+        allReadContacts = AllAppData.allReadContacts;
         Log.e("Not_Design","called..:"+currentPlayButtonId);
         changeDetected = false;
         mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
@@ -231,7 +221,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         LinearLayout ll = new LinearLayout(view.getContext());
         ll.setOrientation(LinearLayout.VERTICAL);
-        allNotifications = AppData.allNotifications;
+        allNotifications = AllAppData.allNotifications;
         int difference = allNotifications.size() - oldCountOfNotifications;
         Log.e("NotFrag","Updating notification view:"+difference+" "+allReadContacts.size());
         for (i = 0; i < allNotifications.size(); i++) {
@@ -239,7 +229,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             String[] componentsInNotification = allNotifications.get(i).split(" ");
             final String fromUserNumber = componentsInNotification[0];
             String fromUserName = allReadContacts.get(fromUserNumber);
-            Log.e("NotFrag",fromUserName+" is this");
             if(fromUserNumber.equals(userData.getUserMobileNumber())){
                     fromUserName = "You";
             }

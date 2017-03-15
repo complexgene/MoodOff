@@ -1,18 +1,12 @@
 package com.moodoff.dao;
 
-import android.util.Log;
-import android.widget.Toast;
-
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.moodoff.helper.LoggerBaba;
-import com.moodoff.helper.Messenger;
-import com.moodoff.model.User;
+import com.google.firebase.database.ValueEventListener;
+import com.moodoff.helper.ServerManager;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import static com.moodoff.helper.HttpGetPostInterface.serverURL;
 import static com.moodoff.helper.LoggerBaba.printMsg;
 
 /**
@@ -26,14 +20,28 @@ public class NotificationManagerDaoImpl implements NotificationManagerDaoInterfa
     private DatabaseReference dbRef;
     //--------------------------------------------------------------------------------------------
 
+    public void detectChangeInNotificationNode(String userMobileNumber){
+        mRootRef.child(userMobileNumber).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                printMsg("NotificationManagerDaoImpl", "Some new notifications appeared in cloud..So calling SM.readNotifications..()");
+                ServerManager sm = new ServerManager();
+                sm.readNotificationsFromServerAndWriteToInternalDB();
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
     public boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type) {
         try{
             printMsg("NotificationManagerDaoImpl", "Came to create nodes for dedicator and dedicate :P in cloud DB..");
             // New dedicate entry in current user Node
-            dbRef = mRootRef.child(fromUser).child(ts);
+            dbRef = mRootRef.child(fromUser).child(toUser+"@"+ts);
             dbRef.setValue(fromUser+"#"+toUser+"#"+(currentMood+"@"+currentSong)+"#"+type+"#"+ts);
             // New dedicate entry in dedicated person's Node
-            dbRef = mRootRef.child(toUser).child(ts);
+            dbRef = mRootRef.child(toUser).child(fromUser+"@"+ts);
             dbRef.setValue(fromUser+"#"+toUser+"#"+(currentMood+"@"+currentSong)+"#"+type+"#"+ts);
             printMsg("NotificationManagerDaoImpl", "Nodes for dedicator and dedicate :P in cloud DB successful..");
             return true;
