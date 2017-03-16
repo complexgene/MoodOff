@@ -52,4 +52,14 @@ public class AllAppData {
     public static String getAppDirectoryPath(){
         return Environment.getExternalStorageDirectory().getAbsoluteFile().toString()+"/moodoff";
     }
+
+    //UserObjects Constants
+    public static String userName = "userName";
+    public static String userMobileNumber = "userMobileNumber";
+    public static String userDateOfBirth = "userDateOfBirth";
+    public static String userTextStatus = "userTextStatus";
+    public static String userAudioStatus = "userAudioStatusSong";
+    public static String userTextStatusLoveCount = "userTextStatusLoveCount";
+    public static String userAudioStatusLoveCount = "userAudioStatusLoveCount";
+
 }

@@ -6,6 +6,7 @@ package com.moodoff.ui;
 
 import android.util.Log;
 
+import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.LoggerBaba;
 
 import org.json.JSONArray;
@@ -20,7 +21,7 @@ import static com.moodoff.helper.LoggerBaba.printMsg;
 
 public class ParseNotificationData {
 
-    public static ArrayList<String> parseAllContacts(String contactsInJson){
+    public static ArrayList<String> getAllAppUsers(String contactsInJson){
         ArrayList<String> allContactNumbersInServer = new ArrayList<>();
         try {
             JSONObject jsonRootObject = new JSONObject(contactsInJson);
@@ -69,19 +70,21 @@ public class ParseNotificationData {
 
         try {
             JSONObject jsonRootObject = new JSONObject(strJson);
-            String name = jsonRootObject.optString("userName").toString();
-            String phoneNumber = jsonRootObject.optString("userPhoneNo").toString();
-            String dob = jsonRootObject.optString("userDob");
-            String textStatus = jsonRootObject.optString("userTextStatus").toString();
-            String audioStatusURL = jsonRootObject.optString("userAudioStatus").toString();
+            String userName = jsonRootObject.optString(AllAppData.userName).toString();
+            String userMobileNumber = jsonRootObject.optString(AllAppData.userMobileNumber).toString();
+            String userDateOfBirth = jsonRootObject.optString(AllAppData.userDateOfBirth);
+            String userTextStatus = jsonRootObject.optString(AllAppData.userTextStatus).toString();
+            String userAudioStatus = jsonRootObject.optString(AllAppData.userAudioStatus).toString();
 
-            allProfileData.put("userName",name);
-            allProfileData.put("userPhoneNo",phoneNumber);
-            allProfileData.put("userDob",dob);
-            allProfileData.put("userTextStatus",textStatus);
-            allProfileData.put("userAudioStatus",audioStatusURL);
-            allProfileData.put("userTextStatusLoveCount","0");
-            allProfileData.put("userAudioStatusLoveCount","0");
+            allProfileData.put(AllAppData.userName,userName);
+            allProfileData.put(AllAppData.userMobileNumber,userMobileNumber);
+            allProfileData.put(AllAppData.userDateOfBirth,userDateOfBirth);
+            allProfileData.put(AllAppData.userTextStatus,userTextStatus);
+            allProfileData.put(AllAppData.userAudioStatus,userAudioStatus);
+            allProfileData.put(AllAppData.userTextStatusLoveCount,"0");
+            allProfileData.put(AllAppData.userAudioStatusLoveCount,"0");
+
+            printMsg("ParseNotificationData", "Opened User:" + allProfileData.toString());
 
             return allProfileData;
 

@@ -212,14 +212,14 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void changeStatusOfUsersInContactsTable(ArrayList<String> allUsers){
-        Log.e("DBHelper_StatusChngQury","Initiating status change of few users..");
+        Log.e("DBHelper_StatusChngQury","Initiating status change of STATUS = 1 for new app users in internal DB..");
         SQLiteDatabase writer = getWritableDatabase();
         for(String phNo : allUsers){
             String updateQuery = "update allcontacts set status=1 where phone_no='"+phNo+"'";
             Log.e("DBHelper_StatusChngQury",updateQuery);
             writer.execSQL(updateQuery);
         }
-        Log.e("DBHelper_StatusChngQury","Status change of few users done..");
+        Log.e("DBHelper_StatusChngQury","Status change of new app users in internal DB done..");
     }
 
 

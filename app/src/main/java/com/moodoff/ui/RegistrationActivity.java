@@ -127,7 +127,7 @@ public class RegistrationActivity extends AppCompatActivity {
             userMobileNumber = et_userMobileNumber.getText().toString();
             userBirthday = et_userBirthday.getText().toString();
             userTextStatus = et_userTextStatus.getText().toString();
-            userAudioStatus = "romantic@HERO.com";
+            userAudioStatus = "romantic@HERO.mp3";
             userScore = 0;
             userOldNotificationCount = 0;
             // Call for validation of the fetched data

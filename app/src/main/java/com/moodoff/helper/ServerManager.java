@@ -79,7 +79,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            printMsg("ServerManager","Start reading Users from Server every 13 secs");
+                            printMsg("ServerManager","Start reading Users from Server every 10 secs");
                             URL url = new URL(serverURL + "/userlist.json");
                             printMsg("ServerManager", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
@@ -93,24 +93,24 @@ public class ServerManager{
                             }
                             printMsg("ServerManager", "Response: "+response);
                             // Reading all the registered Users
-                            AllAppData.allReadContactsFromDBServer = ParseNotificationData.parseAllContacts(response.toString());
-                            ArrayList<String> contactNumbers = new ArrayList<>();
-                            //Iterate through each of them
+                            AllAppData.allReadContactsFromDBServer = ParseNotificationData.getAllAppUsers(response.toString());
+                            ArrayList<String> allAppUsersInMyContact = new ArrayList<>();
+                            //Iterate through each of the app users got from the cloud DB and check if they belong in my contacts.
                             for(String eachContactNo : AllAppData.allReadContactsFromDBServer){
                                 // If the person is in my contact list and if its not my own number
                                 if(AllAppData.allReadContacts.containsKey(eachContactNo) && !eachContactNo.equals(singleTonUser.getUserMobileNumber())){
-                                    contactNumbers.add(eachContactNo);
+                                    allAppUsersInMyContact.add(eachContactNo);
                                 }
                             }
-                            int currentCountOfAppUsersInMyContacts = contactNumbers.size();
-                            if(currentCountOfAppUsersInMyContacts> AllAppData.countFriendsUsingApp){
-                                printMsg("ServerManager","Got some new app users\nUpdate the data containers\n Refresh the contacts display view..");
-                                for(String eachno : contactNumbers){
+                            int currentCountOfAppUsersInMyContacts = allAppUsersInMyContact.size();
+                            if(currentCountOfAppUsersInMyContacts > AllAppData.countFriendsUsingApp){
+                                printMsg("ServerManager","Got some new app users.\nWill update the data containers.\n Refresh the contacts display view..");
+                                for(String eachno : allAppUsersInMyContact){
                                     if(!AllAppData.friendsWhoUsesApp.contains(eachno)){
                                         AllAppData.friendsWhoUsesApp.add(eachno);
                                         AllAppData.friendsWhoDoesntUseApp.remove(eachno);
-                                        printMsg("ServerManager","Added to users and deleted from non-users");
-                                        printMsg("ServerManager", AllAppData.friendsWhoUsesApp.toString());
+                                        printMsg("ServerManager","Added to App users and deleted from non-app users");
+                                        printMsg("ServerManager", "Incase you want to see the list.\n" + AllAppData.friendsWhoUsesApp.toString());
                                     }
                                 }
                                 // Update the container counts now as based on counts only the above is triggered
@@ -118,7 +118,7 @@ public class ServerManager{
                                 AllAppData.countFriendsNotUsingApp = AllAppData.friendsWhoDoesntUseApp.size();
                                 // change the status to 1 for these new users
                                 DBHelper dbHelper = new DBHelper(context);
-                                dbHelper.changeStatusOfUsersInContactsTable(contactNumbers);
+                                dbHelper.changeStatusOfUsersInContactsTable(allAppUsersInMyContact);
                                 // update the contactsFragment list
                                 ContactsFragment.updateViewCalled = true;
                                // Notify users that some new friends joined
@@ -327,17 +327,18 @@ public class ServerManager{
     /*********-----------NOTIFICATION FUNCTIONS-------------------***********/
     public void readNotificationsFromServerAndWriteToInternalDB(){
         final String userMobileNumber = singleTonUser.getUserMobileNumber();
-                final String serverURL = AllAppData.serverURL;
-        //        new Handler().postDelayed(new Runnable() {
-        //            @Override
-        //            public void run() {
+        final String serverURL = AllAppData.serverURL;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
                 new Thread(new Runnable() {
                     HttpURLConnection urlConnection = null;
                     InputStreamReader isr = null;
+
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(serverURL+ "/allNotifications/" + userMobileNumber + ".json");
+                            URL url = new URL(serverURL + "/allNotifications/" + userMobileNumber + ".json");
                             Log.e("ServerManager_ReadURL", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
@@ -348,17 +349,18 @@ public class ServerManager{
                                 response.append((char) data);
                                 data = isr.read();
                             }
-                            Log.e("ServerManager",response.toString());
+                            Log.e("ServerManager", response.toString());
                             ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
                             currentNumberOfNotifications = allYourNotificationFromServer.size();
                             oldNumberOfNotifications = AllAppData.totalNoOfNot;
-                            if((currentNumberOfNotifications>oldNumberOfNotifications)){
+                            if ((currentNumberOfNotifications > oldNumberOfNotifications)) {
                                 dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
                                 dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
                                 AllAppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
+                                printMsg("ServerManager", "DONEDONE");
                                 AllAppData.totalNoOfNot = currentNumberOfNotifications;
                                 NotificationFragment.changeDetected = true;
-                                displayAlertNotificationOnTopBarOfPhone(context,(currentNumberOfNotifications-oldNumberOfNotifications));
+                                displayAlertNotificationOnTopBarOfPhone(context, (currentNumberOfNotifications - oldNumberOfNotifications));
                             }
                         } catch (Exception ee) {
                             Log.e("ServerManager_Not_Err1", ee.getMessage());
@@ -367,9 +369,9 @@ public class ServerManager{
                         }
                     }
                 }).start();
-        notificationManagerDao.detectChangeInNotificationNode(singleTonUser.getUserMobileNumber());
-          //  }
-       // },10000);
+                readNotificationsFromServerAndWriteToInternalDB();
+            }
+        },10000);
     }
     public boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type){
         boolean writeToCloudDBIsSuccessful = notificationManagerDao.writeSongDedicateToCloudDB(ts, fromUser, toUser, currentMood, currentSong, type);
@@ -660,7 +662,7 @@ public class ServerManager{
             }
         },0);
     }
-    public void loveTextStatus(final String user, final TextView txtViewToChange, final Activity curActivity){
+    public void loveTextStatus(final String userMobileNumber, final TextView txtViewToChange, final Activity curActivity){
     /*
         new Handler().postDelayed(new Runnable() {
             @Override

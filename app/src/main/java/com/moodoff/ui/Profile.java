@@ -55,6 +55,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.moodoff.helper.LoggerBaba.printMsg;
+
 public class Profile extends Fragment implements AudioManager.OnAudioFocusChangeListener{
 
     private AudioManager mAudioManager;
@@ -166,7 +168,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         profileOfUser = mParam1;
         String p= AllAppData.allReadContacts.get(profileOfUser);
 
-        Toast.makeText(getContext(),"Loading profile of: "+ (p==null?userData.getUserName():p),Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(),"Loading profile of: "+ (p==null?userData.getUserName():p),Toast.LENGTH_SHORT).show();
 
         // Check if its someone else's profile, then remove the edit button
         if(!profileOfUser.equals(userData.getUserMobileNumber())){
@@ -343,9 +345,9 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         Log.e("GenericMood_MPissue",error);
     }
 
-    private void loveTheTextStatus(String user, TextView txtViewToChange, Activity curActivity){
+    private void loveTheTextStatus(String userMobileNumber, TextView txtViewToChange, Activity curActivity){
         ServerManager serverManager = new ServerManager();
-        serverManager.loveTextStatus(user, txtViewToChange, curActivity);
+        serverManager.loveTextStatus(userMobileNumber, txtViewToChange, curActivity);
     }
 
     private void editStatus(int textOrAudioStatus){
@@ -691,10 +693,9 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
 
     public static boolean profileDetailsNotRetrievedYet = true;
     HashMap<String,String> profileDataParsed = new HashMap<>();
-    DatabaseReference dbRef;
+
     public static String currentMood = "Not Live";
     private void setUserProfileData(final String userPhoneNumber){
-        dbRef = FirebaseDatabase.getInstance().getReference().child(profileOfUser);
         final String serverURL = AllAppData.serverURL;
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null;
@@ -702,7 +703,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             @Override
             public void run() {
                 try {
-                    URL url = new URL(serverURL + "/users/" + userPhoneNumber);
+                    URL url = new URL(serverURL + "/allusers/" + userPhoneNumber +".json");
                     Log.e("Profile_ContactURL", url.toString());
                     urlConnection = (HttpURLConnection) url.openConnection();
                     InputStream is = urlConnection.getInputStream();
@@ -713,12 +714,14 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                         response.append((char) data);
                         data = isr.read();
                     }
-                    Log.e("Profile_Data", response.toString());
+                    printMsg("Profile", "Got from server:" + response.toString());
                     profileDataParsed = ParseNotificationData.parseAndGetProfileData(response.toString());
-                    Log.e("Profile_parsedHM",profileDataParsed.get("name")+" "+profileDataParsed.get("genderpic"));
-                    ServerManager serverManager = new ServerManager();
+
+                    /*ServerManager serverManager = new ServerManager();
                     serverManager.getLiveMood(userPhoneNumber);
+
                     while(profileDetailsNotRetrievedYet);
+*/
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -737,7 +740,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         return (genderType.equals("0"))?R.drawable.man:R.drawable.woman;
     }
 
-    @Override
+    /*@Override
     public void onStart() {
         super.onStart();
         dbRef.addValueEventListener(new ValueEventListener() {
@@ -754,42 +757,21 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
 
             }
         });
-    }
+    }*/
+
     private void showProfileData(){
-        /*String email = profileDataParsed.get("email");
-        String dob = profileDataParsed.get("dob");
-        email = dbRef.child("email").toString();
-        dob = dbRef.child("dob").toString();
-*/
-        //myEmail.setText(email);
-        //myDob.setText(dob);
-        //profileImage.setImageResource(getPicFor(profileDataParsed.get("genderpic")));
-        myTextStatus.setText(profileDataParsed.get("textStatus").replaceAll("_"," "));
-        myAudioStatusSong=profileDataParsed.get("audioStatusURL");
-        //Messenger.print(getContext(),myAudioStatusSong);
-        textStatusLoveCount.setText(profileDataParsed.get("textStatusLoveCount")+" people loved the status");
-        audioStatusLoveCount.setText(profileDataParsed.get("audioStatusLoveCount")+" people loved the status");
-        Log.e("Profile____","gonna check live..."+currentMood);
-        String mood = currentMood.split("_")[0].trim();
-        boolean userIsNotLive = currentMood.split("_")[1].equals("0");
-        Log.e("Profile__",currentMood);
-        String userStatusText="";int userStatusColor=0;
-       if(userIsNotLive){
-           userStatusText = "[Offline]:";
-           userStatusColor = Color.rgb(255,0,0);
-           lastMoodListened.setText("Last Mood Listened..");
-       }
-        else{
-           userStatusText = "[Live]:";
-           userStatusColor = Color.rgb(255,0,255);
-           lastMoodListened.setText("Listening To Mood..");
-       }
-        txtViewUserStatus.setTextColor(userStatusColor);
-        txtViewUserStatus.setText(userStatusText);
-        btnCurrentMoodPic.setBackgroundResource(getResImage(mood));
-        txtViewCurrentMood.setText(Character.toUpperCase(mood.charAt(0))+mood.substring(1));
-        profileDetailsNotRetrievedYet = true;
+        populateBasicDetails();
+        //populateLiveDetails();
     }
+    private void populateBasicDetails(){
+        myName.setText(profileDataParsed.get(AllAppData.userName));
+        myPhNo.setText(profileDataParsed.get(AllAppData.userMobileNumber));
+        myDob.setText(profileDataParsed.get(AllAppData.userDateOfBirth));
+        myDob.setVisibility(View.GONE);
+        myTextStatus.setText(profileDataParsed.get(AllAppData.userTextStatus));
+        myAudioStatusSong = profileDataParsed.get(AllAppData.userAudioStatus);
+    }
+
     private int getResImage(String currentMood){
         switch(currentMood){
             case "crazy":{return R.drawable.mood_crazy;}
@@ -805,7 +787,6 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         }
         return 0;
     }
-
     private void getAndSetScreenSizes(){
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -813,7 +794,6 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         screenWidth = size.x;
         screenHeight = size.y;
     }
-
     public void setWidthOfButtonAcrossScreen(){
         /*okButtonWidth = (ImageButton)dialogView.findViewById(R.id.songselectok);
         cancelButtonWidth = (ImageButton)dialogView.findViewById(R.id.songselectcancel);

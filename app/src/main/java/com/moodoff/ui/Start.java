@@ -170,6 +170,7 @@ public class Start extends AppCompatActivity {
                 Log.e("Start_greetUser", "Greet User done");
                 notificationFetchNotComplete = false;
                 allProfilesDataFetchNotComplete = false;
+                // Get and separate all the contacts based on who uses app and who doesn't uses from the internal table.
                 fetchContacts();
                 while (fetchContactsNotComplete) ;
                 fetchNotifications();

@@ -20,7 +20,7 @@ public class NotificationManagerDaoImpl implements NotificationManagerDaoInterfa
     private DatabaseReference dbRef;
     //--------------------------------------------------------------------------------------------
 
-    public void detectChangeInNotificationNode(String userMobileNumber){
+    /*public void detectChangeInNotificationNode(String userMobileNumber){
         mRootRef.child(userMobileNumber).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -33,7 +33,8 @@ public class NotificationManagerDaoImpl implements NotificationManagerDaoInterfa
 
             }
         });
-    }
+    }*/
+
     public boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type) {
         try{
             printMsg("NotificationManagerDaoImpl", "Came to create nodes for dedicator and dedicate :P in cloud DB..");

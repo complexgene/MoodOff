@@ -118,7 +118,7 @@ public class ContactsFragment extends Fragment{
 
     public static boolean updateViewCalled = false;
     private void monitorViewChange(){
-        Log.e("Contacts_viewChange","Monitor is running to detect a view change");
+        Log.e("Contacts_viewChange","Monitor is running to add or delete for current app users");
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {

@@ -239,10 +239,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             final String date = componentsInNotification[2];
             final String time = componentsInNotification[3];
             final String type = componentsInNotification[4];
-            Log.e("Not_fragTYPEEEMAN",type);
             final String toUserNumber = componentsInNotification[1];
             String toUserName = allReadContacts.get(toUserNumber);
-            Log.e("NotFrag",toUserName+" is this2");
 
             if(toUserNumber.equals(userData.getUserMobileNumber())){
                     toUserName = "You";
@@ -253,8 +251,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             }
 
             final String songName = componentsInNotification[5];
-
-            Log.e("NOTEFRAGGG",fromUserName+" "+toUserName+" yaaaa ");
 
             // Each notification layout
             boolean isCurrentUser = fromUserName.trim().equals("You");
