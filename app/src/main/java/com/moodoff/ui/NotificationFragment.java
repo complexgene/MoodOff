@@ -48,9 +48,14 @@ import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.User;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.moodoff.helper.AllAppData.serverURL;
 import static com.moodoff.helper.LoggerBaba.printMsg;
 
 public class NotificationFragment extends Fragment implements ViewPager.OnPageChangeListener,AudioManager.OnAudioFocusChangeListener{
@@ -148,7 +153,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
         init();
 
-        fetchNotifications();
+        //fetchNotifications();
 
         monitorLiveNotifications();
 
@@ -513,8 +518,67 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         dbRefForallNotificationsNode.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    printMsg("NotificationFragment", "New notifications added, so lets invoke the READ from Cloud..");
-                    serverManager.readNotificationsFromServerAndWriteToInternalDB();
+                    printMsg("NotificationFragment", "New notifications added, so lets invoke the READ from Cloud.."+Thread.currentThread().getName());
+                    //serverManager.readNotificationsFromServerAndWriteToInternalDB();
+                    Log.e("NotificationFragment","fetchNotifications(): Start loading notifications from Internal DB");
+                    ArrayList<String> allNotificationsFromDB = dbOperations.readNotificationsFromInternalDB();
+                    AllAppData.allNotifications = allNotificationsFromDB;
+                    AllAppData.totalNoOfNot = allNotificationsFromDB.size();
+                    NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
+                    Log.e("NotificationFragment","fetchNotifications(): Fetched " + AllAppData.totalNoOfNot + " notifications from internal DB..");
+                    designNotPanel(view);
+                    new Thread(new Runnable() {
+                        HttpURLConnection urlConnection = null;
+                        InputStreamReader isr = null;
+
+                        @Override
+                        public void run() {
+                            try {
+                                URL url = new URL(serverURL + "/allNotifications/" + singleTonUser.getUserMobileNumber() + ".json");
+                                Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB(): " + url.toString());
+                                urlConnection = (HttpURLConnection) url.openConnection();
+                                InputStream is = urlConnection.getInputStream();
+                                isr = new InputStreamReader(is);
+                                int data = isr.read();
+                                final StringBuilder response = new StringBuilder("");
+                                while (data != -1) {
+                                    response.append((char) data);
+                                    data = isr.read();
+                                }
+                                Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB():" + response.toString());
+                                ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
+
+                                int currentNumberOfNotifications = allYourNotificationFromServer.size();
+                                int oldNumberOfNotifications = AllAppData.totalNoOfNot;
+                                //------TRUE : We got some new notifications-----------------------------------------//
+                                if ((currentNumberOfNotifications > oldNumberOfNotifications)) {
+                                    //-------Delete all notifications from Internal DB----------------------------//
+                                    printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: delete all notifications from Internal DB");
+                                    dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
+                                    //-------Write all the read notifications from cloud to Internal DB---------------//
+                                    printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: write all notifications got from cloud to Internal DB");
+                                    dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
+                                    //-----------------Update the variables that holds info about notifications---------------//
+                                    printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: read all notifications from Internal DB");
+                                    AllAppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
+                                    printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: read all notifications from Internal DB is DONE");
+                                    AllAppData.totalNoOfNot = currentNumberOfNotifications;
+                                    //---------------------Display notifications to User for new Notifications--------------------//
+                                    serverManager.displayAlertNotificationOnTopBarOfPhone(getContext(), (currentNumberOfNotifications - oldNumberOfNotifications));
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            fetchNotifications();
+                                        }
+                                    });
+                                }
+                            } catch (Exception ee) {
+                                Log.e("ServerManager_Not_Err1", "readNotificationsFromServerAndWriteToInternalDB():" + ee.getMessage() + ee.fillInStackTrace().toString());
+                                ee.printStackTrace();
+                                ee.fillInStackTrace();
+                            }
+                        }
+                    }).start();
                 }
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {

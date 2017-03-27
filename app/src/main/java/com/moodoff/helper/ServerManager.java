@@ -292,7 +292,7 @@ public class ServerManager{
 
     //---------------------------NOTIFICATION FUNCTIONS ENDS--------------------------------------------------------/
 
-    private void displayAlertNotificationOnTopBarOfPhone(final Context context, final int diff){
+    public void displayAlertNotificationOnTopBarOfPhone(final Context context, final int diff){
         // Getting number of last unseen notifications from file and add the current unseen to get total unseen
         printMsg("ServerManager","displayAlertNotificationOnTopBarOfPhone: came for alert display on top bar of phone");
         StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("UserData.txt");
