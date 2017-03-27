@@ -28,74 +28,46 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.moodoff.R;
 import com.moodoff.helper.AllAppData;
+import com.moodoff.helper.LoggerBaba;
 import com.moodoff.helper.Messenger;
 import com.moodoff.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Random;
 
 import static android.content.Context.MODE_PRIVATE;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ContactsFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ContactsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ContactsFragment extends Fragment{
+    // All Variables declaration -----------------------------------------------------------------------
     public static boolean openedAProfile = false;
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     private OnFragmentInteractionListener mListener;
-    public ContactsFragment() {
-        // Required empty public constructor
-    }
-    public static ContactsFragment newInstance(String param1, String param2) {
-        ContactsFragment fragment = new ContactsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    View mainView, profileDialogView;
+    View mainView;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
     Context ctx;
     SQLiteDatabase mydatabase;
-    EditText tableName;
-    TextView tv = null;
-    TextView contacts;
-    ProgressBar spinner;
-    FloatingActionButton refreshContactButton;
     HashMap<String,String> allC = new HashMap<>();
-    boolean contactReadingStatusNotComplete = true;
-    User userData = User.getInstance();
+    User singleTonUser = User.getInstance();
+    HashMap<String, HashMap<String, String>> userAndMood = new HashMap<>();
+    int countOfIterationsToFetchMoodDetailsForEachAppUserFriend = 0;
+    public static boolean updateViewCalled = false;
+    Button myProfile;
+    // Declaration of all variables complete------------------------------------------------------------
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         mainContainer = container;
         mainInflater = inflater;
@@ -104,44 +76,14 @@ public class ContactsFragment extends Fragment{
         mainView = inflater.inflate(R.layout.fragment_contacts, container, false);
         ctx = mainView.getContext();
 
-        addOwnProfileAndRefreshButton();
+        // Live monitoring of the mood status changes
+        detailsForLiveMoodRelatedFeeds();
 
-        //monitorViewChange();
-
-        //spinner = (ProgressBar)mainView.findViewById(R.id.refreshSpin);
-        //DBInternal dbInternal = new DBInternal();
+        // Load all the contacts in the hashMap
         allC = AllAppData.allReadContacts;
-
 
         return mainView;
     }
-
-    public static boolean updateViewCalled = false;
-    private void monitorViewChange(){
-        Log.e("Contacts_viewChange","Monitor is running to add or delete for current app users");
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(updateViewCalled){
-                            updateViewCalled = false;
-                            Log.e("Contacts_viewChange","View change detected..");
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    addOwnProfileAndRefreshButton();
-                                }
-                            });
-                        }
-                     }
-                }).start();
-                monitorViewChange();
-            }
-        },5000);
-    }
-
 
     private View getHorizontalLine(int width){
         View v = new View(getContext());
@@ -152,15 +94,6 @@ public class ContactsFragment extends Fragment{
         v.setBackgroundColor(Color.parseColor("#B3B3B3"));
         return v;
     }
-    private View getVerticalLine(int width){
-        View v = new View(getContext());
-        v.setLayoutParams(new LinearLayout.LayoutParams(width,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        ));
-        v.setBackgroundColor(Color.parseColor("#B3B3B3"));
-        return v;
-    }
-    Button myProfile;
     private void addOwnProfileAndRefreshButton(){
         ImageButton refreshContactButton = (ImageButton) mainView.findViewById(R.id.btn_refreshContact);
         refreshContactButton.setImageResource(R.drawable.refresh_contacts);
@@ -190,7 +123,7 @@ public class ContactsFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 openedAProfile = true;
-                loadProfile(userData.getUserMobileNumber());
+                loadProfile(singleTonUser.getUserMobileNumber());
             }
         });
         // Populating all contacts who uses app and who doesn't
@@ -244,7 +177,11 @@ public class ContactsFragment extends Fragment{
                 name.setLayoutParams(layoutDetails);
                 eachContactLayout.addView(name);
 
-                boolean userIsLive = (new Random().nextInt(2) == 1);
+                // This gets the value of the current mood details(moodType, isLIVE, atTtime) which was populated
+                // from MAIN before this function call
+
+                String moodType = userAndMood.get(eachFriendContact).get("moodType");
+                boolean userIsLive = userAndMood.get(eachFriendContact).get("liveNow").equals("1")?true:false;
 
                 LinearLayout moodStatusAndMood = new LinearLayout(getContext());
                 moodStatusAndMood.setGravity(Gravity.CENTER);
@@ -273,7 +210,7 @@ public class ContactsFragment extends Fragment{
                 TextView moodName = new TextView(ctx);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 moodName.setAllCaps(false);
-                moodName.setText(" : Party");
+                moodName.setText(" : " + moodType);
                // moodName.setBackgroundResource(R.drawable.contactsusingappdesign);
                 moodName.setLayoutParams(layoutDetails);
                 moodStatusAndMood.addView(moodName);
@@ -289,7 +226,6 @@ public class ContactsFragment extends Fragment{
                 eachContact.addView(eachContactLayout);
             }
         }
-
         eachContact.addView(getHorizontalLine(2));
         LinearLayout titleNotAppUsers = new LinearLayout(getContext());
         titleNotAppUsers.setGravity(Gravity.CENTER);
@@ -432,12 +368,68 @@ public class ContactsFragment extends Fragment{
         //allContactsPresent.add("santanu");
         return allContactsPresent;
     }
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    // Async Listeners for Live Feed In Profile
+    private void detailsForLiveMoodRelatedFeeds(){
+        final int limit = AllAppData.friendsWhoUsesApp.size();
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        final DatabaseReference liveFeedNode = firebaseDatabase.getReference().child("livefeed");
+        for(final String eachAppUsingFriend : AllAppData.friendsWhoUsesApp){
+            DatabaseReference
+              dbRefForLiveFeedMoodType = liveFeedNode.child(eachAppUsingFriend)
+                                                             .child(AllAppData.moodLiveFeedNode)
+                                                             .child(AllAppData.userLiveMood);
+
+            final HashMap<String, String> moodTypeAndLiveStatus = new HashMap<>();
+
+            dbRefForLiveFeedMoodType.addChildEventListener(new ChildEventListener() {
+                  @Override
+                  public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                      String value = dataSnapshot.getValue().toString();
+                      if(value.length() == 1) {
+                          moodTypeAndLiveStatus.put("liveNow",value);
+                          userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                      }
+                      else {
+                          moodTypeAndLiveStatus.put("moodType",value);
+                          userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                      }
+                      countOfIterationsToFetchMoodDetailsForEachAppUserFriend++;
+                      if(countOfIterationsToFetchMoodDetailsForEachAppUserFriend >= (limit+limit)) {
+                          addOwnProfileAndRefreshButton();
+                      }
+                      LoggerBaba.printMsg("ContactsFragment", userAndMood.toString());
+                  }
+                  @Override
+                  public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                      String value = dataSnapshot.getValue().toString();
+                      if(value.length() == 1) {
+                          moodTypeAndLiveStatus.put("liveNow",value);
+                          userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                      }
+                      else {
+                          moodTypeAndLiveStatus.put("moodType",value);
+                          userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                      }
+                        addOwnProfileAndRefreshButton();
+                        LoggerBaba.printMsg("ContactsFragment", userAndMood.toString());
+                  }
+                  @Override
+                  public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                  }
+                  @Override
+                  public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                  }
+                  @Override
+                  public void onCancelled(DatabaseError databaseError) {
+
+                  }
+              });
         }
     }
+
+    // Fragment specific methods -- NOT USED --------------------------------------------------------------
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -454,8 +446,32 @@ public class ContactsFragment extends Fragment{
         mListener = null;
         super.onDetach();
     }
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
+        }
+    }
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+    public ContactsFragment() {
+        // Required empty public constructor
+    }
+    public static ContactsFragment newInstance(String param1, String param2) {
+        ContactsFragment fragment = new ContactsFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM2, param2);
+        fragment.setArguments(args);
+        return fragment;
+    }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
+        }
     }
 }

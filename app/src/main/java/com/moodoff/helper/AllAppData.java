@@ -40,12 +40,12 @@ public class AllAppData {
             "DEDICATE","HOLIDAY","COUNTRY","EXCELLENT","TALENTED","SUPERIOR"));
     public static String getTodaysDate(){
         Calendar c = Calendar.getInstance();
-        String todaysDate = c.get(Calendar.DATE)+""+(c.get(Calendar.MONTH)+1)+c.get(Calendar.YEAR);
+        String todaysDate = c.get(Calendar.DATE)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.YEAR);
         return todaysDate;
     }
     public static String getTodaysDateAndTime(){
         Calendar c = Calendar.getInstance();
-        String todaysDate = c.get(Calendar.DATE)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.YEAR)+"_"+c.getTime();
+        String todaysDate = getTodaysDate()+"_"+c.getTime().toString().split(" ")[3];
         return todaysDate;
     }
 
@@ -61,5 +61,18 @@ public class AllAppData {
     public static String userAudioStatus = "userAudioStatusSong";
     public static String userTextStatusLoveCount = "userTextStatusLoveCount";
     public static String userAudioStatusLoveCount = "userAudioStatusLoveCount";
-
+    public static String userNumberOfOldNotifications = "userNumberOfOldNotifications";
+    public static String userScore = "userScore";
+    public static String likedTextStatusLine = " liked your text status";
+    public static String likedAudioStatusLine = " liked your audio status";
+    public static String defaultAudioStatusSong = "romantic/HERO.mp3";
+    // >> Mood Related
+    public static String moodLiveFeedNode = "liveMoodFeeds";
+    public static String userLiveMood = "userLiveMood";
+    public static String userMoodLikeCount = "moodLikeCount";
+    public static String userMoodLoveCount = "moodLoveCount";
+    public static String userMoodSadCount = "moodSadCount";
+    public static String timeStamp = "timeStamp";
+    // >> File Related
+    public static String userDetailsFileName = "UserData.txt";
 }

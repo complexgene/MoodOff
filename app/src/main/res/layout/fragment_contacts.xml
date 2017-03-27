@@ -21,7 +21,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:src="@drawable/refresh_contacts"
-            android:background="@drawable/refreshcontactbuttonlayout"
+            android:background="@color/appcolor_backup3"
             />
         <Button
             android:id="@+id/ownProfile"

@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:background="@drawable/shadedappcolorpanel"
+            android:background="@color/appcolor_backup1"
             >
             <ImageButton
                 android:id="@+id/backbutton"
@@ -61,16 +61,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="MyName"
-                    android:textStyle="normal|bold"
-                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="italic|bold"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/gm_mp_bg"
                     android:id="@+id/username"
                     />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="MyPhoneNumber"
-                    android:textStyle="normal|bold"
-                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="italic|bold"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/gm_mp_bg"
                     android:id="@+id/userPhNo"
                     />
                 <TextView
@@ -119,7 +123,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:background="@drawable/shadedappcolorpanel"
+                android:background="@color/appcolor_backup3"
                 >
 
                 <TextView
@@ -184,7 +188,7 @@
                     android:textSize="16sp"
                     android:textStyle="italic|bold"
                     android:fontFamily="sans-serif-condensed"
-                    android:textColor="@color/colorPrimary" />
+                    android:textColor="@color/gm_mp_bg" />
 
             </LinearLayout>
         </LinearLayout>
@@ -200,7 +204,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:background="@drawable/shadedappcolorpanel"
+                android:background="@color/appcolor_backup3"
                 >
                 <TextView
                     android:layout_width="wrap_content"
@@ -278,20 +282,20 @@
                     android:textSize="16sp"
                     android:textStyle="italic|bold"
                     android:fontFamily="sans-serif-condensed"
-                    android:textColor="@color/colorPrimary" />
+                    android:textColor="@color/gm_mp_bg" />
 
             </LinearLayout>
             <LinearLayout
                 android:gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/shadedappcolorpanel"
+                android:background="@color/appcolor_backup3"
                 >
                 <TextView
-                    android:id="@+id/userStatus"
+                    android:id="@+id/userLiveMoodStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#48b60c"
+                    android:textColor="#558B2F"
                     android:layout_marginLeft="5dp"
                     android:textStyle="bold"
                     android:textSize="18sp"
@@ -346,56 +350,56 @@
                 android:background="@color/appcolor"
                 >
                 <ImageButton
-                    android:id="@+id/loveCurrentMood"
+                    android:id="@+id/imgBtn_likeCurrentMood"
                     android:paddingLeft="5dp"
                     style="@style/profileLoveButtonStyle"/>
 
                 <TextView
-                    android:id="@+id/loveCurrentMoodCount"
+                    android:id="@+id/txtView_likeCurrentMoodCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="5dp"
                     android:layout_marginRight="5dp"
                     android:text="(10)"
                     android:textSize="16sp"
-                    android:textStyle="normal|bold"
+                    android:textStyle="bold"
                     android:fontFamily="sans-serif-condensed"
-                    android:textColor="@color/colorPrimary" />
+                    android:textColor="@color/gm_mp_bg" />
                 <ImageButton
-                    android:id="@+id/likeCurrentMood"
+                    android:id="@+id/imgBtn_loveCurrentMood"
                     android:paddingLeft="5dp"
                     style="@style/profileLoveButtonStyle"
-                    android:src="@drawable/like_ns"
+                    android:src="@drawable/love_s"
                     />
                 <TextView
-                    android:id="@+id/likeCurrentMoodCount"
+                    android:id="@+id/txtView_loveCurrentMoodCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="5dp"
                     android:layout_marginRight="5dp"
                     android:text="(7)"
                     android:textSize="16sp"
-                    android:textStyle="normal|bold"
+                    android:textStyle="bold"
                     android:fontFamily="sans-serif-condensed"
-                    android:textColor="@color/colorPrimary" />
+                    android:textColor="@color/gm_mp_bg" />
                 <ImageButton
-                    android:id="@+id/sadCurrentMood"
+                    android:id="@+id/imgBtn_sadCurrentMood"
                     android:paddingLeft="5dp"
                     style="@style/profileLoveButtonStyle"
                     android:src="@drawable/sad_mood"
                     />
                 <TextView
-                    android:id="@+id/sadCurrentMoodCount"
+                    android:id="@+id/txtView_sadCurrentMoodCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="5dp"
                     android:text="(22)"
                     android:textSize="16sp"
-                    android:textStyle="normal|bold"
+                    android:textStyle="bold"
                     android:fontFamily="sans-serif-condensed"
-                    android:textColor="@color/colorPrimary" />
+                    android:textColor="@color/gm_mp_bg" />
             </LinearLayout>
-            <LinearLayout
+            <!--<LinearLayout
                 android:orientation="vertical"
                 android:background="@color/appcolor"
                 android:layout_width="match_parent"
@@ -404,7 +408,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:background="@drawable/shadedappcolorpanel"
+                    android:background="@color/appcolor_backup1"
                     >
 
                     <TextView
@@ -454,7 +458,7 @@
                     android:fontFamily="sans-serif-condensed"
                     android:textColor="@color/colorPrimary" />
 
-            </LinearLayout>
+            </LinearLayout>-->
 
         </LinearLayout>
 

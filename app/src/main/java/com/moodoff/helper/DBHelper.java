@@ -173,7 +173,6 @@ public class DBHelper extends SQLiteOpenHelper {
             //Log.e("DBHelper_RDNot",data);
             resultSet.moveToNext();
         }
-        AllAppData.lovedDedicateOldCount = countLoveType;
         Log.e("DBHelper", "Reading of the notifications from the Internal DB -> DONE");
         return allNotifications;
     }

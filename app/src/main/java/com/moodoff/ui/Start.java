@@ -1,6 +1,7 @@
 package com.moodoff.ui;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -30,6 +31,7 @@ import com.moodoff.service.UserManagementService;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import static com.moodoff.helper.LoggerBaba.printMsg;
 
@@ -172,11 +174,11 @@ public class Start extends AppCompatActivity {
                 allProfilesDataFetchNotComplete = false;
                 // Get and separate all the contacts based on who uses app and who doesn't uses from the internal table.
                 fetchContacts();
-                while (fetchContactsNotComplete) ;
+                /*while (fetchContactsNotComplete) ;
                 fetchNotifications();
-                // Distinguishes who uses app and who don't
+                */// Distinguishes who uses app and who don't
                 fetchContactsFromServer();
-                fetchAllProfilesData();
+                //fetchAllProfilesData();
                 Log.e("Start_FILEREADS", "DONE..");
                 try {
                     new Handler().postDelayed(new Runnable() {
@@ -263,27 +265,12 @@ public class Start extends AppCompatActivity {
         //NotificationFragment.allReadContacts = allReadContacts;
         Log.e("Start_contactsFetch","Contacts fetching done..");
     }
-    private void fetchNotifications() {
-                try {
-                    Log.e("Start_Notifications","Start loading notifications from DB");
-                    ArrayList<String> allNotificationsFromDB = dbOperations.readNotificationsFromInternalDB();
-                    AllAppData.allNotifications = allNotificationsFromDB;
-                    AllAppData.totalNoOfNot = allNotificationsFromDB.size();
-                    NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
-                    Log.e("Start_Notifications","Fetched " + AllAppData.totalNoOfNot + " notifications from internal DB..");
-                    serverManager.readNotificationsFromServerAndWriteToInternalDB();
-                    notificationFetchNotComplete = false;
-                    Log.e("Start_Notifications", "Notification read complete and auto notification read script started..");
-                } catch (Exception ee) {
-                    Log.e("Start_Notifications_Err", ee.getMessage());
-                    ee.printStackTrace();
-                }
-    }
+
     private void fetchContactsFromServer(){
         ServerManager serverManager = new ServerManager(this);
         serverManager.fetchContactsFromServer();
     }
-    private void fetchAllProfilesData(){
+    /*private void fetchAllProfilesData(){
         try{
             Log.e("Start_ProfileFetch","Start reading profile data for all friends..");
             AllAppData.allProfileData = dbOperations.readAllProfilesDataFromInternalDB();
@@ -295,7 +282,9 @@ public class Start extends AppCompatActivity {
             Log.e("Start_ProfileFetch_Err",ee.getMessage());
             ee.printStackTrace();
         }
-    }
+    }*/
+
+
     private void startAutoBots(){
         Log.e("Start_Bots","Bots in work");
         new Handler().postDelayed(new Runnable() {

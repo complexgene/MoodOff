@@ -1,39 +1,35 @@
 package com.moodoff.ui;
 
-import android.app.NotificationManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.AppCompatActivity;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RemoteViews;
 
 import com.moodoff.R;
-import com.moodoff.helper.AllAppData;
-import com.moodoff.helper.Messenger;
+import com.moodoff.helper.LoggerBaba;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.model.User;
 
 import java.util.ArrayList;
 
-public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener,SingSong.OnFragmentInteractionListener,Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,KaraokeFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
+public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnFragmentInteractionListener,Profile.OnFragmentInteractionListener,Moods.OnFragmentInteractionListener,GenericMood.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,ContactsFragment.OnFragmentInteractionListener{
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     public static ViewPager mViewPager;
     public static ArrayList<String> tabNames = new ArrayList<>();
     private  TabLayout tabLayout;
+    User singleTonUser = User.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +56,18 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
 
         mViewPager.setOffscreenPageLimit(2);
         //setUpTabIcons();
-        //Request all the dangerous permissions over here
-
     }
+
+    /*private int[] tabIcons = {
+            R.drawable.changemood,
+            R.drawable.btn_dedicate,
+            R.drawable.tab_profile
+    };
+    private void setUpTabIcons(){
+        tabLayout.getTabAt(0).setIcon(tabIcons[0]);
+        tabLayout.getTabAt(1).setIcon(tabIcons[1]);
+        tabLayout.getTabAt(2).setIcon(tabIcons[2]);
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,51 +77,21 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-        // Just to control the nullPointerException
-    }
-    private int[] tabIcons = {
-            R.drawable.changemood,
-            R.drawable.btn_dedicate,
-            R.drawable.tab_profile
-    };
-    private void setUpTabIcons(){
-        tabLayout.getTabAt(0).setIcon(tabIcons[0]);
-        tabLayout.getTabAt(1).setIcon(tabIcons[1]);
-        tabLayout.getTabAt(2).setIcon(tabIcons[2]);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
     public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
         public PlaceholderFragment() {
         }
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
@@ -126,32 +101,15 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_all_tabs, container, false);
 
             Log.e("ALLTABS","I am called again..");
 
-            /*mViewPager.setCurrentItem(Start.switchToTab);
-            mViewPager.getAdapter().notifyDataSetChanged();*/
-
-            /*FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            Fragment newFragment = Moods.newInstance("replacedA","b");
-            // Replace whatever is in the fragment_container view with this fragment,
-            // and add the transaction to the back stack if needed
-            //transaction.replace(R.id.allmoods, newFragment);
-            transaction.replace(R.id.fragment, newFragment);
-            transaction.addToBackStack("mainA");*/
-            //transaction.commitAllowingStateLoss();
-
             return rootView;
         }
     }
-    private boolean doorClosed = true;
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter{
 
         public SectionsPagerAdapter(FragmentManager fm) {
@@ -163,7 +121,6 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
             // getItem is called to instantiate the fragment for the given page.
             if(position == 0)return Moods.newInstance("a","b");
             else if(position == 1)return NotificationFragment.newInstance("x","y");
-            //else if(position == 2)return SingSong.newInstance("p","q");
             else if(position == 2)return ContactsFragment.newInstance("p","q");
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
@@ -190,75 +147,28 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
             return null;
         }
 
-
         @Override
         public void notifyDataSetChanged() {
             super.notifyDataSetChanged();
         }
 
     }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        // Just to control the nullPointerException
+    }
     @Override
     public void onBackPressed() {
-        try {
-            Log.e("AllTabs_onBackPressed", "onBackPressed:"+ AllAppData.noOfTimesBackPressed);
-            if ((AllAppData.noOfTimesBackPressed == 1&&mViewPager.getCurrentItem()!=1) || (AllAppData.noOfTimesBackPressed==0 && mViewPager.getCurrentItem() == 1)) {
-                Messenger.print(getApplicationContext(), "Press Back again to Exit");
-                if(mViewPager.getCurrentItem()==1) AllAppData.noOfTimesBackPressed=2;
-            }
-            else{
-                super.onBackPressed();
-            }
-        }catch (Exception ee){return;}
+       super.onBackPressed();
     }
-
-    User userData = User.getInstance();
-
     @Override
     protected void onDestroy() {
-        Log.e("AllTabs_onDestroy","onDestroy");
         super.onDestroy();
-        /*if(AllAppData.noOfTimesBackPressed==1 && mViewPager.getCurrentItem()==1){
-            new ServerManager().exitLiveMood(User.getPhoneNumber());
-            GenericMood.releaseMediaPlayerObject();
-            NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
-            Profile.releaseMediaPlayerObject(Profile.mediaPlayer);
-        }
-        else*/
-        if(AllAppData.noOfTimesBackPressed==2){
-            new ServerManager().exitLiveMood(userData.getUserMobileNumber());
-            GenericMood.releaseMediaPlayerObject();
-            NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
-            Profile.releaseMediaPlayerObject(Profile.mediaPlayer);
-            /*AllAppData.noOfTimesBackPressed=0;
-            String currentPlayingSong = GenericMood.currentSong;
-            if(currentPlayingSong != null) {
-                manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                remoteViewBig = new RemoteViews(getPackageName(), R.layout.statusbar_expanded);
-                remoteViewSmall = new RemoteViews(getPackageName(), R.layout.statusbar_minimized);
-                remoteViewBig.setImageViewResource(R.id.albumimage,R.drawable.man);
-                remoteViewSmall.setImageViewResource(R.id.albumimage,R.drawable.man);
-                currentPlayingSong = currentPlayingSong.replaceAll("_"," ").replace(".mp3","");
-                remoteViewBig.setTextViewText(R.id.songname,"Mood: "+Character.toUpperCase(GenericMood.currentMood.charAt(0))+GenericMood.currentMood.substring(1));
-                remoteViewBig.setTextViewText(R.id.songdetails,currentPlayingSong+" - Arijit Singh");
-                remoteViewSmall.setTextViewText(R.id.songname,currentPlayingSong);
-                remoteViewSmall.setTextViewText(R.id.songdetails,currentPlayingSong+" - Arijit Singh");
-                builder = new NotificationCompat.Builder(this);
-                builder
-                        .setSmallIcon(R.drawable.btn_dedicate)
-                        .setAutoCancel(true)
-                        .setContentTitle(currentPlayingSong)
-                        .setContentText(currentPlayingSong+" - Arijit Singh")
-                        .setContent(remoteViewSmall)
-                        .setCustomBigContentView(remoteViewBig)
-                        .setColor(Color.rgb(255, 0, 0));
-                manager.notify(0, builder.build());
-            }*/
-        }
-
+        LoggerBaba.printMsg("AllTabs", "In onDestroy() of AllTabs activity trying to exit from the live Mood..");
+        new ServerManager().exitLiveMood(singleTonUser.getUserMobileNumber());
+        GenericMood.releaseMediaPlayerObject();
+        NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
+        Profile.releaseMediaPlayerObject(Profile.mediaPlayer);
     }
-    private NotificationCompat.Builder builder;
-    private NotificationManager manager;
-    private int notification_Id;
-    private RemoteViews remoteViewBig,remoteViewSmall;
-
 }

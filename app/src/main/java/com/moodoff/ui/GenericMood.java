@@ -428,36 +428,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
             serverManager.loadStory(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
         }
     }
-    private void checkAndPopulateQuote(){
-        // Check if toay's story has already been downloaded
-        String todaysQuoteFileName = "quote"+ AllAppData.getTodaysDate();
-        //Messenger.printCenter(getContext(),todaysStroyFileName);
-        File f = new File(AllAppData.getAppDirectoryPath()+"/"+todaysQuoteFileName+".txt");
-        if(f.exists()){
-            Log.e("GenericMood_QUOTE","Quote file exists..");
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(f));
-                final StringBuilder storyBody = new StringBuilder("");
-                String body="";
-                while ((body = br.readLine()) != null) {
-                    storyBody.append(body);
-                }
-                storyTitleTV.setText("Quote Of The Day");
-                storyBodyTV.setTypeface(Typeface.DEFAULT_BOLD);
-                storyBodyTV.setText(storyBody.toString());
-                storyLoadSpinner.setVisibility(View.GONE);
-                br.close();
-            }catch(Exception ee){
-                Log.e("GenericMood_QuoteRead","QuoteRead Error!!"+ee.getMessage());
-            }
-        }
-        else{
-            Log.e("GenericMood_QUOTE","Quote file not yet created..");
-            f.mkdirs();
-            ServerManager serverManager = new ServerManager();
-            serverManager.loadQuote(currentMood,getActivity(),storyTitleTV,storyBodyTV,storyLoadSpinner);
-        }
-    }
+
     public void showItemInMiddle(final int selectedOption){
         switch(selectedOption){
             case 1:{
@@ -1233,8 +1204,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     @Override
     public void onDestroy() {
         try {
-            if (AllTabs.mViewPager.getCurrentItem() == 0) {
-                Log.e("GenericMood", "GM on Destroy");
+
                 mAudioManager.abandonAudioFocus(this);
                 if (mp != null) {
                     releaseMediaPlayerObject();
@@ -1242,7 +1212,7 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
                 }
                 playOrPauseParm = 0;
                 super.onDestroy();
-            }
+
         }catch (Exception ee){}
 
     }

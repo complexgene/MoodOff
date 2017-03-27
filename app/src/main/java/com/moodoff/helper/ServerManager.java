@@ -26,7 +26,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.moodoff.dao.NotificationManagerDaoImpl;
 import com.moodoff.dao.NotificationManagerDaoInterface;
+import com.moodoff.dao.UserManagementdaoImpl;
+import com.moodoff.dao.UserManagementdaoInterface;
 import com.moodoff.model.User;
+import com.moodoff.model.UserLiveMoodDetailsPojo;
 import com.moodoff.ui.AllTabs;
 import com.moodoff.ui.ContactsFragment;
 import com.moodoff.ui.NotificationFragment;
@@ -60,6 +63,7 @@ public class ServerManager{
     DBHelper dbOperations;
     Context context;
     NotificationManagerDaoInterface notificationManagerDao = new NotificationManagerDaoImpl();
+    UserManagementdaoInterface userManagementDao = new UserManagementdaoImpl();
     int currentNumberOfNotifications, oldNumberOfNotifications;
     User singleTonUser = User.getInstance();
 
@@ -69,6 +73,8 @@ public class ServerManager{
         this.context = context;
         dbOperations = new DBHelper(context);
     }
+    //--------------------------------CONTACTS RELATED FUNCTIONS----------------------------------------------
+
     public void fetchContactsFromServer() {
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -134,115 +140,27 @@ public class ServerManager{
             }
         },10000);
     }
-    // LIVE FEED FUNCTIONS
-    String liveMood = "";
-    public String getLiveMood(final String userNumber){
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
-            @Override
-            public void run() {
-                try {
-                    Log.e("ServerManager_LiveMood","Getting the live mood for the user:"+userNumber);
-                    URL url = new URL(serverURL+ "/livefeed/" + userNumber );
-                    Log.e("ServerManager_LiveURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    InputStream is = urlConnection.getInputStream();
-                    isr = new InputStreamReader(is);
-                    int data = isr.read();
-                    final StringBuilder response = new StringBuilder("");
-                    while (data != -1) {
-                        response.append((char) data);
-                        data = isr.read();
-                    }
-                    Log.e("ServerManager_LiveMood", "Getting done for live mood for the user:"+userNumber+" res:"+response.toString());
-                    liveMood =  response.toString();
-                    Profile.currentMood = liveMood;
-                    Profile.profileDetailsNotRetrievedYet = false;
-                } catch (Exception ee) {
-                    Log.e("ServerManager_LIVE_Err1", ee.getMessage());
-                    ee.printStackTrace();
-                }
-            }
-        }).start();
-        return liveMood;
-    }
-    public void setLiveMood(final String userNumber, final String moodName){
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
-            @Override
-            public void run() {
-                try {
-                    Log.e("ServerManager_LiveMood","Setting the live mood for the user:"+userNumber+" as:"+moodName);
-                    URL url = new URL(serverURL+ "/livefeed/" + userNumber +"/"+ moodName);
-                    Log.e("ServerManager_LiveURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setDoOutput(true);
-                    int responseCode = urlConnection.getResponseCode();
-                    if(responseCode!=200){
-                        throw new Exception("Live Mood couldn't be saved..");
-                    }
-                    Log.e("ServerManager_LiveMood", "Setting done for live mood for the user:"+userNumber);
-                } catch (Exception ee) {
-                    Log.e("ServerManager_LIVE_Err2", ee.getMessage());
-                    ee.printStackTrace();
-                }
-            }
-        }).start();
-    }
-    public String exitLiveMood(final String userNumber){
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
-            @Override
-            public void run() {
-                try {
-                    Log.e("ServerManager_LiveMood","Exiting the live mood for the user:"+userNumber);
-                    URL url = new URL(serverURL+ "/livefeed/exit/" + userNumber );
-                    Log.e("ServerManager_LiveURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setDoOutput(true);
-                    int responseCode = urlConnection.getResponseCode();
-                    if(responseCode!=200){
-                        throw new Exception("Live Mood exit couldn't be done..");
-                    }
-                    Log.e("ServerManager_LiveMood", "Exiting done for live mood for the user:"+userNumber);
-                } catch (Exception ee) {
-                    Log.e("ServerManager_LIVE_Err1", ee.getMessage());
-                    ee.printStackTrace();
-                }
-            }
-        }).start();
-        return liveMood;
-    }
-    public void voteForLiveMood(final String userNumber, final int type){
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
-            @Override
-            public void run() {
-                try {
-                    Log.e("ServerManager_LiveMood","Voting for live mood for the user:"+userNumber+" with type:"+type);
-                    URL url = new URL(serverURL+ "/livefeed/vote/" + userNumber +"/"+ type);
-                    Log.e("ServerManager_LiveURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setDoOutput(true);
-                    int responseCode = urlConnection.getResponseCode();
-                    if(responseCode!=200){
-                        throw new Exception("Vote for Live Mood couldn't be done..");
-                    }
-                    Log.e("ServerManager_LiveMood", "Voting done for live mood for the user:"+userNumber);
-                } catch (Exception ee) {
-                    Log.e("ServerManager_LIVE_Err3", ee.getMessage());
-                    ee.printStackTrace();
-                }
-            }
-        }).start();
-    }
-    // LIVE FEED FUNCTIONS COMPLETE
 
-    // This below function reads the playlist file from the server ----CONVERTED----
+    //--------------------------------CONTACTS RELATED FUNCTIONS COMPLETE----------------------------------------------
+
+
+
+    //----------------------------- LIVE FEED FUNCTIONS-------------------------------------------------------
+
+    public void setLiveMood(final String userMobileNumber, UserLiveMoodDetailsPojo userLiveMoodDetails){
+        userManagementDao.setLiveMood(userMobileNumber, userLiveMoodDetails);
+    }
+    public void exitLiveMood(final String userMobileNumber){
+        //userManagementDao.exitLiveMood(userMobileNumber);
+    }
+
+    //------------------------- LIVE FEED FUNCTIONS COMPLETE---------------------------------------------------
+
+
+
+
+    //---------------------------SONG RELATED FUNCTIONS--------------------------------------------------------
+
     public void readPlayListFromServer(final Context curContext, final String todaysDate){
         FirebaseStorage storage = FirebaseStorage.getInstance();
         // Create a storage reference from our app
@@ -306,40 +224,25 @@ public class ServerManager{
             }
         });
     }
-    public void readAllProfileDataFromServerAndWriteToInternalDB()  {
-        ArrayList<String> allContactsOfUser = AllAppData.friendsWhoUsesApp;
-        Log.e("ServerManager_FWUA",allContactsOfUser.toString());
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        /*for(String eachUser : allContactsOfUser){
 
-                        }*/
-                    }
-                }).start();
-                //readAllProfileDataFromServerAndWriteToInternalDB();
-            }
-        },8000);
-    }
-    /*********-----------NOTIFICATION FUNCTIONS-------------------***********/
+    //---------------------------SONG RELATED FUNCTIONS COMPLETE-----------------------------------------------
+
+
+
+
+    //---------------------------NOTIFICATION FUNCTIONS--------------------------------------------------------/
+
     public void readNotificationsFromServerAndWriteToInternalDB(){
         final String userMobileNumber = singleTonUser.getUserMobileNumber();
         final String serverURL = AllAppData.serverURL;
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
                 new Thread(new Runnable() {
                     HttpURLConnection urlConnection = null;
                     InputStreamReader isr = null;
-
                     @Override
                     public void run() {
                         try {
                             URL url = new URL(serverURL + "/allNotifications/" + userMobileNumber + ".json");
-                            Log.e("ServerManager_ReadURL", url.toString());
+                            Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB(): " + url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
                             isr = new InputStreamReader(is);
@@ -349,55 +252,65 @@ public class ServerManager{
                                 response.append((char) data);
                                 data = isr.read();
                             }
-                            Log.e("ServerManager", response.toString());
+                            Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB():" + response.toString());
                             ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
+
                             currentNumberOfNotifications = allYourNotificationFromServer.size();
                             oldNumberOfNotifications = AllAppData.totalNoOfNot;
+                            //------TRUE : We got some new notifications-----------------------------------------//
                             if ((currentNumberOfNotifications > oldNumberOfNotifications)) {
+                                //-------Delete all notifications from Internal DB----------------------------//
+                                printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB: delete all notifications from Internal DB");
                                 dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
+                                //-------Write all the read notifications from cloud to Internal DB---------------//
+                                printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB: write all notifications got from cloud to Internal DB");
                                 dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
+                                //-----------------Update the variables that holds info about notifications---------------//
+                                printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB: read all notifications from Internal DB");
                                 AllAppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
-                                printMsg("ServerManager", "DONEDONE");
+                                printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB: read all notifications from Internal DB is DONE");
                                 AllAppData.totalNoOfNot = currentNumberOfNotifications;
-                                NotificationFragment.changeDetected = true;
+                                //---------------------Display notifications to User for new Notifications--------------------//
                                 displayAlertNotificationOnTopBarOfPhone(context, (currentNumberOfNotifications - oldNumberOfNotifications));
+
                             }
                         } catch (Exception ee) {
-                            Log.e("ServerManager_Not_Err1", ee.getMessage());
+                            Log.e("ServerManager_Not_Err1", "readNotificationsFromServerAndWriteToInternalDB():" + ee.getMessage() + ee.fillInStackTrace().toString());
                             ee.printStackTrace();
                             ee.fillInStackTrace();
                         }
                     }
                 }).start();
-                readNotificationsFromServerAndWriteToInternalDB();
-            }
-        },10000);
     }
     public boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type){
         boolean writeToCloudDBIsSuccessful = notificationManagerDao.writeSongDedicateToCloudDB(ts, fromUser, toUser, currentMood, currentSong, type);
         if(writeToCloudDBIsSuccessful){
-            readNotificationsFromServerAndWriteToInternalDB();
             return true;
         }
         return false;
     }
-    /*********-----------NOTIFICATION FUNCTIONS ENDS-------------------***********/
+
+    //---------------------------NOTIFICATION FUNCTIONS ENDS--------------------------------------------------------/
 
     private void displayAlertNotificationOnTopBarOfPhone(final Context context, final int diff){
-        // Getting the number of last unseen notifications from Userdata file
+        // Getting number of last unseen notifications from file and add the current unseen to get total unseen
+        printMsg("ServerManager","displayAlertNotificationOnTopBarOfPhone: came for alert display on top bar of phone");
         StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("UserData.txt");
         fileOpr.beginReadTransaction();
-        int lastNumberOfUnseenNotifications = Integer.parseInt(fileOpr.getValueFor("numberOfOldNotifications"));
+        int lastNumberOfUnseenNotifications = Integer.parseInt(fileOpr.getValueFor(AllAppData.userNumberOfOldNotifications));
         fileOpr.endReadTransaction();
+        printMsg("ServerManager","displayAlertNotificationOnTopBarOfPhone: 1came for alert display on top bar of phone");
         final int currentNumberOfUnseenNotifications = lastNumberOfUnseenNotifications+diff;
         fileOpr.beginWriteTransaction();
-        fileOpr.updateValueFor("numberOfOldNotifications",String.valueOf(currentNumberOfUnseenNotifications));
+        fileOpr.updateValueFor(AllAppData.userNumberOfOldNotifications,String.valueOf(currentNumberOfUnseenNotifications));
         fileOpr.endWriteTransaction();
-        // Read Complete
-
-        final Activity currActivity = (Activity)context;
+        printMsg("ServerManager","displayAlertNotificationOnTopBarOfPhone: 2came for alert display on top bar of phone");
+        // Read Complete and Operation Done---------------------------------------
+        // Use Plural english in case no of notifications is more than 1(ONE)---------------------------
         String notificationTextSingularPlural="notification";
         if(currentNumberOfUnseenNotifications>1)notificationTextSingularPlural="notifications";
+
+        final Activity currActivity = (Activity)context;
         final NotificationCompat.Builder builder =
             new NotificationCompat.Builder(currActivity)
                     .setSmallIcon(R.drawable.btn_dedicate)
@@ -417,7 +330,7 @@ public class ServerManager{
                 @Override
                 public void run() {
                     if(isAppForground(context)) {
-                        Log.e("ServerManager","Here yoooooo foreground");
+                        Log.e("ServerManager","App is running in foreground..");
                         if(AllTabs.mViewPager.getCurrentItem()!=1) {
                             AllTabs.tabNames.clear();
                             AllTabs.tabNames.add("MOODS");
@@ -426,11 +339,10 @@ public class ServerManager{
                         }
                         ViewPager mViewPager = AllTabs.mViewPager;
                         mViewPager.getAdapter().notifyDataSetChanged();
-                        NotificationFragment.changeDetected = true;
-                        Toast.makeText(context,"Hey! You got new notifications!!",Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, singleTonUser.getUserName() + "! You got new notifications!!",Toast.LENGTH_LONG).show();
                     }
                     else{
-                        Log.e("ServerManager","Here yoooooo");
+                        Log.e("ServerManager","App is running in background..");
                         Start.switchToTab = 1;
                         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         PendingIntent contentIntent = PendingIntent.getActivity(currActivity, 0, notificationIntent,
@@ -444,22 +356,13 @@ public class ServerManager{
                     }
                 }
             });
-
         }
+        //--------------This would trigger a child change in cloud for async listener-----------------------
+        userManagementDao.setRebuildNotificationPanelNodeInCloud(singleTonUser.getUserMobileNumber());
+        //-------------Play Notification sound-------------------------------------------------------------
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Ringtone r = RingtoneManager.getRingtone(currActivity, notification);
         r.play();
-    }
-    public boolean isAppForground(Context mContext) {
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
-        if (!tasks.isEmpty()) {
-            ComponentName topActivity = tasks.get(0).topActivity;
-            if (!topActivity.getPackageName().equals(mContext.getPackageName())) {
-                return false;
-            }
-        }
-        return true;
     }
     public boolean voteLove(final String urlAPI, final Activity curActivity, final ImageButton loveButton) {
         new Thread(new Runnable() {
@@ -500,57 +403,8 @@ public class ServerManager{
         }).start();
         return false;
     }
-    public void writeStatusChange(final int type, final String newValue, final Activity curActivity, final TextView userTextStatus){
-        // type:0 for TEXT ,,,, type:1 for AUDIO
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                new Thread(new Runnable() {
-                    HttpURLConnection urlConnection = null;
-                    InputStreamReader isr = null;
-                    @Override
-                    public void run() {
-                        try {
-                            URL url = new URL(serverURL+"/users/update/" + type + "/" + singleTonUser.getUserMobileNumber() + "/" + newValue.replaceAll(" ","_"));
-                            Log.e("ServerM_ASModf_url", url.toString());
-                            urlConnection = (HttpURLConnection) url.openConnection();
-                            urlConnection.setDoOutput(true);
-                            InputStream is = urlConnection.getInputStream();
-                            isr = new InputStreamReader(is);
-                            int data = isr.read();
-                            final StringBuilder response = new StringBuilder("");
-                            while (data != -1) {
-                                response.append((char) data);
-                                data = isr.read();
-                            }
-                            Log.e("ServerM_ASModf_RES",response.toString());
-                            curActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(response.toString().equals("true")){
-                                        if(type==0)
-                                            userTextStatus.setText(newValue);
-                                    }
-                                }
-                            });
 
-                        } catch (Exception ee) {
-                            Log.e("ServerM_ASModf_Err", ee.getMessage());
-                        } finally {
-                            try {
-                                isr.close();
-                            } catch (Exception ee) {
-                                Log.e("ServerM_ASModf_Err", "BufferedReader couldn't be closed");
-                            }
-                            urlConnection.disconnect();
-
-                        }
-                    }
-                }).start();
-            }
-        },0);
-    }
-    private String getStoryName(String moodType){return "story"+new Random().nextInt(16)+".txt";}
+    private String getStoryName(){return "story"+new Random().nextInt(16)+".txt";}
     private void writeTheStoryIntoFile(String storyTitle, String storyBody){
         try{
             File f = new File(AllAppData.getAppDirectoryPath()+"/story"+ AllAppData.getTodaysDate()+".txt");
@@ -574,7 +428,7 @@ public class ServerManager{
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL(AllAppData.serverStoriesURL + "/allstories/" + getStoryName(currentMood));
+                            URL url = new URL(AllAppData.serverStoriesURL + "/allstories/" + getStoryName());
                             Log.e("ServerMan_STORY_Url", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
                             InputStream is = urlConnection.getInputStream();
@@ -613,103 +467,39 @@ public class ServerManager{
             }
         },0);
     }
-    public void loadQuote(final String currentMood, final Activity curActivity, final TextView storyTitleTV, final TextView storyBodyTV, final ProgressBar storyLoadSpinner){
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                new Thread(new Runnable() {
-                    HttpURLConnection urlConnection = null;
-                    BufferedReader bufferedReader = null;
-                    @Override
-                    public void run() {
-                        try {
-                            URL url = new URL(AllAppData.serverStoriesURL + "/allquotes/" + getStoryName(currentMood));
-                            Log.e("ServerMan_STORY_Url", url.toString());
-                            urlConnection = (HttpURLConnection) url.openConnection();
-                            InputStream is = urlConnection.getInputStream();
-                            InputStreamReader isr = new InputStreamReader(is);
-                            bufferedReader = new BufferedReader(isr);
-                            final StringBuilder storyBody = new StringBuilder("");
-                            String body="";
-                            final String title=bufferedReader.readLine();
-                            while ((body = bufferedReader.readLine()) != null) {
-                                storyBody.append(body);
-                            }
-                            writeTheStoryIntoFile(title,storyBody.toString());
-                            Log.e("ServerMan_STORY","Story file written..");
-                            curActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    storyTitleTV.setText(title);
-                                    storyBodyTV.setText(storyBody.toString());
-                                    storyLoadSpinner.setVisibility(View.GONE);
-                                }
-                            });
 
-                        } catch (Exception ee) {
-                            Log.e("GenericM_StoryReadErr", ee.getMessage());
-                        } finally {
-                            try {
-                                bufferedReader.close();
-                            } catch (Exception ee) {
-                                Log.e("GenericM_Err", "BufferedReader couldn't be closed");
-                            }
-                            urlConnection.disconnect();
-
-                        }
-                    }
-                }).start();
+    public boolean isAppForground(Context mContext) {
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (!tasks.isEmpty()) {
+            ComponentName topActivity = tasks.get(0).topActivity;
+            if (!topActivity.getPackageName().equals(mContext.getPackageName())) {
+                return false;
             }
-        },0);
+        }
+        return true;
     }
-    public void loveTextStatus(final String userMobileNumber, final TextView txtViewToChange, final Activity curActivity){
-    /*
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                new Thread(new Runnable() {
-                    HttpURLConnection urlConnection = null;
-                    InputStreamReader isr = null;
-                    @Override
-                    public void run() {
-                        try {
-                            URL url = new URL("http://192.168.2.4:5789/controller/moodoff/users/update/" + type + "/" + User.getPhoneNumber() + "/" + newValue.replaceAll(" ","_"));
-                            Log.e("ServerM_ASModf_url", url.toString());
-                            urlConnection = (HttpURLConnection) url.openConnection();
-                            urlConnection.setDoOutput(true);
-                            InputStream is = urlConnection.getInputStream();
-                            isr = new InputStreamReader(is);
-                            int data = isr.read();
-                            final StringBuilder response = new StringBuilder("");
-                            while (data != -1) {
-                                response.append((char) data);
-                                data = isr.read();
-                            }
-                            Log.e("ServerM_ASModf_RES",response.toString());
-                            curActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(response.toString().equals("true")){
-                                        int curValue = Integer.parseInt(txtViewToChange.getText().toString());
-                                        txtViewToChange.setText((curValue+1)+" people loved the status");
-                                    }
-                                }
-                            });
 
-                        } catch (Exception ee) {
-                            Log.e("ServerM_ASModf_Err", ee.getMessage());
-                        } finally {
-                            try {
-                                isr.close();
-                            } catch (Exception ee) {
-                                Log.e("ServerM_ASModf_Err", "BufferedReader couldn't be closed");
-                            }
-                            urlConnection.disconnect();
-                        }
-                    }
-                }).start();
-            }
-        },0);
-    */
+    public void loveTextStatus(final String userMobileNumber, String currentUserMobileNumber, Activity profileActivity){
+        userManagementDao.voteForTextStatus(userMobileNumber, currentUserMobileNumber, profileActivity);
+    }
+    public void loveAudioStatus(final String userMobileNumber, String currentUserMobileNumber, Activity profileActivity){
+        userManagementDao.voteForAudioStatus(userMobileNumber, currentUserMobileNumber, profileActivity);
+    }
+    public void likeCurrentMood(final String userMobileNumber, String currentUserMobileNumber, Activity profileActivity){
+        userManagementDao.likeCurrentMood(userMobileNumber, currentUserMobileNumber, profileActivity);
+    }
+    public void loveCurrentMood(final String userMobileNumber, String currentUserMobileNumber, Activity profileActivity){
+        userManagementDao.loveCurrentMood(userMobileNumber, currentUserMobileNumber, profileActivity);
+    }
+    public void sadCurrentMood(final String userMobileNumber, String currentUserMobileNumber, Activity profileActivity){
+        userManagementDao.sadCurrentMood(userMobileNumber, currentUserMobileNumber, profileActivity);
+    }
+
+    public void writeTextStatusChange(String userMobileNumber, String newTextStatus, Activity curActivity, TextView userTextStatus){
+        userManagementDao.writeTextStatusChange(userMobileNumber, newTextStatus, curActivity, userTextStatus);
+    }
+    public void writeAudioStatusChange(String userMobileNumber, String newTextStatus, Activity curActivity, TextView userTextStatus){
+        userManagementDao.writeAudioStatusChange(userMobileNumber, newTextStatus, curActivity, userTextStatus);
     }
 }

@@ -30,7 +30,7 @@
             android:label="@string/title_activity_all_tabs"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.RegistrationActivity"
             android:windowSoftInputMode="stateAlwaysVisible"
@@ -40,9 +40,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.ContactList"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.PermissionRequest"
             android:screenOrientation="portrait" />
     </application>
 

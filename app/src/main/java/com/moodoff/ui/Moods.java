@@ -21,22 +21,11 @@ import com.moodoff.helper.DBInternal;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.model.User;
+import com.moodoff.model.UserLiveMoodDetailsPojo;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link Moods.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link Moods#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class Moods extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
-    MoodsListAdapter moodsListAdapter;
-
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -204,21 +193,20 @@ public class Moods extends Fragment {
             Log.e("MOODS",super.getId()+"");
             ContactsFragment.openedAProfile = false;
         }
+        // Populate the pojo with live mood details
+        UserLiveMoodDetailsPojo userLiveMoodDetails = new UserLiveMoodDetailsPojo();
+        userLiveMoodDetails.setMoodType(Character.toUpperCase(moodType.charAt(0)) + moodType.substring(1));
+        userLiveMoodDetails.setLiveNow(1);
+
         ServerManager serverManager = new ServerManager();
-        serverManager.setLiveMood(singleTonUser.getUserMobileNumber(),moodType);
+        serverManager.setLiveMood(singleTonUser.getUserMobileNumber(), userLiveMoodDetails);
+
         if(AllAppData.allMoodPlayList.containsKey(moodType)) {
             FragmentTransaction transaction = fm.beginTransaction();
             Fragment newFragment=GenericMood.newInstance(moodType, "b");
-            // Replace whatever is in the fragment_container view with this fragment,
-            // and add the transaction to the back stack if needed
             transaction.replace(R.id.allmoods, newFragment);
             transaction.addToBackStack(null);
             transaction.commitAllowingStateLoss();
-            //putAllButtonsOff();
-        /*Intent ii = new Intent(getContext(),GenericSelectedMood.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("selectedmood",moodType);
-        startActivity(ii);*/
         }
         else{
             Messenger.print(getContext(),"Sorry!! There is no songs yet in this mood..");

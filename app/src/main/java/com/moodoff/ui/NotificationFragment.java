@@ -30,8 +30,16 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.moodoff.R;
 import com.moodoff.helper.AllAppData;
+import com.moodoff.helper.DBHelper;
+import com.moodoff.helper.LoggerBaba;
 import com.moodoff.helper.Messenger;
 import com.moodoff.helper.ServerManager;
 import com.moodoff.helper.StoreRetrieveDataImpl;
@@ -43,16 +51,42 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.moodoff.helper.LoggerBaba.printMsg;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link NotificationFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link NotificationFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class NotificationFragment extends Fragment implements ViewPager.OnPageChangeListener,AudioManager.OnAudioFocusChangeListener{
+
+    private int i = 0, idOfTheLastPlayButtonClicked = -1, currentPlayButtonId = -1, leftButtonHeight,leftButtonWidth,rightButtonHeight,rightButtonWidth,textViewWidth,textViewHeight;
+    private View view;
+    private FrameLayout mainParentLayout;
+    private ArrayList<String> allNotifications;
+    private LayoutInflater mainInflater;
+    private ViewGroup mainContainer;
+    private AudioManager mAudioManager;
+    private StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl(AllAppData.userDetailsFileName);
+    private Context ctx;
+    private ServerManager serverManager;
+    public static SeekBar currentSeekBar;
+    Handler seekHandler = new Handler();
+    public static int oldCountOfNotifications = 0;
+    User userData = User.getInstance();
+    public static ImageButton playOrStopButton;
+    public static ProgressBar currentNotificationSpinner;
+    public static int totalNumberOfNotifications = 0;
+    private String serverSongURL = AllAppData.serverSongURL;
+    private DBHelper dbOperations;
+    private User singleTonUser;
+    public static MediaPlayer mp;
+    public static ImageButton currentPlayingButton;
+    public static HashMap<String,String> allReadContacts;
+    public static boolean changeDetected = false;
+
+    public void init(){
+        allReadContacts = AllAppData.allReadContacts;
+        dbOperations = new DBHelper(ctx);
+        singleTonUser = User.getInstance();
+        serverManager = new ServerManager(ctx);
+    }
+
     @Override
     public void onAudioFocusChange(int i) {
         if(mp!=null && mp.isPlaying()) {
@@ -64,8 +98,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         }
     }
 
-    private AudioManager mAudioManager;
-    StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl("Userdata.txt");
     @Override
     public void onPageSelected(int position) {
         Log.e("SMNotFrag","Page selected..");
@@ -85,13 +117,9 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
     }
-    public static int totalNumberOfNotifications = 0;
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private String serverURL = AllAppData.serverURL,serverSongURL = AllAppData.serverSongURL;
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     private OnFragmentInteractionListener mListener;
@@ -107,28 +135,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         return fragment;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
-        mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
 
-    int i= 0;
-    View view,dialogView;
-    public static MediaPlayer mp;
-    TextView allNotificationsTextView;
-    FrameLayout mainParentLayout;
-    ArrayList<String> allNotifications;
-    int idOfTheLastPlayButtonClicked=-1;
-    boolean isPlaying = false;
-    static HashMap<String,String> allReadContacts = AllAppData.allReadContacts;
-    LayoutInflater mainInflater;
-    ViewGroup mainContainer;
+
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -136,82 +144,37 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         mainContainer = container;
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_notification, container, false);
-        setSizes();
-        Log.e("Nota_Frag3","being called..");
+        ctx = view.getContext();
 
-        try {
-            while(Start.notificationFetchNotComplete);
-            allNotifications = AllAppData.allNotifications;
-            oldCountOfNotifications = allNotifications.size();
-            Log.e("NotificationFrag_SIZE",allNotifications.size()+"");
-            designNotPanel(view);
-            showNotPanel();
+        init();
 
-        }
-        catch (Exception ei){
-            Log.e("NotificationFrag_Er2",ei.toString());
-        }
+        fetchNotifications();
+
+        monitorLiveNotifications();
 
         return view;
     }
 
-    Activity act;
-    int currentPlayButtonId = -1;
-    public static ImageButton currentPlayingButton;
-    public static boolean changeDetected = false;
-    private void showNotPanel(){
-        act = (Activity)view.getContext();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        act.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(changeDetected) {
-                                    designNotPanel(view);
-                                }
-                            }
-                        });
-                    }
-                }).start();
-                showNotPanel();
-            }
-        },4000);
-    }
-
-    public static SeekBar currentSeekBar;
-    Handler seekHandler = new Handler();
-
-    Runnable run = new Runnable() {
-        @Override
-        public void run() {
-            seekUpdation();
-        }
-    };
-
-    public void seekUpdation() {
+    private void fetchNotifications() {
         try {
-            if (mp!=null || currentSeekBar!=null) {
-                currentSeekBar.setProgress(mp.getCurrentPosition());
-                if(currentSeekBar.getMax()!=0) {
-                    seekHandler.postDelayed(run, 10);
-                }
-            }
-        } catch(Exception e) {
+            Log.e("NotificationFragment","fetchNotifications(): Start loading notifications from Internal DB");
+            ArrayList<String> allNotificationsFromDB = dbOperations.readNotificationsFromInternalDB();
+            AllAppData.allNotifications = allNotificationsFromDB;
+            AllAppData.totalNoOfNot = allNotificationsFromDB.size();
+            NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
+            Log.e("NotificationFragment","fetchNotifications(): Fetched " + AllAppData.totalNoOfNot + " notifications from internal DB..");
+            designNotPanel(view);
+        } catch (Exception ee) {
+            Log.e("NotificationFragmentErr", "fetchNotifications():" + ee.getMessage());
+            ee.printStackTrace();
         }
     }
-
-    public static int oldCountOfNotifications = 0;
-
-    int colorOfLoveFloatingActionButton = Color.rgb(0,255,0);
-
-    User userData = User.getInstance();
 
     public void designNotPanel(final View view){
+
         allReadContacts = AllAppData.allReadContacts;
+        allNotifications = AllAppData.allNotifications;
+
         Log.e("Not_Design","called..:"+currentPlayButtonId);
         changeDetected = false;
         mainParentLayout = (FrameLayout) view.findViewById(R.id.containsallN);
@@ -221,7 +184,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         mainParent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         LinearLayout ll = new LinearLayout(view.getContext());
         ll.setOrientation(LinearLayout.VERTICAL);
-        allNotifications = AllAppData.allNotifications;
         int difference = allNotifications.size() - oldCountOfNotifications;
         Log.e("NotFrag","Updating notification view:"+difference+" "+allReadContacts.size());
         for (i = 0; i < allNotifications.size(); i++) {
@@ -298,7 +260,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                 if (fromUserNumber.equals(userData.getUserMobileNumber())) {
                     loveButton.setVisibility(View.INVISIBLE);
                 }
-                loveButton.setImageResource(R.drawable.likenot_ns);
+                loveButton.setImageResource(R.drawable.like_ns);
             }
 
             layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -453,33 +415,10 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         }
     }
 
-    private String getProcessedDate(String date){
-        String[] months = {"Jan","Feb","Mar","Apr","may","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-        String[] YMD = date.split("-");
-        return YMD[2]+months[Integer.parseInt(YMD[1])-1]+"'"+YMD[0].substring(2);
-    }
-
     private void voteLove(String urlToFire, ImageButton loveButton){
         ServerManager serverManager = new ServerManager();
         serverManager.voteLove(urlToFire,getActivity(),loveButton);
     }
-
-    private void loadProfile(String contactNumber){
-        /*FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        Fragment newFragment = Profile.newInstance(contactNumber,"b");
-        // Replace whatever is in the fragment_container view with this fragment,
-        // and add the transaction to the back stack if needed
-        transaction.replace(R.id.allContactDisplay, newFragment);
-        transaction.addToBackStack(null);
-        transaction.commitAllowingStateLoss();*/
-        final Dialog fbDialogue = new Dialog(view.getContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-        fbDialogue.getWindow().setBackgroundDrawable(new ColorDrawable(Color.argb(100, 0, 0, 0)));
-
-        dialogView = mainInflater.inflate(R.layout.fragment_profile, mainContainer, false);
-    }
-
-    public static ImageButton playOrStopButton;
-    public static ProgressBar currentNotificationSpinner;
 
     public void playSong(ImageButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName, ProgressBar spinner){
         Log.e("Nota_Frag2", currentClickedButton.getId() + "");
@@ -558,18 +497,63 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     currentPlayButton.setImageResource(R.drawable.playdedicate);
                 }
             });
-        } catch (IllegalArgumentException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
-        } catch (IllegalStateException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
-        } catch (IOException e) {toastError(e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
-        } catch (Exception e) {toastError(e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (IllegalArgumentException e) {printMsg("NotificationFragment_Err",e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (IllegalStateException e) {printMsg("NotificationFragment_Err",e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (IOException e) {printMsg("NotificationFragment_Err",e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
+        } catch (Exception e) {printMsg("NotificationFragment_Err",e.getMessage()); releaseMediaPlayerObject(mp); e.printStackTrace();
         }
     }
 
-    /*Toast error message*/
-    public static void toastError(String error) {
-        //Toast.makeText(view.getContext(), "Oops! Somehing went wrong\n"+error.toString(), Toast.LENGTH_LONG).show();
-        Log.e("Notification_issue",error);
+    public void monitorLiveNotifications() {
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        final DatabaseReference allNotificationsNode = firebaseDatabase.getReference().child("allNotifications");
+        final DatabaseReference
+                    dbRefForallNotificationsNode = allNotificationsNode.child(singleTonUser.getUserMobileNumber());
+
+        dbRefForallNotificationsNode.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    printMsg("NotificationFragment", "New notifications added, so lets invoke the READ from Cloud..");
+                    serverManager.readNotificationsFromServerAndWriteToInternalDB();
+                }
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+        });
+
+        final DatabaseReference
+                dbRefForrebuildPanelStateNode = allNotificationsNode.child("rebuildPanelState").child(singleTonUser.getUserMobileNumber());
+        dbRefForrebuildPanelStateNode.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                printMsg("NotificationFragment", "Gonna invoke the designNotPanel() if rebuildPanelState is 1");
+                if(dataSnapshot.getValue(Integer.class) == 1) {
+                    printMsg("NotificationFragment", "rebuildPanelState is 1");
+                    dbRefForrebuildPanelStateNode.setValue(0);
+                    designNotPanel(view);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
+
 
     /*release and return the nullified mediaplayer object*/
     public static void releaseMediaPlayerObject(MediaPlayer mp) {
@@ -582,24 +566,39 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         } catch(Exception e){e.fillInStackTrace();e.printStackTrace();}
     }
 
-    public int leftButtonHeight,leftButtonWidth,rightButtonHeight,rightButtonWidth,textViewWidth,textViewHeight;
-    public void setSizes(){
-        Display display = getActivity().getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
-        int height = size.y;
-        Log.e("NotFrag",height+"");
-        leftButtonWidth = (int)Math.floor(0.15*width);
-        textViewWidth = (int)Math.floor(0.70*width);
-        rightButtonWidth = (int)Math.floor(0.2*width);
-        leftButtonHeight = rightButtonHeight = textViewHeight = (int)Math.ceil(.0625*height);
+    Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            seekUpdation();
+        }
+    };
 
+    public void seekUpdation() {
+        try {
+            if (mp!=null || currentSeekBar!=null) {
+                currentSeekBar.setProgress(mp.getCurrentPosition());
+                if(currentSeekBar.getMax()!=0) {
+                    seekHandler.postDelayed(run, 10);
+                }
+            }
+        } catch(Exception e) {
+        }
     }
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+
+    private String getProcessedDate(String date){
+        String[] months = {"Jan","Feb","Mar","Apr","may","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+        String[] YMD = date.split("-");
+        return YMD[2]+months[Integer.parseInt(YMD[1])-1]+"'"+YMD[0].substring(2);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
     @Override
@@ -621,7 +620,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         }
         super.onDetach();
     }
-
     @Override
     public void onDestroy() {
         Log.e("Notification_onDestroy", "Notification on Destroy");
@@ -640,4 +638,18 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         void onFragmentInteraction(Uri uri);
     }
 
+    //-------------------------Some Extra Code, Might be required later----------------------------------------
+    /*public void setSizes(){
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        Log.e("NotFrag",height+"");
+        leftButtonWidth = (int)Math.floor(0.15*width);
+        textViewWidth = (int)Math.floor(0.70*width);
+        rightButtonWidth = (int)Math.floor(0.2*width);
+        leftButtonHeight = rightButtonHeight = textViewHeight = (int)Math.ceil(.0625*height);
+
+    }*/
 }

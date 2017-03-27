@@ -39,12 +39,19 @@ public class NotificationManagerDaoImpl implements NotificationManagerDaoInterfa
         try{
             printMsg("NotificationManagerDaoImpl", "Came to create nodes for dedicator and dedicate :P in cloud DB..");
             // New dedicate entry in current user Node
-            dbRef = mRootRef.child(fromUser).child(toUser+"@"+ts);
+            dbRef = mRootRef.child(fromUser).child(fromUser+"@"+toUser+"@"+ts);
             dbRef.setValue(fromUser+"#"+toUser+"#"+(currentMood+"@"+currentSong)+"#"+type+"#"+ts);
             // New dedicate entry in dedicated person's Node
-            dbRef = mRootRef.child(toUser).child(fromUser+"@"+ts);
+            dbRef = mRootRef.child(toUser).child(fromUser+"@"+toUser+"@"+ts);
             dbRef.setValue(fromUser+"#"+toUser+"#"+(currentMood+"@"+currentSong)+"#"+type+"#"+ts);
             printMsg("NotificationManagerDaoImpl", "Nodes for dedicator and dedicate :P in cloud DB successful..");
+
+            // Causes Invoke of NotificationBuilder from async listener----------------------------------------
+            dbRef = mRootRef.child("rebuildPanelState").child(fromUser);
+            dbRef.setValue(1);
+            dbRef = mRootRef.child("rebuildPanelState").child(toUser);
+            dbRef.setValue(1);
+
             return true;
         }catch(Exception ee){
             printMsg("NotificationManagerDaoImpl", "ERROR!! Dedicating module broke while creating nodes in cloud DB..");
