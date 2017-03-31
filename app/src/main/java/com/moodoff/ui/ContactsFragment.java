@@ -384,6 +384,7 @@ public class ContactsFragment extends Fragment{
             dbRefForLiveFeedMoodType.addChildEventListener(new ChildEventListener() {
                   @Override
                   public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                      Log.e("ContactsFragment", "Called for monitoring the children..");
                       String value = dataSnapshot.getValue().toString();
                       if(value.length() == 1) {
                           moodTypeAndLiveStatus.put("liveNow",value);

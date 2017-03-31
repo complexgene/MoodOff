@@ -166,7 +166,7 @@ public class AllTabs extends AppCompatActivity implements SelectsongFragment.OnF
     protected void onDestroy() {
         super.onDestroy();
         LoggerBaba.printMsg("AllTabs", "In onDestroy() of AllTabs activity trying to exit from the live Mood..");
-        new ServerManager().exitLiveMood(singleTonUser.getUserMobileNumber());
+        GenericMood.AmStillHere = false;
         GenericMood.releaseMediaPlayerObject();
         NotificationFragment.releaseMediaPlayerObject(NotificationFragment.mp);
         Profile.releaseMediaPlayerObject(Profile.mediaPlayer);

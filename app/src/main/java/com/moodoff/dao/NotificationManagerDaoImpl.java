@@ -1,12 +1,23 @@
 package com.moodoff.dao;
 
+import android.util.Log;
+import android.widget.ImageButton;
+import android.widget.Toast;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.moodoff.R;
 import com.moodoff.helper.ServerManager;
+import com.moodoff.model.User;
 
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import static com.moodoff.helper.AllAppData.serverURL;
 import static com.moodoff.helper.LoggerBaba.printMsg;
 
 /**
@@ -56,6 +67,17 @@ public class NotificationManagerDaoImpl implements NotificationManagerDaoInterfa
         }catch(Exception ee){
             printMsg("NotificationManagerDaoImpl", "ERROR!! Dedicating module broke while creating nodes in cloud DB..");
             return false;
+        }
+    }
+
+    public void likeTheDedicatedSong(String fromUserNumber, String toUserNumber, String currentMoodType, String currentSong, String timeStamp) {
+        try {
+            printMsg("NotificationManagerDaoImpl", "likedTheDedicatedSong():Came to love the dedicated song with details:" + fromUserNumber+" "+toUserNumber+" "+timeStamp+" ");
+            dbRef = mRootRef.child(toUserNumber).child(fromUserNumber+"@"+toUserNumber+"@"+timeStamp);
+            dbRef.setValue(fromUserNumber+"#"+toUserNumber+"#"+(currentMoodType+"@"+currentSong)+"#5#"+timeStamp);
+            printMsg("NotificationManagerDaoImpl", "likedTheDedicatedSong():Loving the dedicated song with details:" + fromUserNumber+" "+toUserNumber+" "+timeStamp+" is DONE!!");
+        } catch (Exception ee) {
+            printMsg("NotificationManagerDaoImpl", "ERROR!! Liking the dedicated song experienced ISSUE!!");
         }
     }
 }

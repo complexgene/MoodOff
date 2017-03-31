@@ -14,6 +14,7 @@ public class User {
     private String userAudioStatusSong;
     private int userScore;
     private int userNumberOfOldNotifications;
+    private int userNumberOfOldLikedDedicates;
     private static User instance;
 
     private User(){
@@ -67,6 +68,13 @@ public class User {
     public void setUserNumberOfOldNotifications(int userNumberOfOldNotifications) {
         this.userNumberOfOldNotifications = userNumberOfOldNotifications;
     }
+    public int getUserNumberOfOldLikedDedicates() {
+        return userNumberOfOldLikedDedicates;
+    }
+    public void setUserNumberOfOldLikedDedicates(int userNumberOfOldLikedDedicates) {
+        this.userNumberOfOldLikedDedicates = userNumberOfOldLikedDedicates;
+    }
+
     public String toString(){
         return userMobileNumber + "|" + userName + "|" + userDateOfBirth + "|" + userTextStatus + "|"
                 + userAudioStatusSong + "|" + userNumberOfOldNotifications + "|" +userScore;

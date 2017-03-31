@@ -81,6 +81,7 @@ public class UserManagementService {
             rd.createNewData(AllAppData.userAudioStatus, singleTonUser.getUserAudioStatusSong());
             rd.createNewData(AllAppData.userScore,String.valueOf(singleTonUser.getUserScore()));
             rd.createNewData(AllAppData.userNumberOfOldNotifications,String.valueOf(singleTonUser.getUserNumberOfOldNotifications()));
+            rd.createNewData(AllAppData.userNumberOfOldLikedDedicates, String.valueOf(singleTonUser.getUserNumberOfOldLikedDedicates()));
             rd.endWriteTransaction();
             printMsg("UserManagementService","Creating text file in local and writing user data to that completed..");
             return true;

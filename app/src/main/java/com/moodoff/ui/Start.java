@@ -174,9 +174,9 @@ public class Start extends AppCompatActivity {
                 allProfilesDataFetchNotComplete = false;
                 // Get and separate all the contacts based on who uses app and who doesn't uses from the internal table.
                 fetchContacts();
-                /*while (fetchContactsNotComplete) ;
+                while (fetchContactsNotComplete) ;
                 fetchNotifications();
-                */// Distinguishes who uses app and who don't
+                // Distinguishes who uses app and who don't
                 fetchContactsFromServer();
                 //fetchAllProfilesData();
                 Log.e("Start_FILEREADS", "DONE..");
@@ -207,6 +207,22 @@ public class Start extends AppCompatActivity {
             }
         }
     }
+
+    private void fetchNotifications() {
+        try {
+            Log.e("NotificationFragment","fetchNotifications(): Start loading notifications from Internal DB");
+            ArrayList<String> allNotificationsFromDB = dbOperations.readNotificationsFromInternalDB();
+            AllAppData.allNotifications = allNotificationsFromDB;
+            AllAppData.totalNoOfNot = allNotificationsFromDB.size();
+            //NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
+            Log.e("NotificationFragment","fetchNotifications(): Fetched " + AllAppData.totalNoOfNot + " notifications from internal DB..");
+            notificationFetchNotComplete = false;
+        } catch (Exception ee) {
+            Log.e("NotificationFragmentErr", "fetchNotifications():" + ee.getMessage());
+            ee.printStackTrace();
+        }
+    }
+
     private boolean checkNetworkAvailability(){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

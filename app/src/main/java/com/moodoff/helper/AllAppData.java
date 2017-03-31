@@ -23,8 +23,8 @@ public class AllAppData {
     public static HashMap<String,ArrayList<String>> allMoodPlayList = new HashMap<>();
     public static HashMap<String,HashMap<String,String>> allProfileData = new HashMap<>();
     public static int totalNoOfNot = 0;
-    public static int lovedDedicateOldCount = 0;
-    public static int lovedDedicateNewCount = 0;
+    //public static int numberOfLikedDedicatesOldCount = 0;
+    public static int numberOfLikedDedicatesCurrentServerCount = 0;
     public static ArrayList<String> allNotifications;
     public static int noOfFriendUsesTheApp = 0;
     public static String backPressedFragement="";
@@ -62,9 +62,10 @@ public class AllAppData {
     public static String userTextStatusLoveCount = "userTextStatusLoveCount";
     public static String userAudioStatusLoveCount = "userAudioStatusLoveCount";
     public static String userNumberOfOldNotifications = "userNumberOfOldNotifications";
+    public static String userNumberOfOldLikedDedicates = "userNumberOfOldLikedDedicates";
     public static String userScore = "userScore";
-    public static String likedTextStatusLine = " liked your text status";
-    public static String likedAudioStatusLine = " liked your audio status";
+    public static String likedTextStatusLine = " liked the text status";
+    public static String likedAudioStatusLine = " liked the audio status";
     public static String defaultAudioStatusSong = "romantic/HERO.mp3";
     // >> Mood Related
     public static String moodLiveFeedNode = "liveMoodFeeds";

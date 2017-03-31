@@ -9,6 +9,7 @@ import android.util.Log;
 import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.LoggerBaba;
 import com.moodoff.helper.Messenger;
+import com.moodoff.model.NotificationDetailsPojo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,26 +39,37 @@ public class ParseNotificationData {
         return allContactNumbersInServer;
     }
 
-    public static ArrayList<String> getNotification(String raw_json) {
+    public static ArrayList<NotificationDetailsPojo> getNotification(String raw_json, String userMobileNumber) {
         int lovedDedicateServerCount = 0;
         String strJson = raw_json;
-        ArrayList<String> allNotifications = new ArrayList<>();
+        ArrayList<NotificationDetailsPojo> allNotifications = new ArrayList<>();
         try {
             JSONObject jsonRootObject = new JSONObject(strJson);
             Iterator<String> allTS = jsonRootObject.keys();
             while (allTS.hasNext()) {
+                NotificationDetailsPojo notificationDetails = new NotificationDetailsPojo();
+
                 String key = allTS.next();
                 String[] allData = jsonRootObject.get(key).toString().split("#");
                 String fromUser = allData[0];
                 String toUser = allData[1];
                 String songName = allData[2];
                 String type = allData[3];
-                if (type.equals("5")) lovedDedicateServerCount++;
+                if (!toUser.trim().equals(userMobileNumber) && type.equals("5")) {
+                    lovedDedicateServerCount++;
+                }
                 String ts = allData[4];
 
-                allNotifications.add(fromUser + " " + toUser + " " + ts + " " + type + " " + songName);
+                notificationDetails.setFromUser(fromUser);
+                notificationDetails.setToUser(toUser);
+                notificationDetails.setSongName(songName);
+                notificationDetails.setType(type);
+                notificationDetails.setSendDone(true);
+                notificationDetails.setTimeStamp(ts);
+
+                allNotifications.add(notificationDetails);
             }
-            Log.e("ParseNotification", allNotifications.toString());
+            AllAppData.numberOfLikedDedicatesCurrentServerCount = lovedDedicateServerCount;
             return allNotifications;
         } catch (JSONException e) {
             e.printStackTrace();

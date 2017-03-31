@@ -33,6 +33,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
 import com.moodoff.R;
 import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.DBHelper;
@@ -159,6 +160,8 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         view = inflater.inflate(R.layout.fragment_generic_mood, container, false);
         //view.setBackgroundColor(Color.WHITE);
         init();
+        keepPingingToTellUAreAlive();
+
         fileOperations.beginReadTransaction();
         String optionLastSelectedByUser = fileOperations.getValueFor("lastOption_" + currentMood);
         fileOperations.endReadTransaction();
@@ -1194,13 +1197,23 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
         Log.e("GenericMood", "GM on Detach");
         if(AllTabs.mViewPager.getCurrentItem()==0) {
             releaseMediaPlayerObject();
+            /*
             ServerManager serverManager = new ServerManager();
             serverManager.exitLiveMood(singleTonUser.getUserMobileNumber());
+            */
+            AmStillHere = false;
             mListener = null;
             playOrPauseParm = 0;
         }
         super.onDetach();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        AmStillHere = true;
+    }
+
     @Override
     public void onDestroy() {
         try {
@@ -1219,5 +1232,24 @@ public class GenericMood extends Moods implements View.OnClickListener,AudioMana
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public static boolean AmStillHere = true;
+    ServerManager serverManager = new ServerManager();
+    public void keepPingingToTellUAreAlive() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(AmStillHere) {
+                            serverManager.keepPingingToStayAlive(singleTonUser.getUserMobileNumber());
+                        }
+                    }
+                }).start();
+                keepPingingToTellUAreAlive();
+            }
+        },12000);
     }
 }

@@ -29,7 +29,9 @@ public class UserManagementdaoImpl implements UserManagementdaoInterface {
     private DatabaseReference allUserDetailsNode = firebaseDatabase.getReference().child("allusers");
     private DatabaseReference onlyUserPhoneNumbersNode = firebaseDatabase.getReference().child("userlist");
     private DatabaseReference liveFeedNode = firebaseDatabase.getReference().child("livefeed");
-    private DatabaseReference dbRefForAllNotificationsNode, dbRefForAllUserDetailsNode, dbRefForOnlyUserPhoneNumbersNode, dbRefForLiveFeed;
+    private DatabaseReference checkAliveNode = firebaseDatabase.getReference().child("checkAlive");
+
+    private DatabaseReference dbRefForAllNotificationsNode, dbRefForAllUserDetailsNode, dbRefForOnlyUserPhoneNumbersNode, dbRefForLiveFeed, dbRefForCheckAlive;
     //--------------------------------------------------------------------------------------------
 
     public boolean storeUserDataToCloudDB(User singleTonUser){
@@ -242,9 +244,15 @@ public class UserManagementdaoImpl implements UserManagementdaoInterface {
     }
     public void setLiveMood(String userMobileNumber, UserLiveMoodDetailsPojo userLiveMoodDetails) {
         try {
+
             printMsg("UserManagementDaoImpl", "Came to set the mood for the current user:" + userMobileNumber);
-            dbRefForLiveFeed = liveFeedNode.child(userMobileNumber).child(AllAppData.moodLiveFeedNode).child(AllAppData.userLiveMood);
-            dbRefForLiveFeed.setValue(userLiveMoodDetails);
+            dbRefForCheckAlive = checkAliveNode.child(userMobileNumber);
+            dbRefForCheckAlive.setValue(AllAppData.getTodaysDateAndTime());
+
+            dbRefForLiveFeed = liveFeedNode.child(userMobileNumber).child(AllAppData.moodLiveFeedNode).child(AllAppData.userLiveMood).child("moodType");
+            dbRefForLiveFeed.setValue(userLiveMoodDetails.getMoodType());
+            dbRefForLiveFeed = liveFeedNode.child(userMobileNumber).child(AllAppData.moodLiveFeedNode).child(AllAppData.userLiveMood).child("liveNow");
+            dbRefForLiveFeed.setValue(userLiveMoodDetails.getLiveNow());
             dbRefForLiveFeed = liveFeedNode.child(userMobileNumber).child(AllAppData.moodLiveFeedNode).child(AllAppData.timeStamp);
             dbRefForLiveFeed.setValue(AllAppData.getTodaysDateAndTime());
             dbRefForLiveFeed = liveFeedNode.child(userMobileNumber).child(AllAppData.moodLiveFeedNode).child(AllAppData.userMoodLikeCount);
@@ -254,6 +262,7 @@ public class UserManagementdaoImpl implements UserManagementdaoInterface {
             dbRefForLiveFeed = liveFeedNode.child(userMobileNumber).child(AllAppData.moodLiveFeedNode).child(AllAppData.userMoodSadCount);
             dbRefForLiveFeed.removeValue();
             printMsg("UserManagementDaoImpl", "Setting the mood for the current user done.");
+
         }
         catch(Exception ee) {
             printMsg("UserManagementDaoImpl", "ERROR!! Setting current mood couldn't be done in cloud DB!!");
@@ -263,5 +272,11 @@ public class UserManagementdaoImpl implements UserManagementdaoInterface {
         dbRefForAllNotificationsNode = allNotificationsNode.child("rebuildStatePanel").
                 child(userMobileNumber);
         dbRefForAllNotificationsNode.setValue(1);
+    }
+    public void keepPingingToStayAlive(String userMobileNumber) {
+        printMsg("UserManagementDaoImpl", "Came here to ping and keep the live mood alive..");
+        dbRefForCheckAlive = checkAliveNode.child(userMobileNumber);
+        dbRefForCheckAlive.setValue(AllAppData.getTodaysDateAndTime());
+        printMsg("UserManagementDaoImpl", "Ping and keeping the live mood alive DONE..");
     }
 }

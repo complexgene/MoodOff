@@ -7,9 +7,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
 import android.util.Log;
 
+import com.moodoff.model.NotificationDetailsPojo;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 /**
@@ -168,6 +173,15 @@ public class DBHelper extends SQLiteOpenHelper {
             if(type.equals("5"))countLoveType++;
             final int send_done = resultSet.getInt(4);
             final String timestamp = resultSet.getString(5);
+
+            NotificationDetailsPojo notificationDetailsObject = new NotificationDetailsPojo();
+            notificationDetailsObject.setFromUser(from_user);
+            notificationDetailsObject.setToUser(to_user);
+            notificationDetailsObject.setType(type);
+            notificationDetailsObject.setSendDone((send_done==1)?true:false);
+            notificationDetailsObject.setSongName(fileName);
+            notificationDetailsObject.setTimeStamp(timestamp);
+
             String data = from_user+" "+to_user+" "+timestamp+" "+type+" "+fileName;
             allNotifications.add(data);
             //Log.e("DBHelper_RDNot",data);
@@ -176,27 +190,43 @@ public class DBHelper extends SQLiteOpenHelper {
         Log.e("DBHelper", "Reading of the notifications from the Internal DB -> DONE");
         return allNotifications;
     }
-    public void writeNewNotificationsToInternalDB(ArrayList<String> newNotifications){
+    public int INT(String val){return Integer.parseInt(val);}
+    public void writeNewNotificationsToInternalDB(ArrayList<NotificationDetailsPojo> newNotifications){
         Log.e("DBHelper", "Came to write the newly arrived notifications to internal DB..");
+
+        Collections.sort(newNotifications, new Comparator<NotificationDetailsPojo>() {
+            @Override
+            public int compare(NotificationDetailsPojo notificationDetails1, NotificationDetailsPojo notificationDetails2) {
+                String[] YMDOfNotification1 = notificationDetails1.getTimeStamp().split("_")[0].split("-"),
+                        YMDOfNotification2 = notificationDetails2.getTimeStamp().split("_")[0].split("-");
+                String[] HMSOfNotification1 = notificationDetails1.getTimeStamp().split("_")[1].split(":"),
+                        HMSOfNotification2 = notificationDetails2.getTimeStamp().split("_")[1].split(":");
+
+                Calendar c1 = Calendar.getInstance();
+                c1.set(INT(YMDOfNotification1[0]),INT(YMDOfNotification1[1]),INT(YMDOfNotification1[2]),INT(HMSOfNotification1[0]),INT(HMSOfNotification1[1]),INT(HMSOfNotification1[2]));
+                Calendar c2 = Calendar.getInstance();
+                c2.set(INT(YMDOfNotification2[0]),INT(YMDOfNotification2[1]),INT(YMDOfNotification2[2]),INT(HMSOfNotification2[0]),INT(HMSOfNotification2[1]),INT(HMSOfNotification2[2]));
+
+                return c2.compareTo(c1);
+            }
+        });
+
         myDatabaseWritable = getWritableDatabase();
         ArrayList<String> loveUpdateMarkerQueries = new ArrayList<>();
-        for(String eachNotification : newNotifications){
-            Log.e("DBHelper",eachNotification);
-            String[] allData = eachNotification.split(" ");
-            String fromUser = allData[0];
-            String toUser = allData[1];
-            String ts = allData[2];
+        for(NotificationDetailsPojo notificationObject : newNotifications){
+            String fromUser = notificationObject.getFromUser();
+            String toUser = notificationObject.getToUser();
+            String ts = notificationObject.getTimeStamp();
             String timeSplit[] = ts.split("_");
             String date = timeSplit[0];
             String time = timeSplit[1];
-            //time = time.substring(0,time.lastIndexOf(":"));
-            String type = allData[3];
-            String fileName = allData[4];
+            String type = notificationObject.getType();
+            String sendDone = (notificationObject.isSendDone())?"1":"0";
+            String fileName = notificationObject.getSongName();
 
-            String queryToFire = "insert into rnotifications values('"+fromUser+"','"+toUser+"','"+fileName+"','"+type+"',0,'"+(date+" "+time)+"');";
+            String queryToFire = "insert into rnotifications values('"+fromUser+"','"+toUser+"','"+fileName+"','"+type+"','"+sendDone+"','"+(date+" "+time)+"');";
                 myDatabaseWritable.execSQL(queryToFire);
 
-            Log.e("DBHelper_STATUSTYPE",queryToFire);
         }
         for(String eachUpdateQuery : loveUpdateMarkerQueries){
             myDatabaseWritable.execSQL(eachUpdateQuery);

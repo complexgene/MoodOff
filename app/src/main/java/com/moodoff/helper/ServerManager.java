@@ -28,6 +28,7 @@ import com.moodoff.dao.NotificationManagerDaoImpl;
 import com.moodoff.dao.NotificationManagerDaoInterface;
 import com.moodoff.dao.UserManagementdaoImpl;
 import com.moodoff.dao.UserManagementdaoInterface;
+import com.moodoff.model.NotificationDetailsPojo;
 import com.moodoff.model.User;
 import com.moodoff.model.UserLiveMoodDetailsPojo;
 import com.moodoff.ui.AllTabs;
@@ -52,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import static com.moodoff.helper.AllAppData.getAppDirectoryPath;
 import static com.moodoff.helper.AllAppData.serverURL;
 import static com.moodoff.helper.LoggerBaba.printMsg;
 
@@ -150,8 +152,8 @@ public class ServerManager{
     public void setLiveMood(final String userMobileNumber, UserLiveMoodDetailsPojo userLiveMoodDetails){
         userManagementDao.setLiveMood(userMobileNumber, userLiveMoodDetails);
     }
-    public void exitLiveMood(final String userMobileNumber){
-        //userManagementDao.exitLiveMood(userMobileNumber);
+    public void keepPingingToStayAlive(final String userMobileNumber){
+        userManagementDao.keepPingingToStayAlive(userMobileNumber);
     }
 
     //------------------------- LIVE FEED FUNCTIONS COMPLETE---------------------------------------------------
@@ -235,12 +237,16 @@ public class ServerManager{
     public void readNotificationsFromServerAndWriteToInternalDB(){
         final String userMobileNumber = singleTonUser.getUserMobileNumber();
         final String serverURL = AllAppData.serverURL;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
                 new Thread(new Runnable() {
                     HttpURLConnection urlConnection = null;
                     InputStreamReader isr = null;
                     @Override
                     public void run() {
                         try {
+                            Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB(): Notification check from cloud every 10 secs");
                             URL url = new URL(serverURL + "/allNotifications/" + userMobileNumber + ".json");
                             Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB(): " + url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
@@ -252,9 +258,8 @@ public class ServerManager{
                                 response.append((char) data);
                                 data = isr.read();
                             }
-                            Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB():" + response.toString());
-                            ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
-
+                            ArrayList<NotificationDetailsPojo> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString(), singleTonUser.getUserMobileNumber());
+                            //printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB():" + allYourNotificationFromServer);
                             currentNumberOfNotifications = allYourNotificationFromServer.size();
                             oldNumberOfNotifications = AllAppData.totalNoOfNot;
                             //------TRUE : We got some new notifications-----------------------------------------//
@@ -272,8 +277,44 @@ public class ServerManager{
                                 AllAppData.totalNoOfNot = currentNumberOfNotifications;
                                 //---------------------Display notifications to User for new Notifications--------------------//
                                 displayAlertNotificationOnTopBarOfPhone(context, (currentNumberOfNotifications - oldNumberOfNotifications));
-
+                                NotificationFragment.signalledForDesign = true;
                             }
+                            else {
+                                printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: Came to count the number of dedicates");
+                                StoreRetrieveDataInterface fileOpr = new StoreRetrieveDataImpl(AllAppData.userDetailsFileName);
+                                fileOpr.beginReadTransaction();
+                                int currentNumberOfLikedDedicates = Integer.parseInt(fileOpr.getValueFor(AllAppData.userNumberOfOldLikedDedicates));
+                                fileOpr.endReadTransaction();
+                                printMsg("ServerManager", currentNumberOfLikedDedicates + " ---> " + AllAppData.numberOfLikedDedicatesCurrentServerCount);
+                                if (currentNumberOfLikedDedicates < AllAppData.numberOfLikedDedicatesCurrentServerCount) {
+                                    printMsg("ServerManager", "SuperB!!!! Some new dedicates, DELETE ALL NOTS FROM INTERNAL DB -> READ FROM CLOUD -> REFRESH NOT VIEW");
+                                    //-------Delete all notifications from Internal DB----------------------------//
+                                    printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB: delete all notifications from Internal DB");
+                                    dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
+                                    //-------Write all the read notifications from cloud to Internal DB---------------//
+                                    printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB: write all notifications got from cloud to Internal DB");
+                                    dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
+                                    //-----------------Update the variables that holds info about notifications---------------//
+                                    printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB: read all notifications from Internal DB");
+                                    AllAppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
+                                    printMsg("ServerManager","readNotificationsFromServerAndWriteToInternalDB: read all notifications from Internal DB is DONE");
+                                    // This line is redundant as this left value is not gonna change anyway. If so, it would hve landed in IF block.
+                                    AllAppData.totalNoOfNot = currentNumberOfNotifications;
+
+                                    //---------------------Display notifications to User for new Notifications--------------------//
+                                    fileOpr.beginWriteTransaction();
+                                    fileOpr.updateValueFor(AllAppData.userNumberOfOldLikedDedicates, ""+AllAppData.numberOfLikedDedicatesCurrentServerCount);
+                                    fileOpr.endWriteTransaction();
+                                    ((Activity)context).runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Messenger.print(context, "!!Your dedicates were liked!!");
+                                        }
+                                    });
+                                    NotificationFragment.signalledForDesign = true;
+                                }
+                            }
+
                         } catch (Exception ee) {
                             Log.e("ServerManager_Not_Err1", "readNotificationsFromServerAndWriteToInternalDB():" + ee.getMessage() + ee.fillInStackTrace().toString());
                             ee.printStackTrace();
@@ -281,6 +322,9 @@ public class ServerManager{
                         }
                     }
                 }).start();
+                readNotificationsFromServerAndWriteToInternalDB();
+            }
+        },10000);
     }
     public boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type){
         boolean writeToCloudDBIsSuccessful = notificationManagerDao.writeSongDedicateToCloudDB(ts, fromUser, toUser, currentMood, currentSong, type);
@@ -339,7 +383,7 @@ public class ServerManager{
                         }
                         ViewPager mViewPager = AllTabs.mViewPager;
                         mViewPager.getAdapter().notifyDataSetChanged();
-                        Toast.makeText(context, singleTonUser.getUserName() + "! You got new notifications!!",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(context, singleTonUser.getUserName() + "! You got new notifications!!",Toast.LENGTH_LONG).show();
                     }
                     else{
                         Log.e("ServerManager","App is running in background..");
@@ -364,44 +408,8 @@ public class ServerManager{
         Ringtone r = RingtoneManager.getRingtone(currActivity, notification);
         r.play();
     }
-    public boolean voteLove(final String urlAPI, final Activity curActivity, final ImageButton loveButton) {
-        new Thread(new Runnable() {
-            HttpURLConnection urlConnection = null;
-            InputStreamReader isr = null;
-            @Override
-            public void run() {
-                try {
-                    Log.e("ServerManager_Not","Start loving the notification");
-                    URL url = new URL(serverURL+ "/notifications/" + urlAPI);
-                    Log.e("ServerManager_ReadURL", url.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setDoOutput(true);
-                    int responseCode = urlConnection.getResponseCode();
-                    if(responseCode==200){
-                        curActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(curActivity.getApplicationContext(),"You loved a dedicate",Toast.LENGTH_SHORT).show();
-                                loveButton.setImageResource(R.drawable.like_s);
-                            }
-                        });
-                    }
-                    else{
-                        curActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(curActivity.getApplicationContext(),"Sorry!! Please try after sometime!!",Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                    Log.e("ServerManager_Not_Read", "Notification read complete from server");
-                } catch (Exception ee) {
-                    Log.e("ServerManager_Not_Err2", ee.getMessage());
-                    ee.printStackTrace();
-                }
-            }
-        }).start();
-        return false;
+    public void likeTheDedicatedSong(String fromUserNumber, String toUserNumber, String currentMoodType, String currentSong, String timeStamp) {
+        notificationManagerDao.likeTheDedicatedSong(fromUserNumber, toUserNumber, currentMoodType, currentSong, timeStamp);
     }
 
     private String getStoryName(){return "story"+new Random().nextInt(16)+".txt";}

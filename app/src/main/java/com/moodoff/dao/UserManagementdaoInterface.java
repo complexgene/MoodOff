@@ -23,4 +23,5 @@ public interface UserManagementdaoInterface {
     void writeTextStatusChange(String userMobileNumber, final String newTextStatus, Activity curActivity, final TextView userTextStatus);
     void writeAudioStatusChange(String userMobileNumber, final String newTextStatus, Activity curActivity, final TextView userTextStatus);
     void setRebuildNotificationPanelNodeInCloud(String userMobileNumber);
+    void keepPingingToStayAlive(String userMobileNumber);
 }

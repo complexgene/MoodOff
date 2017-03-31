@@ -181,6 +181,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         singleTonUser.setUserAudioStatusSong(userAudioStatus);
                         singleTonUser.setUserScore(userScore);
                         singleTonUser.setUserNumberOfOldNotifications(0);
+                        singleTonUser.setUserNumberOfOldLikedDedicates(0);
                         printMsg("RegistrationActivity","Creating User POJO done..");
                         if(userManagementService.createUserProfileFileinLocal(singleTonUser)){
                             if(userManagementService.registerUser(singleTonUser)){

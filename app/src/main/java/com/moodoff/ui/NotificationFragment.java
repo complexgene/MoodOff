@@ -46,6 +46,7 @@ import com.moodoff.helper.StoreRetrieveDataImpl;
 import com.moodoff.helper.StoreRetrieveDataInterface;
 import com.moodoff.helper.ValidateMediaPlayer;
 import com.moodoff.model.User;
+import com.moodoff.service.NotificationService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +55,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static com.moodoff.helper.AllAppData.serverURL;
 import static com.moodoff.helper.LoggerBaba.printMsg;
@@ -111,7 +113,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         AllTabs.tabNames.add("Moods");AllTabs.tabNames.add("Activity");AllTabs.tabNames.add("Profiles");
         viewPager.getAdapter().notifyDataSetChanged();
         fileOpr.beginWriteTransaction();
-        fileOpr.updateValueFor("numberOfOldNotifications","0");
+        fileOpr.updateValueFor(AllAppData.userNumberOfOldNotifications,"0");
         fileOpr.endWriteTransaction();
     }
     @Override
@@ -141,6 +143,31 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     }
 
 
+    public static boolean signalledForDesign = false;
+    public void checkIfNeedToCallDesignNotPanel(){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(signalledForDesign) {
+
+                            signalledForDesign = false;
+                            Log.e("NotificationFragee", ""+view.getId());
+                            ((Activity)ctx).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    designNotPanel(view);
+                                }
+                            });
+                        }
+                    }
+                }).start();
+                checkIfNeedToCallDesignNotPanel();
+            }
+        },1000);
+    }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
@@ -153,9 +180,14 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
 
         init();
 
-        //fetchNotifications();
+        Log.e("NotificationFrag", ""+view.getId());
 
-        monitorLiveNotifications();
+        designNotPanel(view);
+
+        checkIfNeedToCallDesignNotPanel();
+
+        serverManager.readNotificationsFromServerAndWriteToInternalDB();
+        //monitorLiveNotifications();
 
         return view;
     }
@@ -196,6 +228,7 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             String[] componentsInNotification = allNotifications.get(i).split(" ");
             final String fromUserNumber = componentsInNotification[0];
             String fromUserName = allReadContacts.get(fromUserNumber);
+            final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
             if(fromUserNumber.equals(userData.getUserMobileNumber())){
                     fromUserName = "You";
             }
@@ -216,8 +249,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     if(toUserName == null)
                         toUserName = toUserNumber;
             }
-
-            final String songName = componentsInNotification[5];
 
             // Each notification layout
             boolean isCurrentUser = fromUserName.trim().equals("You");
@@ -251,9 +282,12 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
                     if(fromUserNumber.equals(userData.getUserMobileNumber()))
                         Messenger.print(getContext(),"You can't like your own dedicated songs!!");
                     else {
-                        String urlToFire = fromUserNumber + "/" + toUserNumber + "/" + date + "_" + time + "/5";
-                        //loadProfile(toUserNumber);
-                        voteLove(urlToFire, loveButton);
+                        NotificationService notificationService = new NotificationService(getActivity());
+                        String[] moodTypeAndSong = songFileName.split("@");
+                        String currentMoodType = moodTypeAndSong[0];
+                        String currentSong = moodTypeAndSong[1];
+                        notificationService.likeTheDedicatedSong(fromUserNumber, toUserNumber, currentMoodType, currentSong, date + "_" + time);
+                        loveButton.setImageResource(R.drawable.like_s);
                     }
                 }
             });
@@ -375,7 +409,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             notificationProgressBar.setVisibility(View.GONE);
 
             // Play button
-            final String songFileName = allNotifications.get(i).substring(allNotifications.get(i).lastIndexOf(" ")).trim();
             final ImageButton playImageButton = new ImageButton(view.getContext());
             playImageButton.setBackgroundResource(0);
             playImageButton.setId(i);
@@ -414,15 +447,10 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
             currentSeekBar.setEnabled(true);
             seekUpdation();
             currentPlayingButton = (ImageButton)view.findViewById(currentPlayButtonId+difference);
-            currentPlayingButton.setImageResource(R.drawable.stop);
+            currentPlayingButton.setImageResource(R.drawable.stopdedicate);
             //currentPlayingButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(255,0,0)));
             idOfTheLastPlayButtonClicked = currentPlayButtonId+difference;
         }
-    }
-
-    private void voteLove(String urlToFire, ImageButton loveButton){
-        ServerManager serverManager = new ServerManager();
-        serverManager.voteLove(urlToFire,getActivity(),loveButton);
     }
 
     public void playSong(ImageButton playButton, View currentClickedButton, SeekBar currentSeekBar, String songFileName, ProgressBar spinner){
@@ -509,116 +537,6 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
         }
     }
 
-    public void monitorLiveNotifications() {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        final DatabaseReference allNotificationsNode = firebaseDatabase.getReference().child("allNotifications");
-        final DatabaseReference
-                    dbRefForallNotificationsNode = allNotificationsNode.child(singleTonUser.getUserMobileNumber());
-
-        dbRefForallNotificationsNode.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    printMsg("NotificationFragment", "New notifications added, so lets invoke the READ from Cloud.."+Thread.currentThread().getName());
-                    //serverManager.readNotificationsFromServerAndWriteToInternalDB();
-                    Log.e("NotificationFragment","fetchNotifications(): Start loading notifications from Internal DB");
-                    ArrayList<String> allNotificationsFromDB = dbOperations.readNotificationsFromInternalDB();
-                    AllAppData.allNotifications = allNotificationsFromDB;
-                    AllAppData.totalNoOfNot = allNotificationsFromDB.size();
-                    NotificationFragment.totalNumberOfNotifications = allNotificationsFromDB.size();
-                    Log.e("NotificationFragment","fetchNotifications(): Fetched " + AllAppData.totalNoOfNot + " notifications from internal DB..");
-                    designNotPanel(view);
-                    new Thread(new Runnable() {
-                        HttpURLConnection urlConnection = null;
-                        InputStreamReader isr = null;
-
-                        @Override
-                        public void run() {
-                            try {
-                                URL url = new URL(serverURL + "/allNotifications/" + singleTonUser.getUserMobileNumber() + ".json");
-                                Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB(): " + url.toString());
-                                urlConnection = (HttpURLConnection) url.openConnection();
-                                InputStream is = urlConnection.getInputStream();
-                                isr = new InputStreamReader(is);
-                                int data = isr.read();
-                                final StringBuilder response = new StringBuilder("");
-                                while (data != -1) {
-                                    response.append((char) data);
-                                    data = isr.read();
-                                }
-                                Log.e("ServerManager", "readNotificationsFromServerAndWriteToInternalDB():" + response.toString());
-                                ArrayList<String> allYourNotificationFromServer = ParseNotificationData.getNotification(response.toString());
-
-                                int currentNumberOfNotifications = allYourNotificationFromServer.size();
-                                int oldNumberOfNotifications = AllAppData.totalNoOfNot;
-                                //------TRUE : We got some new notifications-----------------------------------------//
-                                if ((currentNumberOfNotifications > oldNumberOfNotifications)) {
-                                    //-------Delete all notifications from Internal DB----------------------------//
-                                    printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: delete all notifications from Internal DB");
-                                    dbOperations.deleteAllDataFromNotificationTableFromInternalDB();
-                                    //-------Write all the read notifications from cloud to Internal DB---------------//
-                                    printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: write all notifications got from cloud to Internal DB");
-                                    dbOperations.writeNewNotificationsToInternalDB(allYourNotificationFromServer);
-                                    //-----------------Update the variables that holds info about notifications---------------//
-                                    printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: read all notifications from Internal DB");
-                                    AllAppData.allNotifications = dbOperations.readNotificationsFromInternalDB();
-                                    printMsg("ServerManager", "readNotificationsFromServerAndWriteToInternalDB: read all notifications from Internal DB is DONE");
-                                    AllAppData.totalNoOfNot = currentNumberOfNotifications;
-                                    //---------------------Display notifications to User for new Notifications--------------------//
-                                    serverManager.displayAlertNotificationOnTopBarOfPhone(getContext(), (currentNumberOfNotifications - oldNumberOfNotifications));
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            fetchNotifications();
-                                        }
-                                    });
-                                }
-                            } catch (Exception ee) {
-                                Log.e("ServerManager_Not_Err1", "readNotificationsFromServerAndWriteToInternalDB():" + ee.getMessage() + ee.fillInStackTrace().toString());
-                                ee.printStackTrace();
-                                ee.fillInStackTrace();
-                            }
-                        }
-                    }).start();
-                }
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-        });
-
-        final DatabaseReference
-                dbRefForrebuildPanelStateNode = allNotificationsNode.child("rebuildPanelState").child(singleTonUser.getUserMobileNumber());
-        dbRefForrebuildPanelStateNode.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                printMsg("NotificationFragment", "Gonna invoke the designNotPanel() if rebuildPanelState is 1");
-                if(dataSnapshot.getValue(Integer.class) == 1) {
-                    printMsg("NotificationFragment", "rebuildPanelState is 1");
-                    dbRefForrebuildPanelStateNode.setValue(0);
-                    designNotPanel(view);
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    }
-
-
     /*release and return the nullified mediaplayer object*/
     public static void releaseMediaPlayerObject(MediaPlayer mp) {
         try {
@@ -652,7 +570,8 @@ public class NotificationFragment extends Fragment implements ViewPager.OnPageCh
     private String getProcessedDate(String date){
         String[] months = {"Jan","Feb","Mar","Apr","may","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
         String[] YMD = date.split("-");
-        return YMD[2]+months[Integer.parseInt(YMD[1])-1]+"'"+YMD[0].substring(2);
+        Log.e("NotFrag", date);
+        return YMD[0]+months[Integer.parseInt(YMD[1])-1]+"'"+YMD[2].substring(2);
     }
 
     @Override
