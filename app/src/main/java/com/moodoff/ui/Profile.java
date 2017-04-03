@@ -146,19 +146,25 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
 
     View view;
     ImageView profileImage;
-    TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount;
-    TextView txtViewUserLiveMoodStatus, lastMoodListened;
-    TextView txtViewCurrentMood, txtView_likeCurrentMoodCount, txtView_loveCurrentMoodCount, txtView_sadCurrentMoodCount;
-    ImageButton imgBtn_LikeCurrentMood, imgBtn_LoveCurrentMood, imgBtn_SadCurrentMood;
-    ImageButton editAudioStatus, editTextStatus,okButton,cancelButton,okButtonWidth,cancelButtonWidth;
+    TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount, txtViewUserLiveMoodStatus, lastMoodListened, txtViewCurrentMood, txtView_likeCurrentMoodCount, txtView_loveCurrentMoodCount, txtView_sadCurrentMoodCount;
+    ImageButton loveTextStatus, loveAudioStatus, editBasicInfo, backbutton, imgBtn_LikeCurrentMood, imgBtn_LoveCurrentMood, imgBtn_SadCurrentMood, editAudioStatus, editTextStatus, okButton, cancelButton;
     Button  btnCurrentMoodPic;
-    ImageButton loveTextStatus, loveAudioStatus, editBasicInfo, backbutton;
     int screenHeight, screenWidth;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
     LinearLayout dialogContainer;
     StoreRetrieveDataInterface fileOperations;
     String profileOfUser;
+    HashMap<String,String> profileDataParsed = new HashMap<>(), profileDataParsed2 = new HashMap<>();
+    ProgressDialog dialog;
+    ArrayList<String> allSongsInMap = new ArrayList<>();
+    public static ImageButton currentAudioStatusSelectionPlayOrStopButton;
+    public static ProgressBar currentAudioStatusSelectionSpinner;
+    public static SeekBar currentAudioStatusSelectionSeekbar;
+    public static int currentPlayOrStopButtonId = -1, idOfTheLastPlayButtonClicked = -1;
+    public static View currentView, lastView;
+    public static String songFileName;
+    public static Handler seekHandlerForAudioStatusSelection = new Handler();
     public static View dialogView;
     public static ImageButton playAudioStatusButton;
     public static MediaPlayer mediaPlayer = null;
@@ -276,6 +282,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             seekUpdation();
         }
     };
+
     public static void seekUpdation() {
         if (mediaPlayer!=null) {
             if(seekBar_Profile.getMax()!=0) {
@@ -284,6 +291,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             }
         }
     }
+
     public static void playAudioStatusSong(String myAudioStatusSongURL){
         // Write the code to play the song and handle the seekbar too
         showSpinner();
@@ -334,6 +342,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             }
         }
     }
+
     /*set play or pause button for display*/
     public static void showPlayStopButton(String playOrPause) {
         try {
@@ -352,6 +361,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             releaseMediaPlayerObject(mediaPlayer);
         }
     }
+
     public static void releaseMediaPlayerObject(MediaPlayer mp) {
         try {
             if (mp != null) {
@@ -378,18 +388,22 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         ServerManager serverManager = new ServerManager();
         serverManager.loveTextStatus(profileOfUser, singleTonUser.getUserMobileNumber(), getActivity());
     }
+
     private void loveTheAudioStatusOfThePersonWhoseProfileIsOpen() {
         ServerManager serverManager = new ServerManager();
         serverManager.loveAudioStatus(profileOfUser, singleTonUser.getUserMobileNumber(), getActivity());
     }
+
     private void likeTheCurrentMoodOfThePersonWhoseProfileIsOpen() {
         ServerManager serverManager = new ServerManager();
         serverManager.likeCurrentMood(profileOfUser, singleTonUser.getUserMobileNumber(), getActivity());
     }
+
     private void loveTheCurrentMoodOfThePersonWhoseProfileIsOpen() {
         ServerManager serverManager = new ServerManager();
         serverManager.loveCurrentMood(profileOfUser, singleTonUser.getUserMobileNumber(), getActivity());
     }
+
     private void sadTheCurrentMoodOfThePersonWhoseProfileIsOpen() {
         ServerManager serverManager = new ServerManager();
         serverManager.sadCurrentMood(profileOfUser, singleTonUser.getUserMobileNumber(), getActivity());
@@ -426,6 +440,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             }
         });
     }
+
     private void editUserTextStatus(final Dialog fbDialogue){
         fbDialogue.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         statusChangeTitle.setText("Edit your Text Status");
@@ -457,6 +472,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             }
         });
     }
+
     private boolean writeTheTextStatusChangeToServerAndFile(String newStatus){
         try {
             ServerManager serverManager = new ServerManager();
@@ -475,6 +491,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             return false;
         }
     }
+
     private boolean writeTheAudioStatusChangeToServerAndFile(String newAudioStatus){
         try {
             ServerManager serverManager = new ServerManager();
@@ -494,7 +511,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             return false;
         }
     }
-    ArrayList<String> allSongsInMap = new ArrayList<>();
+
     private void editUserAudioStatus(final Dialog fbDialogue){
         int playButtonId = 0;
         statusChangeTitle.setText("Change Audio Status");
@@ -621,6 +638,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             }
         });
     }
+
     private View getHorizontalLine(int width){
         View v = new View(getContext());
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, width);
@@ -630,14 +648,6 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         v.setBackgroundColor(Color.parseColor("#B3B3B3"));
         return v;
     }
-
-    public static ImageButton currentAudioStatusSelectionPlayOrStopButton;
-    public static ProgressBar currentAudioStatusSelectionSpinner;
-    public static SeekBar currentAudioStatusSelectionSeekbar;
-    public static int currentPlayOrStopButtonId = -1, idOfTheLastPlayButtonClicked = -1;
-    public static View currentView, lastView;
-    public static String songFileName;
-    public static Handler seekHandlerForAudioStatusSelection = new Handler();
 
     Runnable runAudioStatuSelection = new Runnable() {
         @Override
@@ -741,19 +751,23 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         }
     }
 
-    public static boolean profileDetailsNotRetrievedYet = true;
-    HashMap<String,String> profileDataParsed = new HashMap<>(), profileDataParsed2 = new HashMap<>();
-
-    public static String currentMood = "Not Live";
+    private void showProfileLoadWaitDialog() {
+        dialog = ProgressDialog.show(getActivity(), "",
+                "Live Profile Loading..", true);
+        dialog.setCancelable(false);
+        dialog.show();
+    }
 
     private void setUserProfileData(final String userPhoneNumber){
         final String serverURL = AllAppData.serverURL;
+        showProfileLoadWaitDialog();
         new Thread(new Runnable() {
             HttpURLConnection urlConnection = null, urlConnection2 = null;
             InputStreamReader isr = null, isr2 = null;
             @Override
             public void run() {
                 try {
+
                     URL userDetailsUrl = new URL(serverURL + "/allusers/" + userPhoneNumber +".json");
                     URL userLiveFeedDetailsUrl = new URL(serverURL + "/livefeed/" + userPhoneNumber + ".json");
                     Log.e("Profile_userDetailsURL", userDetailsUrl.toString());
@@ -785,6 +799,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            dialog.dismiss();
                             showProfileData();
                         }
                     });
@@ -842,6 +857,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             }
         }).start();
     }
+
     private void populateDetails(){
         myName.setText(profileDataParsed.get(AllAppData.userName));
         myPhNo.setText(profileDataParsed.get(AllAppData.userMobileNumber));
@@ -855,6 +871,20 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         txtView_likeCurrentMoodCount.setText(profileDataParsed2.get(AllAppData.userMoodLikeCount));
         txtView_loveCurrentMoodCount.setText(profileDataParsed2.get(AllAppData.userMoodLoveCount));
         txtView_sadCurrentMoodCount.setText(profileDataParsed2.get(AllAppData.userMoodSadCount));
+        HashMap<String, HashMap<String, String>> userAndMood = ContactsFragment.userAndMood;
+        if(!profileOfUser.equals(singleTonUser.getUserMobileNumber())) {
+            boolean userIsLive = userAndMood.get(profileOfUser).get("liveNow").equals("1")?true:false;
+            if(userIsLive) {
+                txtViewUserLiveMoodStatus.setTextColor(Color.rgb(85,139,47));
+                txtViewUserLiveMoodStatus.setAllCaps(false);
+                txtViewUserLiveMoodStatus.setText("[Live] :");
+            }
+            else {
+                txtViewUserLiveMoodStatus.setTextColor(Color.RED);
+                txtViewUserLiveMoodStatus.setAllCaps(false);
+                txtViewUserLiveMoodStatus.setText("[Last Listened] :");
+            }
+        }
     }
 
     //Extra items required for the Activity
@@ -873,9 +903,11 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         }
         return 0;
     }
+
     private int getPicFor(String genderType){
         return (genderType.equals("0"))?R.drawable.man:R.drawable.woman;
     }
+
     private void getAndSetScreenSizes(){
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -883,6 +915,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         screenWidth = size.x;
         screenHeight = size.y;
     }
+
     public void setWidthOfButtonAcrossScreen(){
         /*okButtonWidth = (ImageButton)dialogView.findViewById(R.id.songselectok);
         cancelButtonWidth = (ImageButton)dialogView.findViewById(R.id.songselectcancel);
@@ -891,7 +924,6 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
 */
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -1017,6 +1049,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 printMsg("Profile", "Some value changed in livemood node..");
                 populateLiveDetails();
+                dialog.dismiss();
             }
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) { }

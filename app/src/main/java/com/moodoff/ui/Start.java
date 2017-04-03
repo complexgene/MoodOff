@@ -186,8 +186,7 @@ public class Start extends AppCompatActivity {
                         public void run() {
                             final Intent mainIntent = new Intent(Start.this, AllTabs.class);
                             Log.e("Start_FILEREADS", notificationFetchNotComplete + " " + moodsAndSongsFetchNotComplete);
-                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete || allProfilesDataFetchNotComplete)
-                                ;
+                            while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete || allProfilesDataFetchNotComplete || fetchContactsFromServerNotComplete);
                             Log.e("Start_AllTabsLaunch", "AllTabs will be launched");
                             Start.this.startActivity(mainIntent);
                             Start.this.finish();
@@ -286,20 +285,6 @@ public class Start extends AppCompatActivity {
         ServerManager serverManager = new ServerManager(this);
         serverManager.fetchContactsFromServer();
     }
-    /*private void fetchAllProfilesData(){
-        try{
-            Log.e("Start_ProfileFetch","Start reading profile data for all friends..");
-            AllAppData.allProfileData = dbOperations.readAllProfilesDataFromInternalDB();
-            allProfilesDataFetchNotComplete = false;
-            serverManager.readAllProfileDataFromServerAndWriteToInternalDB();
-            Log.e("Start_ProfileFetch","End reading profile data for all friends..");
-        }
-        catch (Exception ee){
-            Log.e("Start_ProfileFetch_Err",ee.getMessage());
-            ee.printStackTrace();
-        }
-    }*/
-
 
     private void startAutoBots(){
         Log.e("Start_Bots","Bots in work");

@@ -22,18 +22,23 @@ import android.widget.Toast;
 
 import com.moodoff.R;
 import com.moodoff.helper.AllAppData;
+import com.moodoff.model.ContactPojo;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 public class ContactList extends AppCompatActivity {
 
+    private HashMap<String,String> allC = new HashMap<>();
     private ListView lstNames;
+    private String val=null;
+    private SQLiteDatabase mydatabase;
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
-    String val=null;
-    SQLiteDatabase mydatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,7 +87,6 @@ public class ContactList extends AppCompatActivity {
 
     }
 
-    HashMap<String,String> allC = new HashMap<>();
     public void showContacts() {
         // Check the SDK version and whether the permission is already granted or not.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
@@ -109,8 +113,7 @@ public class ContactList extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission is granted
@@ -121,13 +124,10 @@ public class ContactList extends AppCompatActivity {
         }
     }
 
-    /**
-     * Read the name of all the contacts.
-     *
-     * @return a list of names+mobile_number.
-     */
     public static LinkedHashMap<String,String> getContactNames(ContentResolver contentResolver) {
+        Log.e("ContactList", "buchu");
         LinkedHashMap<String,String> contacts = new LinkedHashMap<>();
+        ArrayList<ContactPojo> allContacts = new ArrayList<>();
         // Get the ContentResolver
         ContentResolver cr = contentResolver;
         // Get the Cursor of all the contacts
@@ -151,13 +151,22 @@ public class ContactList extends AppCompatActivity {
                     while (phones.moveToNext()) {
                         String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                         phoneNumber = phoneNumber.replaceAll("[\\-]", "");
-                        if ( phoneNumber.replaceAll("[^0-9]", "").length()>=10 && Pattern.matches("^((0091)|(\\+91)|0?)[789]{1}\\d{9}$",phoneNumber) ){
+                        if (phoneNumber.replaceAll("[^0-9]", "").length() >= 10 && Pattern.matches("^((0091)|(\\+91)|0?)[789]{1}\\d{9}$", phoneNumber)) {
                             phoneNumber = phoneNumber.substring(phoneNumber.length() - 10);
-                            contacts.put(phoneNumber,name);
+                            //contacts.put(phoneNumber, name);
                             //Log.i("Number", phoneNumber);
+                            ContactPojo contact = new ContactPojo();
+                            contact.setContactNumber(phoneNumber);
+                            contact.setContactName(name);
+                            allContacts.add(contact);
                         }
                     }
-                    //Collections.sort(contacts);
+                    Collections.sort(allContacts, new Comparator<ContactPojo>() {
+                        @Override
+                        public int compare(ContactPojo contact1, ContactPojo contact2) {
+                            return contact1.getContactName().compareTo(contact2.getContactName());
+                        }
+                    });
                     phones.close();
                 }
             }
@@ -165,6 +174,10 @@ public class ContactList extends AppCompatActivity {
         // Close the curosor
         cursor.close();
         //Log.e("ContactList",contacts.get(0));
+        for(ContactPojo eachContact : allContacts) {
+            contacts.put(eachContact.getContactNumber(), eachContact.getContactName());
+        }
+        Log.e("ContactList", contacts.toString());
         return contacts;
     }
 
@@ -189,6 +202,7 @@ public class ContactList extends AppCompatActivity {
         mydatabase.close();
         return false;
     }
+
     public LinkedHashMap<String,String> getOrStoreContactsTableData(int status, HashMap<String,String> allContacts){
         LinkedHashMap<String,String> allContactsPresent = new LinkedHashMap<>();
         mydatabase = openOrCreateDatabase("moodoff", MODE_PRIVATE, null);

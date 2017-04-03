@@ -76,18 +76,29 @@ public class ServerManager{
         dbOperations = new DBHelper(context);
     }
     //--------------------------------CONTACTS RELATED FUNCTIONS----------------------------------------------
-
-    public void fetchContactsFromServer() {
+    public void resursiveFetchContactsFromServer() {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fetchContactsFromServer();
+                    }
+                }).start();
+                resursiveFetchContactsFromServer();
+            }
+        },10000);
+    }
+
+    public void fetchContactsFromServer() {
                 new Thread(new Runnable() {
                     HttpURLConnection urlConnection = null;
                     InputStreamReader isr = null;
                     @Override
                     public void run() {
                         try {
-                            printMsg("ServerManager","Start reading Users from Server every 10 secs");
+                            printMsg("ServerManager","Start reading Users from Server");
                             URL url = new URL(serverURL + "/userlist.json");
                             printMsg("ServerManager", url.toString());
                             urlConnection = (HttpURLConnection) url.openConnection();
@@ -138,9 +149,6 @@ public class ServerManager{
                         }
                     }
                 }).start();
-                fetchContactsFromServer();
-            }
-        },10000);
     }
 
     //--------------------------------CONTACTS RELATED FUNCTIONS COMPLETE----------------------------------------------
@@ -169,7 +177,7 @@ public class ServerManager{
         StorageReference storageRef = storage.getReference();
         // Create a child reference
         StorageReference imagesRef = storageRef.child("allsongdata.txt");
-        Log.e("ServerManager",imagesRef.getPath());
+        printMsg("ServerManager","readPlayListFromServer:" + imagesRef.getPath());
         imagesRef.getBytes(AllAppData.fileSizeToRead).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
@@ -178,7 +186,7 @@ public class ServerManager{
                     for (int i = 0; i < bytes.length; i++) {
                         sb.append((char) bytes[i]);
                     }
-                    Log.e("ServerManager", sb.toString());
+                    printMsg("ServerManager", "readPlayListFromServer:" + sb.toString());
                     BufferedReader bufferedReader = new BufferedReader(new StringReader(sb.toString()));
 
                     int noOfMoods = Integer.parseInt(bufferedReader.readLine());
@@ -187,7 +195,7 @@ public class ServerManager{
                         typeOfMoods.add(bufferedReader.readLine());
                     }
 
-                    Log.e("Start_typeOfMoods", typeOfMoods.toString());
+                    printMsg("Start_typeOfMoods", "readPlayListFromServer:" + typeOfMoods.toString());
                     bufferedReader.readLine(); //SEPARATOR
                     String song = "";
                     ArrayList<String> allSongInAMood = new ArrayList<String>();
@@ -200,28 +208,28 @@ public class ServerManager{
                             }
                         }
                         AllAppData.allMoodPlayList.put(typeOfMoods.get(i), allSongInAMood);
-                        Log.e("Start_MoodAndSongs", typeOfMoods.get(i) + " " + allSongInAMood.toString());
+                        printMsg("Start_MoodAndSongs", "readPlayListFromServer:" + typeOfMoods.get(i) + " " + allSongInAMood.toString());
                         allSongInAMood = new ArrayList<String>();
                     }
                     Start.moodsAndSongsFetchNotComplete = false;
                     DBHelper dbOperations = new DBHelper(curContext);
                     SQLiteDatabase writeDB = dbOperations.getWritableDatabase();
                     writeDB.execSQL("delete from playlist");
-                    Log.e("Start_Playlist", "Deleted all songs from playlist");
+                    printMsg("ServerManager", "readPlayListFromServer:" + "Deleted all songs from playlist");
 
                     HashMap<String, ArrayList<String>> allSongs = AllAppData.allMoodPlayList;
                     for (String moodType : allSongs.keySet()) {
                         ArrayList<String> songs = allSongs.get(moodType);
                         for (String eachSong : songs) {
                             String queryToFireToInsertSong = "insert into playlist values('" + todaysDate + "','" + moodType + "','" + eachSong + "','xxx','xxx')";
-                            Log.e("Start_QUERYINSRT", queryToFireToInsertSong);
+                            printMsg("ServerManager", "readPlayListFromServer:" + queryToFireToInsertSong);
                             writeDB.execSQL(queryToFireToInsertSong);
                         }
                     }
-                    Log.e("Start_Playlist", "Songs written to DB");
-                    Log.e("Start_allmoods_Read", "AllMoods read complete..");
+                    printMsg("ServerManager", "readPlayListFromServer:" + "Songs written to DB");
+                    printMsg("ServerManager", "readPlayListFromServer:" + "AllMoods read complete..");
                 } catch (Exception ee) {
-                    Log.e("Start_notRd_Er", "Server not reachable i think:" + ee.getMessage());
+                    printMsg("ServerManager", "readPlayListFromServer:" + "Server not reachable i think:" + ee.getMessage());
                 }
             }
         });
@@ -324,7 +332,7 @@ public class ServerManager{
                 }).start();
                 readNotificationsFromServerAndWriteToInternalDB();
             }
-        },10000);
+        },5000);
     }
     public boolean writeSongDedicateToCloudDB(String ts, String fromUser, final String toUser, String currentMood, String currentSong, String type){
         boolean writeToCloudDBIsSuccessful = notificationManagerDao.writeSongDedicateToCloudDB(ts, fromUser, toUser, currentMood, currentSong, type);

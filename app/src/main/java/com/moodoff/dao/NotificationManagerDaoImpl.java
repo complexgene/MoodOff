@@ -57,11 +57,12 @@ public class NotificationManagerDaoImpl implements NotificationManagerDaoInterfa
             dbRef.setValue(fromUser+"#"+toUser+"#"+(currentMood+"@"+currentSong)+"#"+type+"#"+ts);
             printMsg("NotificationManagerDaoImpl", "Nodes for dedicator and dedicate :P in cloud DB successful..");
 
-            // Causes Invoke of NotificationBuilder from async listener----------------------------------------
+            /*// Causes Invoke of NotificationBuilder from async listener----------------------------------------
             dbRef = mRootRef.child("rebuildPanelState").child(fromUser);
             dbRef.setValue(1);
             dbRef = mRootRef.child("rebuildPanelState").child(toUser);
             dbRef.setValue(1);
+            */
 
             return true;
         }catch(Exception ee){
@@ -74,6 +75,8 @@ public class NotificationManagerDaoImpl implements NotificationManagerDaoInterfa
         try {
             printMsg("NotificationManagerDaoImpl", "likedTheDedicatedSong():Came to love the dedicated song with details:" + fromUserNumber+" "+toUserNumber+" "+timeStamp+" ");
             dbRef = mRootRef.child(toUserNumber).child(fromUserNumber+"@"+toUserNumber+"@"+timeStamp);
+            dbRef.setValue(fromUserNumber+"#"+toUserNumber+"#"+(currentMoodType+"@"+currentSong)+"#5#"+timeStamp);
+            dbRef = mRootRef.child(fromUserNumber).child(fromUserNumber+"@"+toUserNumber+"@"+timeStamp);
             dbRef.setValue(fromUserNumber+"#"+toUserNumber+"#"+(currentMoodType+"@"+currentSong)+"#5#"+timeStamp);
             printMsg("NotificationManagerDaoImpl", "likedTheDedicatedSong():Loving the dedicated song with details:" + fromUserNumber+" "+toUserNumber+" "+timeStamp+" is DONE!!");
         } catch (Exception ee) {

@@ -37,6 +37,7 @@ import com.moodoff.R;
 import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.LoggerBaba;
 import com.moodoff.helper.Messenger;
+import com.moodoff.helper.ServerManager;
 import com.moodoff.model.User;
 
 import java.util.ArrayList;
@@ -60,10 +61,11 @@ public class ContactsFragment extends Fragment{
     SQLiteDatabase mydatabase;
     HashMap<String,String> allC = new HashMap<>();
     User singleTonUser = User.getInstance();
-    HashMap<String, HashMap<String, String>> userAndMood = new HashMap<>();
+    static HashMap<String, HashMap<String, String>> userAndMood = new HashMap<>();
     int countOfIterationsToFetchMoodDetailsForEachAppUserFriend = 0;
     public static boolean updateViewCalled = false;
     Button myProfile;
+    ServerManager serverManager;
     // Declaration of all variables complete------------------------------------------------------------
 
     @Override
@@ -79,6 +81,10 @@ public class ContactsFragment extends Fragment{
         // Live monitoring of the mood status changes
         detailsForLiveMoodRelatedFeeds();
 
+        // Check if somebody joins our app and reload the profile view then..
+        serverManager = new ServerManager();
+        serverManager.resursiveFetchContactsFromServer();
+
         // Load all the contacts in the hashMap
         allC = AllAppData.allReadContacts;
 
@@ -86,7 +92,7 @@ public class ContactsFragment extends Fragment{
     }
 
     private View getHorizontalLine(int width){
-        View v = new View(getContext());
+        View v = new View(ctx);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, width);
         layoutParams.leftMargin = 50;
         layoutParams.rightMargin = 50;
@@ -138,7 +144,7 @@ public class ContactsFragment extends Fragment{
         Log.e("CONTCCCCCTSSSS",allC.size()+" "+friendWhoUsesApp.size());
 
         eachContact.addView(getHorizontalLine(1));
-        LinearLayout titleAppUsers = new LinearLayout(getContext());
+        LinearLayout titleAppUsers = new LinearLayout(ctx);
         titleAppUsers.setGravity(Gravity.CENTER);
         layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         layoutDetails.topMargin = 10;
@@ -147,7 +153,7 @@ public class ContactsFragment extends Fragment{
         layoutDetails.rightMargin = 20;
         titleAppUsers.setLayoutParams(layoutDetails);
         titleAppUsers.setBackgroundResource(R.drawable.poster);
-        TextView tvv = new TextView(getContext());
+        TextView tvv = new TextView(ctx);
         tvv.setGravity(Gravity.CENTER);
         tvv.setPadding(3,3,3,3);
         tvv.setTextColor(Color.WHITE);
@@ -157,7 +163,7 @@ public class ContactsFragment extends Fragment{
         for(final String eachFriendContact : friendWhoUsesApp) {
             String contactName = allC.get(eachFriendContact);
             if (contactName!=null && !isNotHavingAnyCharacter(contactName)) {
-                LinearLayout eachContactLayout = new LinearLayout(getContext());
+                LinearLayout eachContactLayout = new LinearLayout(ctx);
                 eachContactLayout.setOrientation(LinearLayout.VERTICAL);
                 eachContactLayout.setBackgroundColor(Color.WHITE);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -183,7 +189,7 @@ public class ContactsFragment extends Fragment{
                 String moodType = userAndMood.get(eachFriendContact).get("moodType");
                 boolean userIsLive = userAndMood.get(eachFriendContact).get("liveNow").equals("1")?true:false;
 
-                LinearLayout moodStatusAndMood = new LinearLayout(getContext());
+                LinearLayout moodStatusAndMood = new LinearLayout(ctx);
                 moodStatusAndMood.setGravity(Gravity.CENTER);
                 moodStatusAndMood.setOrientation(LinearLayout.HORIZONTAL);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -227,7 +233,7 @@ public class ContactsFragment extends Fragment{
             }
         }
         eachContact.addView(getHorizontalLine(2));
-        LinearLayout titleNotAppUsers = new LinearLayout(getContext());
+        LinearLayout titleNotAppUsers = new LinearLayout(ctx);
         titleNotAppUsers.setGravity(Gravity.CENTER);
         layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         layoutDetails.topMargin = 10;
@@ -237,7 +243,7 @@ public class ContactsFragment extends Fragment{
         layoutDetails.gravity = Gravity.CENTER;
         titleNotAppUsers.setLayoutParams(layoutDetails);
         titleNotAppUsers.setBackgroundResource(R.drawable.poster);
-        TextView tvv1 = new TextView(getContext());
+        TextView tvv1 = new TextView(ctx);
         tvv1.setPadding(3,3,3,3);
         tvv1.setTextColor(Color.WHITE);
         tvv1.setText(" Friends Not Using App ");
@@ -247,7 +253,7 @@ public class ContactsFragment extends Fragment{
             final String contactName = allC.get(eachCntct);
             if(contactName!=null && !isNotHavingAnyCharacter(contactName)){
                 eachContact.addView(getHorizontalLine(1));
-                LinearLayout eachContactLayout = new LinearLayout(getContext());
+                LinearLayout eachContactLayout = new LinearLayout(ctx);
                 eachContactLayout.setBackgroundResource(R.drawable.contactsnotusingappdesign);
                 eachContactLayout.setGravity(Gravity.CENTER);
                 eachContactLayout.setPadding(20,20,20,20);
@@ -258,7 +264,7 @@ public class ContactsFragment extends Fragment{
                 layoutDetails.leftMargin = 20;
                 layoutDetails.rightMargin = 20;
                 eachContactLayout.setLayoutParams(layoutDetails);
-                TextView personName = new TextView(getContext());
+                TextView personName = new TextView(ctx);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 personName.setLayoutParams(layoutDetails);
                 layoutDetails.weight=1;
@@ -283,16 +289,16 @@ public class ContactsFragment extends Fragment{
                             public void onClick(DialogInterface dialog, int which) {
                                 switch (which){
                                     case DialogInterface.BUTTON_POSITIVE:
-                                        Messenger.print(getContext(),"App Link Sent");
+                                        Messenger.print(ctx,"App Link Sent");
                                         break;
                                     case DialogInterface.BUTTON_NEGATIVE:
-                                        Messenger.print(getContext(),"App Link Not Sent");
+                                        Messenger.print(ctx,"App Link Not Sent");
                                         break;
                                 }
                             }
                         };
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
                         builder.setTitle("Confirm Sending App Link");
                         Dialog d=builder.setMessage("Your friend "+contactName+" will receive an app link to install. Proceed?").setPositiveButton("Yes", dialogClickListener)
                                 .setNegativeButton("No", dialogClickListener).show();
