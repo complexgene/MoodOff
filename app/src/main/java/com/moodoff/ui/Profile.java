@@ -887,49 +887,6 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         }
     }
 
-    //Extra items required for the Activity
-    private int getResImage(String currentMood){
-        switch(currentMood){
-            case "crazy":{return R.drawable.mood_crazy;}
-            case "on_tour":{return R.drawable.mood_ontour;}
-            case "old_era":{return R.drawable.mood_oldera;}
-            case "party":{return R.drawable.mood_party;}
-            case "workout":{return R.drawable.mood_workout;}
-            case "friends":{return R.drawable.mood_friends;}
-            case "romantic":{return R.drawable.mood_romantic1;}
-            case "dance":{return R.drawable.mood_dance;}
-            case "sad":{return R.drawable.mood_sad;}
-            case "missu":{return R.drawable.mood_missu;}
-        }
-        return 0;
-    }
-
-    private int getPicFor(String genderType){
-        return (genderType.equals("0"))?R.drawable.man:R.drawable.woman;
-    }
-
-    private void getAndSetScreenSizes(){
-        Display display = getActivity().getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        screenWidth = size.x;
-        screenHeight = size.y;
-    }
-
-    public void setWidthOfButtonAcrossScreen(){
-        /*okButtonWidth = (ImageButton)dialogView.findViewById(R.id.songselectok);
-        cancelButtonWidth = (ImageButton)dialogView.findViewById(R.id.songselectcancel);
-        okButtonWidth.setWidth((int)Math.floor(0.5*screenWidth));
-        cancelButtonWidth.setWidth((int)Math.floor(0.5*screenWidth));
-*/
-    }
-
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -976,10 +933,6 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
-
-
-
-
 
 
     // Async Listeners for Live Feed In Profile

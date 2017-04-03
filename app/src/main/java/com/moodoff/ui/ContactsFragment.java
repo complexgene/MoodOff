@@ -33,6 +33,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.moodoff.R;
 import com.moodoff.helper.AllAppData;
 import com.moodoff.helper.LoggerBaba;
@@ -202,12 +203,12 @@ public class ContactsFragment extends Fragment{
                 if(userIsLive){
                     moodStatus.setTextColor(Color.GREEN);
                     moodStatus.setTypeface(Typeface.DEFAULT_BOLD);
-                    moodStatus.setText("Live on");
+                    moodStatus.setText("Live on Mood");
                 }
                 else{
                     moodStatus.setTextColor(Color.RED);
                     moodStatus.setTypeface(Typeface.DEFAULT_BOLD);
-                    moodStatus.setText("Last Listened");
+                    moodStatus.setText("Last Listened Mood");
                 }
                 //moodStatus.setBackgroundResource(R.drawable.contactsusingappdesign);
                 moodStatus.setLayoutParams(layoutDetails);
@@ -216,12 +217,38 @@ public class ContactsFragment extends Fragment{
                 TextView moodName = new TextView(ctx);
                 layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 moodName.setAllCaps(false);
-                moodName.setText(" : " + moodType);
+                moodName.setText(" : " + moodType.replaceAll("_"," "));
                // moodName.setBackgroundResource(R.drawable.contactsusingappdesign);
                 moodName.setLayoutParams(layoutDetails);
                 moodStatusAndMood.addView(moodName);
-                moodStatusAndMood.setPadding(0,0,0,20);
+
+                LinearLayout atTime = new LinearLayout(ctx);
+                atTime.setGravity(Gravity.CENTER);
+                if(!userIsLive) {
+                    TextView aT = new TextView(ctx);
+                    aT.setTextColor(Color.RED);
+                    aT.setTypeface(Typeface.DEFAULT_BOLD);
+                    aT.setText("Last Listened At ");
+                    aT.setLayoutParams(layoutDetails);
+                    //moodStatusAndMood.addView(aT);
+
+                    TextView lastActiveTime = new TextView(ctx);
+                    String lastActiveTimeStamp = (userAndMood.get(eachFriendContact).get("lastActiveTS")).toString();
+                    layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    lastActiveTime.setAllCaps(false);
+                    lastActiveTime.setText(": " + lastActiveTimeStamp);
+                    // moodName.setBackgroundResource(R.drawable.contactsusingappdesign);
+                    lastActiveTime.setLayoutParams(layoutDetails);
+                    //moodStatusAndMood.addView(lastActiveTime);
+                    atTime.addView(aT);
+                    atTime.addView(lastActiveTime);
+
+                }
+
+                atTime.setPadding(0,0,0,20);
                 eachContactLayout.addView(moodStatusAndMood);
+                eachContactLayout.addView(atTime);
+
                 eachContactLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -374,11 +401,15 @@ public class ContactsFragment extends Fragment{
         //allContactsPresent.add("santanu");
         return allContactsPresent;
     }
+
+    boolean liveStatusLoaded = false, liveMoodTypeLoaded = false, liveLastActiveTSLoaded = false;
     // Async Listeners for Live Feed In Profile
     private void detailsForLiveMoodRelatedFeeds(){
         final int limit = AllAppData.friendsWhoUsesApp.size();
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         final DatabaseReference liveFeedNode = firebaseDatabase.getReference().child("livefeed");
+        final DatabaseReference checkAliveNode = firebaseDatabase.getReference().child("checkAlive");
+
         for(final String eachAppUsingFriend : AllAppData.friendsWhoUsesApp){
             DatabaseReference
               dbRefForLiveFeedMoodType = liveFeedNode.child(eachAppUsingFriend)
@@ -399,11 +430,14 @@ public class ContactsFragment extends Fragment{
                       else {
                           moodTypeAndLiveStatus.put("moodType",value);
                           userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                          liveMoodTypeLoaded = true;
                       }
+
                       countOfIterationsToFetchMoodDetailsForEachAppUserFriend++;
-                      if(countOfIterationsToFetchMoodDetailsForEachAppUserFriend >= (limit+limit)) {
+                      if(countOfIterationsToFetchMoodDetailsForEachAppUserFriend >= (limit + limit + limit)) {
                           addOwnProfileAndRefreshButton();
                       }
+
                       LoggerBaba.printMsg("ContactsFragment", userAndMood.toString());
                   }
                   @Override
@@ -433,7 +467,50 @@ public class ContactsFragment extends Fragment{
 
                   }
               });
+
+            DatabaseReference
+                    dbRefForCheckAlive = checkAliveNode.child(eachAppUsingFriend);
+
+            dbRefForCheckAlive.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String[] tsValue = dataSnapshot.getValue(String.class).split("_");
+                    String date = tsValue[0];
+                    String time = tsValue[1];
+
+                    moodTypeAndLiveStatus.put("lastActiveTS", getProcessedTime(date, time));
+                    userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                    countOfIterationsToFetchMoodDetailsForEachAppUserFriend++;
+                    if(countOfIterationsToFetchMoodDetailsForEachAppUserFriend >= (limit + limit + limit)) {
+                        addOwnProfileAndRefreshButton();
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
+    }
+    private String getProcessedDate(String date){
+        String[] months = {"Jan","Feb","Mar","Apr","may","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+        String[] YMD = date.split("-");
+        Log.e("NotFrag", date);
+        return YMD[0]+months[Integer.parseInt(YMD[1])-1]+"'"+YMD[2].substring(2);
+    }
+    private String getProcessedTime(String date, String time) {
+        String timeToDisplay = "";
+        String hrsMins = time.substring(0, time.lastIndexOf(":"));
+        Log.e("ContactsFragment", hrsMins);
+        int hrs = Integer.parseInt(hrsMins.split(":")[0]);
+        String mins = hrsMins.split(":")[1];
+        if(hrs > 12){
+            timeToDisplay = getProcessedDate(date)+ " " + (hrs-12) +  ":" + mins + "PM";
+        }
+        else{
+            timeToDisplay = getProcessedDate(date) + " " + hrs + ":" + mins +"AM";
+        }
+        return timeToDisplay;
     }
 
     // Fragment specific methods -- NOT USED --------------------------------------------------------------

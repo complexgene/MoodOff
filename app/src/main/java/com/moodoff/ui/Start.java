@@ -35,7 +35,7 @@ import java.util.List;
 
 import static com.moodoff.helper.LoggerBaba.printMsg;
 
-public class Start extends AppCompatActivity {
+public class Start extends AppCompatActivity{
     // All Variables declaration
     public static int switchToTab = 0;
     private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 100;
