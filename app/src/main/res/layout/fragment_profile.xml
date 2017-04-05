@@ -302,7 +302,7 @@
                     android:fontFamily="serif"
                     android:text="[LIVE]:"
                     />
-                <TextView
+                <!--<TextView
                     android:id="@+id/lastMoodListened"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -311,7 +311,7 @@
                     android:text="Listening to Mood..."
                     android:textStyle="bold"
                     android:textSize="15sp"
-                    android:fontFamily="serif" />
+                    android:fontFamily="serif" />-->
 
             </LinearLayout>
             <LinearLayout

@@ -234,6 +234,7 @@ public class ContactsFragment extends Fragment{
 
                     TextView lastActiveTime = new TextView(ctx);
                     String lastActiveTimeStamp = (userAndMood.get(eachFriendContact).get("lastActiveTS")).toString();
+                    Log.e("ContactsFragment", "Retrieved Here is:" + lastActiveTimeStamp);
                     layoutDetails = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     lastActiveTime.setAllCaps(false);
                     lastActiveTime.setText(": " + lastActiveTimeStamp);
@@ -405,6 +406,7 @@ public class ContactsFragment extends Fragment{
     boolean liveStatusLoaded = false, liveMoodTypeLoaded = false, liveLastActiveTSLoaded = false;
     // Async Listeners for Live Feed In Profile
     private void detailsForLiveMoodRelatedFeeds(){
+        AllAppData.friendsWhoUsesApp.add(singleTonUser.getUserMobileNumber());
         final int limit = AllAppData.friendsWhoUsesApp.size();
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         final DatabaseReference liveFeedNode = firebaseDatabase.getReference().child("livefeed");
@@ -480,6 +482,9 @@ public class ContactsFragment extends Fragment{
 
                     moodTypeAndLiveStatus.put("lastActiveTS", getProcessedTime(date, time));
                     userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+
+                    Log.e("ContactsFragment", "Time Changed:" + userAndMood.get(eachAppUsingFriend).get("lastActiveTS"));
+
                     countOfIterationsToFetchMoodDetailsForEachAppUserFriend++;
                     if(countOfIterationsToFetchMoodDetailsForEachAppUserFriend >= (limit + limit + limit)) {
                         addOwnProfileAndRefreshButton();

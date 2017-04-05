@@ -132,7 +132,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         imgBtn_SadCurrentMood = (ImageButton)view.findViewById(R.id.imgBtn_sadCurrentMood);
 
         txtViewUserLiveMoodStatus = (TextView)view.findViewById(R.id.userLiveMoodStatus);
-        lastMoodListened = (TextView)view.findViewById(R.id.lastMoodListened);
+        //lastMoodListened = (TextView)view.findViewById(R.id.lastMoodListened);
         btnCurrentMoodPic = (Button)view.findViewById(R.id.btn_currentMood);
         editBasicInfo = (ImageButton)view.findViewById(R.id.editBasicInfo);
         myAudioStatusSong = new String();
@@ -872,19 +872,19 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         txtView_loveCurrentMoodCount.setText(profileDataParsed2.get(AllAppData.userMoodLoveCount));
         txtView_sadCurrentMoodCount.setText(profileDataParsed2.get(AllAppData.userMoodSadCount));
         HashMap<String, HashMap<String, String>> userAndMood = ContactsFragment.userAndMood;
-        if(!profileOfUser.equals(singleTonUser.getUserMobileNumber())) {
-            boolean userIsLive = userAndMood.get(profileOfUser).get("liveNow").equals("1")?true:false;
-            if(userIsLive) {
-                txtViewUserLiveMoodStatus.setTextColor(Color.rgb(85,139,47));
+        Log.e("Profile", ContactsFragment.userAndMood.get(profileOfUser).toString());
+
+            boolean userIsLive = userAndMood.get(profileOfUser).get("liveNow").equals("1") ? true : false;
+            if (userIsLive) {
+                txtViewUserLiveMoodStatus.setTextColor(Color.rgb(85, 139, 47));
                 txtViewUserLiveMoodStatus.setAllCaps(false);
-                txtViewUserLiveMoodStatus.setText("[Live] :");
-            }
-            else {
+                txtViewUserLiveMoodStatus.setText("[Live Now]");
+            } else {
                 txtViewUserLiveMoodStatus.setTextColor(Color.RED);
                 txtViewUserLiveMoodStatus.setAllCaps(false);
-                txtViewUserLiveMoodStatus.setText("[Last Listened] :");
+                txtViewUserLiveMoodStatus.setText("[Last Listened]");
             }
-        }
+
     }
 
     @Override
@@ -1005,7 +1005,10 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                 dialog.dismiss();
             }
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                ContactsFragment.userAndMood.get(profileOfUser).put("liveNow", ""+dataSnapshot.getValue(Long.class));
+                populateLiveDetails();
+            }
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 printMsg("Profile", "Some value changed in livemood node..");
