@@ -158,29 +158,38 @@ public class StartedTodoDaoImpl extends SQLiteOpenHelper implements StartedTodoD
         return allContacts;
     }
     public boolean checkEntryOfPlaylistInInternalTableAndReadIfRequired(DBHelper dbOpr, String todaysDate, boolean moodsAndSongsFetchNotComplete) {
-        SQLiteDatabase readData = dbOpr.getReadableDatabase();
-        Cursor resultSet = readData.rawQuery("Select * from playlist where date='" + todaysDate + "'", null);
-        // If today's playlist file is not downloaded yet
-        if (resultSet.getCount() == 0) return false;
-        // File downloaded
-        HashMap<String, ArrayList<String>> allSongs = new HashMap<>();
-        resultSet.moveToFirst();
-        Log.e("StartedTodoDaoImpl", resultSet.getCount() + " no of rows..");
-        while (!resultSet.isAfterLast()) {
-            String moodType = resultSet.getString(1);
-            String songName = resultSet.getString(2);
-            String artistName = resultSet.getString(3);
-            String movieOrAlbumname = resultSet.getString(4);
-            if (allSongs.containsKey(moodType)) {
-                allSongs.get(moodType).add(songName);
-            } else {
-                ArrayList<String> songs = new ArrayList<>();
-                songs.add(songName);
-                allSongs.put(moodType, songs);
+        try {
+            SQLiteDatabase readData = getReadableDatabase();
+            Cursor resultSet = readData.rawQuery("Select * from playlist where date='" + todaysDate + "'", null);
+            // If today's playlist file is not downloaded yet
+            if (resultSet.getCount() == 0) {
+                Log.e("StartedTodoDaoImpl", "checkEntryOfPlaylistInInternalTableAndReadIfRequired() : No playlist entry in internal DB");
+                return false;
             }
-            resultSet.moveToNext();
+            // File downloaded
+            HashMap<String, ArrayList<String>> allSongs = new HashMap<>();
+            resultSet.moveToFirst();
+            Log.e("StartedTodoDaoImpl", resultSet.getCount() + " no of rows..");
+            while (!resultSet.isAfterLast()) {
+                String moodType = resultSet.getString(1);
+                String songName = resultSet.getString(2);
+                String artistName = resultSet.getString(3);
+                String movieOrAlbumname = resultSet.getString(4);
+                if (allSongs.containsKey(moodType)) {
+                    allSongs.get(moodType).add(songName);
+                } else {
+                    ArrayList<String> songs = new ArrayList<>();
+                    songs.add(songName);
+                    allSongs.put(moodType, songs);
+                }
+                resultSet.moveToNext();
+            }
+            AllAppData.allMoodPlayList = allSongs;
+            return true;
         }
-        AllAppData.allMoodPlayList = allSongs;
-        return true;
+        catch(Exception ee) {
+            Log.e("STIMPL", "abcdeee");
+        }
+        return false;
     }
 }

@@ -112,6 +112,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
         singleTonUser = User.getInstance();
         view = mainInflater.inflate(R.layout.fragment_profile, mainContainer, false);
         profileImage = (ImageView)view.findViewById(R.id.profileImage);
+        txtView_whosProfile = (TextView)view.findViewById(R.id.whosProfile);
         myName = (TextView)view.findViewById(R.id.username);
         myPhNo = (TextView)view.findViewById(R.id.userPhNo);
         myEmail = (TextView)view.findViewById(R.id.useremailId);
@@ -147,6 +148,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
     View view;
     ImageView profileImage;
     TextView myName, myPhNo, myEmail, myDob, myTextStatus, statusChangeTitle, textStatusLoveCount, audioStatusLoveCount, txtViewUserLiveMoodStatus, lastMoodListened, txtViewCurrentMood, txtView_likeCurrentMoodCount, txtView_loveCurrentMoodCount, txtView_sadCurrentMoodCount;
+    TextView txtView_whosProfile;
     ImageButton loveTextStatus, loveAudioStatus, editBasicInfo, backbutton, imgBtn_LikeCurrentMood, imgBtn_LoveCurrentMood, imgBtn_SadCurrentMood, editAudioStatus, editTextStatus, okButton, cancelButton;
     Button  btnCurrentMoodPic;
     int screenHeight, screenWidth;
@@ -800,6 +802,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
                         @Override
                         public void run() {
                             dialog.dismiss();
+                            txtView_whosProfile.setText("!!" + profileDataParsed.get(AllAppData.userName).split(" ")[0] + "'s Profile!!");
                             showProfileData();
                         }
                     });
@@ -1006,7 +1009,7 @@ public class Profile extends Fragment implements AudioManager.OnAudioFocusChange
             }
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                ContactsFragment.userAndMood.get(profileOfUser).put("liveNow", ""+dataSnapshot.getValue(Long.class));
+                ContactsFragment.userAndMood.get(profileOfUser).put("liveNow", dataSnapshot.getValue(String.class));
                 populateLiveDetails();
             }
             @Override

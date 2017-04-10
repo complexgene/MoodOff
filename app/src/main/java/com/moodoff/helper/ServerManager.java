@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.moodoff.helper.AllAppData.getAppDirectoryPath;
+import static com.moodoff.helper.AllAppData.serverSongURL;
 import static com.moodoff.helper.AllAppData.serverURL;
 import static com.moodoff.helper.LoggerBaba.printMsg;
 
@@ -171,7 +172,7 @@ public class ServerManager{
 
     //---------------------------SONG RELATED FUNCTIONS--------------------------------------------------------
 
-    public void readPlayListFromServer(final Context curContext, final String todaysDate){
+    public void readPlayListFromServerCloud(final Context curContext, final String todaysDate){
         FirebaseStorage storage = FirebaseStorage.getInstance();
         // Create a storage reference from our app
         StorageReference storageRef = storage.getReference();
@@ -233,6 +234,75 @@ public class ServerManager{
                 }
             }
         });
+    }
+
+    public void readPlayListFromServerNormal(final Context curContext, final String todaysDate){
+        Log.e("SM","Here i am");
+        new Thread(new Runnable() {
+            HttpURLConnection urlConnection = null;
+            InputStreamReader isr = null;
+            @Override
+            public void run() {
+                try {
+                    printMsg("ServerManager",  "Start reading Playlist from Server");
+                    URL url = new URL(serverSongURL + "allsongdata.txt");
+                    printMsg("ServerManager", url.toString());
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    InputStream is = urlConnection.getInputStream();
+                    isr = new InputStreamReader(is);
+                    int data = isr.read();
+                    final StringBuilder sb = new StringBuilder("");
+                    while (data != -1) {
+                        sb.append((char) data);
+                        data = isr.read();
+                    }
+                    printMsg("ServerManager", "readPlayListFromServer: " + sb.toString());
+                    BufferedReader bufferedReader = new BufferedReader(new StringReader(sb.toString()));
+
+                    int noOfMoods = Integer.parseInt(bufferedReader.readLine());
+                    ArrayList<String> typeOfMoods = new ArrayList<String>(noOfMoods);
+                    for (int i = 0; i < noOfMoods; i++) {
+                        typeOfMoods.add(bufferedReader.readLine());
+                    }
+
+                    printMsg("Start_typeOfMoods", "readPlayListFromServer:" + typeOfMoods.toString());
+                    bufferedReader.readLine(); //SEPARATOR
+                    String song = "";
+                    ArrayList<String> allSongInAMood = new ArrayList<String>();
+                    for (int i = 0; i < noOfMoods; i++) {
+                        while ((song = bufferedReader.readLine()) != null) {
+                            if (!song.equals("")) {
+                                allSongInAMood.add(song);
+                            } else {
+                                break;
+                            }
+                        }
+                        AllAppData.allMoodPlayList.put(typeOfMoods.get(i), allSongInAMood);
+                        printMsg("Start_MoodAndSongs", "readPlayListFromServer:" + typeOfMoods.get(i) + " " + allSongInAMood.toString());
+                        allSongInAMood = new ArrayList<String>();
+                    }
+                    Start.moodsAndSongsFetchNotComplete = false;
+                    DBHelper dbOperations = new DBHelper(curContext);
+                    SQLiteDatabase writeDB = dbOperations.getWritableDatabase();
+                    writeDB.execSQL("delete from playlist");
+                    printMsg("ServerManager", "readPlayListFromServer:" + "Deleted all songs from playlist");
+
+                    HashMap<String, ArrayList<String>> allSongs = AllAppData.allMoodPlayList;
+                    for (String moodType : allSongs.keySet()) {
+                        ArrayList<String> songs = allSongs.get(moodType);
+                        for (String eachSong : songs) {
+                            String queryToFireToInsertSong = "insert into playlist values('" + todaysDate + "','" + moodType + "','" + eachSong + "','xxx','xxx')";
+                            printMsg("ServerManager", "readPlayListFromServer:" + queryToFireToInsertSong);
+                            writeDB.execSQL(queryToFireToInsertSong);
+                        }
+                    }
+                    printMsg("ServerManager", "readPlayListFromServer:" + "Songs written to DB");
+                    printMsg("ServerManager", "readPlayListFromServer:" + "AllMoods read complete..");
+                } catch (Exception ee) {
+                    printMsg("ServerManager", "readPlayListFromServer:" + "Server not reachable i think:" + ee.getMessage());
+                }
+            }
+        }).start();
     }
 
     //---------------------------SONG RELATED FUNCTIONS COMPLETE-----------------------------------------------
@@ -416,6 +486,57 @@ public class ServerManager{
         Ringtone r = RingtoneManager.getRingtone(currActivity, notification);
         r.play();
     }
+
+    public void displayAlertNotificationOnTopBarOfPhone(final Context context, final String message){
+        // Getting number of last unseen notifications from file and add the current unseen to get total unseen
+        printMsg("ServerManager","displayAlertNotificationOnTopBarOfPhone: came for alert display on top bar of phone");
+
+        final Activity currActivity = (Activity)context;
+        final NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(currActivity)
+                        .setSmallIcon(R.drawable.btn_dedicate)
+                        .setColor(001500)
+                        .setContentTitle("MoodOff")
+                        .setWhen(System.currentTimeMillis())
+                        .setTicker(singleTonUser.getUserName().split("_")[0] + "!! " + message +" !!")
+                        .setContentText(singleTonUser.getUserName().split("_")[0] + "!! " + message +" !!");
+
+        final Intent notificationIntent = new Intent(currActivity, AllTabs.class);
+
+        if(currActivity==null){
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        }
+        else{
+            currActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(isAppForground(context)) {
+                        Toast.makeText(context, singleTonUser.getUserName() + "!! " + message +" !!",Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Log.e("ServerManager","App is running in background..");
+                        Start.switchToTab = 2;
+                        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        PendingIntent contentIntent = PendingIntent.getActivity(currActivity, 0, notificationIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+                        builder.setContentIntent(contentIntent);
+                        builder.setAutoCancel(true);
+
+                        // Add as notification
+                        NotificationManager manager = (NotificationManager) currActivity.getSystemService(Context.NOTIFICATION_SERVICE);
+                        manager.notify(0, builder.build());
+                    }
+                }
+            });
+        }
+        //--------------This would trigger a child change in cloud for async listener-----------------------
+        userManagementDao.setRebuildNotificationPanelNodeInCloud(singleTonUser.getUserMobileNumber());
+        //-------------Play Notification sound-------------------------------------------------------------
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Ringtone r = RingtoneManager.getRingtone(currActivity, notification);
+        r.play();
+    }
+
     public void likeTheDedicatedSong(String fromUserNumber, String toUserNumber, String currentMoodType, String currentSong, String timeStamp) {
         notificationManagerDao.likeTheDedicatedSong(fromUserNumber, toUserNumber, currentMoodType, currentSong, timeStamp);
     }

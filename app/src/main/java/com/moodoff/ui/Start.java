@@ -167,6 +167,7 @@ public class Start extends AppCompatActivity{
                 //Log.e("Start_Bots", "Bots started");
                 //startAutoBots();
                 fetchMoodsAndPlayListFiles();
+                //while(moodsAndSongsFetchNotComplete);
                 Log.e("Start_moodPlaylist", "Playlist file fetched");
                 greetUser();
                 Log.e("Start_greetUser", "Greet User done");
@@ -185,18 +186,18 @@ public class Start extends AppCompatActivity{
                         @Override
                         public void run() {
                             final Intent mainIntent = new Intent(Start.this, AllTabs.class);
-                            Log.e("Start_FILEREADS", notificationFetchNotComplete + " " + moodsAndSongsFetchNotComplete);
+                            Log.e("Start_FILEREADS", notificationFetchNotComplete + " " + moodsAndSongsFetchNotComplete + " " + allProfilesDataFetchNotComplete + " " + fetchContactsFromServerNotComplete);
                             while (notificationFetchNotComplete || moodsAndSongsFetchNotComplete || allProfilesDataFetchNotComplete || fetchContactsFromServerNotComplete);
                             Log.e("Start_AllTabsLaunch", "AllTabs will be launched");
                             Start.this.startActivity(mainIntent);
                             Start.this.finish();
                         }
-                    }, 2000);
+                    }, 2500);
                 } catch (Exception ee) {
                     Log.e("Start_AllTabsLaunchErr", "Error in Alltabs Launch");
                 }
             }
-            else{
+            else {
                 Log.e("Start_USER_STATUS","User opening app first time..");
                 Intent ii = new Intent(this, RegistrationActivity.class);
                 ii.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -228,8 +229,9 @@ public class Start extends AppCompatActivity{
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
     private void resetAllDataContainers(){
-        Log.e("Start_DataSetRESET","Resetting of all data conatiners started..");
+        Log.e("Start_DataSetRESET", "Resetting of all data conatiners started..");
         if(AllAppData.allMoodPlayList!=null)
             AllAppData.allMoodPlayList.clear();
         if(AllAppData.allNotifications!=null)
@@ -244,21 +246,22 @@ public class Start extends AppCompatActivity{
             AllAppData.friendsWhoUsesApp.clear();
         if(AllAppData.friendsWhoDoesntUseApp!=null)
             AllAppData.friendsWhoDoesntUseApp.clear();
-        Log.e("Start_DataSetRESET","Resetting of all data conatiners done..");
+        Log.e("Start_DataSetRESET", "Resetting of all data conatiners done..");
     }
+
     private void fetchMoodsAndPlayListFiles(){
         Calendar c = Calendar.getInstance();
-        String todaysDate = c.get(Calendar.DATE)+"-"+c.get(Calendar.MONTH)+"-"+c.get(Calendar.YEAR);
+        String todaysDate = c.get(Calendar.DATE) + "-" + c.get(Calendar.MONTH) + "-" + c.get(Calendar.YEAR);
         Log.e("Start_Date",todaysDate);
         if(!checkEntryOfPlaylistInInternalTableAndReadIfRequired(todaysDate)) {
             // Not yet downloaded to internal table and will be downloaded only once.
-            Log.e("Start_MOOD","Downloading the playlist for the first time of day..");
+            Log.e("Start_MOOD", "Downloading the playlist for the first time of day..");
             ServerManager reads = new ServerManager();
-            reads.readPlayListFromServer(this,todaysDate);
+            reads.readPlayListFromServerNormal(this,todaysDate);
         }
         else{
-            Log.e("Start_MOOD","As playlist file already fetched to internal DB so will set the lock to FALSE");
-            Start.moodsAndSongsFetchNotComplete = false;
+            Log.e("Start_MOOD", "As playlist file already fetched to internal DB so will set the lock to FALSE");
+            moodsAndSongsFetchNotComplete = false;
         }
     }
     private void greetUser() {
@@ -272,6 +275,7 @@ public class Start extends AppCompatActivity{
         if (hour >= 18 && hour <= 23) greetStr = "- Good Evening -";
         greet.setText(greetStr);
     }
+
     private void fetchContacts() {
         Log.e("Start_contactsFetch","Came to fetch contacts..");
             getContactsTableData(allReadContacts, dbOperations, singleTonUserObject);

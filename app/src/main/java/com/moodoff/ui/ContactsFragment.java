@@ -1,6 +1,7 @@
 package com.moodoff.ui;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -56,6 +57,8 @@ public class ContactsFragment extends Fragment{
     private String mParam2;
     private OnFragmentInteractionListener mListener;
     View mainView;
+    ProgressBar spinner;
+    TextView lastActiveTS;
     ViewGroup mainContainer;
     LayoutInflater mainInflater;
     Context ctx;
@@ -81,6 +84,8 @@ public class ContactsFragment extends Fragment{
 
         // Live monitoring of the mood status changes
         detailsForLiveMoodRelatedFeeds();
+
+        spinner = (ProgressBar)mainView.findViewById(R.id.tempSpinner);
 
         // Check if somebody joins our app and reload the profile view then..
         serverManager = new ServerManager();
@@ -126,6 +131,23 @@ public class ContactsFragment extends Fragment{
             }
         });
         myProfile = (Button)mainView.findViewById(R.id.ownProfile);//new Button(getContext());
+
+        lastActiveTS = (TextView)mainView.findViewById(R.id.lastActiveTS);
+        boolean currentUserIsLive = userAndMood.get(singleTonUser.getUserMobileNumber()).get("liveNow").equals("1")?true:false;
+        String userMoodType = userAndMood.get(singleTonUser.getUserMobileNumber()).get("moodType");
+        String userLastTS = userAndMood.get(singleTonUser.getUserMobileNumber()).get("lastActiveTS");
+        TextView lastListenedOrLiveLabel = (TextView)mainView.findViewById(R.id.lastListenedOrLiveLabel);
+        lastListenedOrLiveLabel.setTypeface(Typeface.DEFAULT_BOLD);
+        if(currentUserIsLive) {
+            lastListenedOrLiveLabel.setText("Live On : ");
+            lastListenedOrLiveLabel.setTextColor(Color.GREEN);
+            lastActiveTS.setText(userMoodType);
+        }
+        else {
+            lastListenedOrLiveLabel.setText("Last listened at : ");
+            lastListenedOrLiveLabel.setTextColor(Color.RED);
+            lastActiveTS.setText(userLastTS);
+        }
         myProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -158,7 +180,7 @@ public class ContactsFragment extends Fragment{
         tvv.setGravity(Gravity.CENTER);
         tvv.setPadding(3,3,3,3);
         tvv.setTextColor(Color.WHITE);
-        tvv.setText(" Friends Using App ");
+        tvv.setText(" Friends Using MoodOff ");
         titleAppUsers.addView(tvv);
         eachContact.addView(titleAppUsers);
         for(final String eachFriendContact : friendWhoUsesApp) {
@@ -274,7 +296,7 @@ public class ContactsFragment extends Fragment{
         TextView tvv1 = new TextView(ctx);
         tvv1.setPadding(3,3,3,3);
         tvv1.setTextColor(Color.WHITE);
-        tvv1.setText(" Friends Not Using App ");
+        tvv1.setText(" Friends Not Using MoodOff ");
         titleNotAppUsers.addView(tvv1);
         eachContact.addView(titleNotAppUsers);
         for(final String eachCntct: AllAppData.friendsWhoDoesntUseApp){
@@ -342,6 +364,7 @@ public class ContactsFragment extends Fragment{
             }
             }
         contactsScroll.addView(eachContact);
+        spinner.setVisibility(View.INVISIBLE);
     }
     private static boolean isNotHavingAnyCharacter(String name){
         for(int i=0;i<name.length();i++){
@@ -447,14 +470,32 @@ public class ContactsFragment extends Fragment{
                       String value = dataSnapshot.getValue().toString();
                       if(value.length() == 1) {
                           moodTypeAndLiveStatus.put("liveNow",value);
-                          userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                          if(!eachAppUsingFriend.equals(singleTonUser.getUserMobileNumber()) && value.equals("1")) {
+                              serverManager.displayAlertNotificationOnTopBarOfPhone(ctx, "Some friends came live");
+                              addOwnProfileAndRefreshButton();
+                          }
+                          else {
+                              checkAliveNode.child(eachAppUsingFriend).addListenerForSingleValueEvent(new ValueEventListener() {
+                                  @Override
+                                  public void onDataChange(DataSnapshot dataSnapshot) {
+                                      String tsValue = dataSnapshot.getValue(String.class);
+                                      String processedTime = getProcessedTime(tsValue.split("_")[0], tsValue.split("_")[1]);
+                                      moodTypeAndLiveStatus.put("lastActiveTS", processedTime);
+                                      userAndMood.put("lastActiveTS", moodTypeAndLiveStatus);
+                                      userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                                      addOwnProfileAndRefreshButton();
+                                  }
+                                  @Override
+                                  public void onCancelled(DatabaseError databaseError) { }
+                              });
+                          }
                       }
                       else {
                           moodTypeAndLiveStatus.put("moodType",value);
                           userAndMood.put(eachAppUsingFriend, moodTypeAndLiveStatus);
+                          addOwnProfileAndRefreshButton();
                       }
-                        addOwnProfileAndRefreshButton();
-                        LoggerBaba.printMsg("ContactsFragment", userAndMood.toString());
+                      LoggerBaba.printMsg("ContactsFragment", userAndMood.toString());
                   }
                   @Override
                   public void onChildRemoved(DataSnapshot dataSnapshot) {
@@ -472,7 +513,6 @@ public class ContactsFragment extends Fragment{
 
             DatabaseReference
                     dbRefForCheckAlive = checkAliveNode.child(eachAppUsingFriend);
-
             dbRefForCheckAlive.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -497,11 +537,12 @@ public class ContactsFragment extends Fragment{
             });
         }
     }
+
     private String getProcessedDate(String date){
         String[] months = {"Jan","Feb","Mar","Apr","may","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
         String[] YMD = date.split("-");
         Log.e("NotFrag", date);
-        return YMD[0]+months[Integer.parseInt(YMD[1])-1]+"'"+YMD[2].substring(2);
+        return YMD[0]+"-"+months[Integer.parseInt(YMD[1])-1]+"'"+YMD[2].substring(2);
     }
     private String getProcessedTime(String date, String time) {
         String timeToDisplay = "";

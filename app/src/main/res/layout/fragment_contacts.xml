@@ -21,16 +21,74 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:src="@drawable/refresh_contacts"
-            android:background="@color/appcolor_backup3"
+            android:background="@color/light_yellow"
             />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
         <Button
             android:id="@+id/ownProfile"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/myprofilebuttondesign"
+            android:background="@color/appcolor_backup1"
             android:text="My Profile"
             android:textAllCaps="false"
+            />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:background="@color/appcolor_backup3"
+                >
+                <TextView
+                    android:id="@+id/lastListenedOrLiveLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Last Listened At : "
+                    android:textColor="@color/black"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:maxLines="1"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit ="marquee_forever"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:scrollHorizontally="true"
+                    />
+                <TextView
+                    android:id="@+id/lastActiveTS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="TS"
+                    android:textColor="@color/black"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:maxLines="1"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit ="marquee_forever"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:scrollHorizontally="true"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ProgressBar
+            android:id="@+id/tempSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTintMode="multiply"
+            android:indeterminateTint="@color/little_deep_orange"
             />
     </LinearLayout>
     <ScrollView
